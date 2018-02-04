@@ -1,0 +1,6 @@
+ABINITIO_PREDICTION	maker	1
+ABINITIO_PREDICTION	maker_complementary	1
+PROTEIN	protein2genome	3
+TRANSCRIPT	est2genome	5
+
+
