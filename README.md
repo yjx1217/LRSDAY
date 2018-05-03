@@ -9,12 +9,14 @@ Long-read sequencing technologies have become increasingly popular in genome pro
 
 
 ## Citations
-Jia-Xing Yue & Gianni Liti. (2018) Long-read sequencing data analysis for yeasts (LRSDAY). *Nature Protocols* (accepted pending minor revision; preprint available at http://www.biorxiv.org/content/early/2017/09/05/184572)
+Jia-Xing Yue & Gianni Liti. (2018) Long-read sequencing data analysis for yeasts. *Nature Protocols*, 13:1213–1231. (preprint available at http://www.biorxiv.org/content/early/2017/09/05/184572)
 
 Jia-Xing Yue, Jing Li, Louise Aigrain, Johan Hallin, Karl Persson, Karen Oliver, Anders Bergström, Paul Coupland, Jonas Warringer, Marco Cosentino Lagomarsino, Gilles Fischer, Richard Durbin, Gianni Liti. (2017) Contrasting evolutionary genome dynamics between domesticated and wild yeasts. *Nature Genetics*, 49:913-924.
 
 ## Current version
 * v1.0.0 Released on 2018/02/04
+
+An updated version that incorporate a few additonal long-read-based assemblers is currently under active testing and expected to be release soon. 
 
 ## License
 LRSDAY itself is distributed under the MIT license. A number of LRSDAY's dependencies (e.g. CAP3, MAKER, GATK, blat, RepBase, etc) are under more restricted licenses, for which commerical use of the software needs to be discussed with the corresponding developers.
@@ -22,7 +24,7 @@ LRSDAY itself is distributed under the MIT license. A number of LRSDAY's depende
 
 ## Requirements
 ### Hardware, operating system and network
-This protocol is designed for a desktop or computing server running an x86-64-bit Linux operating system. Multithreaded processors are preferred to speed up the process since many steps can be configured to use multiple threads in parallel. For assembling and analyzing the budding yeast genomes (genome size = ~12 Mb), at least 16 Gb of RAM and 100 Gb of free disk space are reccomended. When adapted for other eukaryotic organisms with larger genome sizes, the RAM and disk space consumption will scale up, majorly during de novo genome assembly (performed by [Canu](https://github.com/marbl/canu). Plese refer to [Canu’s manual](http://canu.readthedocs.io/en/latest/) for suggested RAM and disk space consumption for assembling large genomes. Stable Internet connection is required for the installation and configuration of LRSDAY as well as for retrieving the test data.
+This protocol is designed for a desktop or computing server running an x86-64-bit Linux operating system. Multithreaded processors are preferred to speed up the process since many steps can be configured to use multiple threads in parallel. For assembling and analyzing the budding yeast genomes (genome size = ~12 Mb), at least 16 Gb of RAM and 100 Gb of free disk space are recomended. When adapted for other eukaryotic organisms with larger genome sizes, the RAM and disk space consumption will scale up, majorly during de novo genome assembly (performed by [Canu](https://github.com/marbl/canu). Plese refer to [Canu’s manual](http://canu.readthedocs.io/en/latest/) for suggested RAM and disk space consumption for assembling large genomes. Stable Internet connection is required for the installation and configuration of LRSDAY as well as for retrieving the test data.
 
 
 ### Software or library requirements

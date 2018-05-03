@@ -25,7 +25,7 @@ output_gff="$prefix.orthology_map.gff3"
 
 test_file_existence () {
     filename=$1
-    if [ ! -f $filename ]
+    if [[ ! -f $filename ]]
     then
 	echo "the file $filename does not exists! process terminated!"
 	exit

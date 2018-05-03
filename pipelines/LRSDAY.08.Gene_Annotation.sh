@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e -o pipefail
+# set -e -o pipefail
 #######################################
 # load environment variables for LRSDAY
 source ./../../env.sh

@@ -8,7 +8,7 @@ PATH=$gnuplot_dir:$PATH
 ###########################################
 # set project-specific variables
 prefix="SK1" # file name prefix for the output files
-reads="$LRSDAY_HOME/Project_Example/00.Long_Reads/SK1.filtered_subreads.fastq.gz" # full path of the long reads file (in fastq or fastq.gz format)
+reads="./../00.Long_Reads/SK1.filtered_subreads.fastq.gz" # path of the long reads file (in fastq or fastq.gz format)
 reads_type="pacbio-raw" # long reads data type: "pacbio-raw" or "pacbio-corrected" or "nanopore-raw" or "nanopore-corrected"
 genome_size="12.5m" # estimated genome size with the format of <number>[g|m|k], e.g. 12.5m for 12.5 Mb
 threads=1 # number of threads to use
