@@ -6,38 +6,39 @@ use Getopt::Long;
 ##############################################################
 #  script: parse_REannotate_gff.pl
 #  author: Jia-Xing Yue (GitHub ID: yjx1217)
-#  last edited: 2017.06.17
+#  last edited: 2017.07.06
 #  description: reformat REannotate GFF output files
-#  example: perl parse_REannotate_gff.pl  -p prefix
+#  example: perl parse_REannotate_gff.pl  -o output
 ##############################################################
 
-my $prefix;
+my $output;
 
-GetOptions('prefix|p:s' => \$prefix); # file name prefix for the output file
+GetOptions('output|o:s' => \$output); # file name for the output file
 
 
-my @inputs = glob "chr*.REannotate.gff";
-my $output = "$prefix.REannotate.gff";
+my @inputs = glob "*.REannotate.gff";
 my $output_fh = write_file($output);
 
 
 foreach my $input (@inputs) {
     my ($chr) = ($input =~ /(\S+)\.REannotate.gff/);
-    print "chr=$chr\n";
-    my $input_fh = read_file($input);
-    my $index = 0;
-    while (<$input_fh>) {
-	chomp;
-	/^#/ and next;
-	/^\s*$/ and next;
-	my @line = split /\t/, $_;
-	if ($line[0] =~ /_TY/) {
-	    $index++;
-	    $line[0] = $chr;
-	    ($line[1], $line[2]) = ($line[1] =~ /(REannotate)_(\S+)/);
-	    $line[8] = "ID=$line[8]"."-"."$line[2]"."$index";
-	    my $line_out = join "\t", @line;
-	    print $output_fh "$line_out\n";
+    if ($chr !~ /^\+/) {
+	print "chr=$chr\n";
+	my $input_fh = read_file($input);
+	my $index = 0;
+	while (<$input_fh>) {
+	    chomp;
+	    /^#/ and next;
+	    /^\s*$/ and next;
+	    my @line = split /\t/, $_;
+	    if ($line[0] =~ /_TY/) {
+		$index++;
+		$line[0] = $chr;
+		($line[1], $line[2]) = ($line[1] =~ /(REannotate)_(\S+)/);
+		$line[8] = "ID=$line[8]"."-"."$line[2]"."$index";
+		my $line_out = join "\t", @line;
+		print $output_fh "$line_out\n";
+	    }
 	}
     }
 }

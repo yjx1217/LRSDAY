@@ -5,18 +5,16 @@ A highly transparent, automated and powerful computational framework for high-qu
 
 
 ## Description
-Long-read sequencing technologies have become increasingly popular in genome projects due to their strengths in resolving complex genomic regions. As a leading model organism with small genome size and great biotechnological importance, the budding yeast, *Saccharomyces cerevisiae*, has many isolates currently being sequenced with long reads. However, analyzing long-read sequencing data to produce high-quality genome assembly and annotation remains challenging. Here we present LRSDAY, the first one-stop solution to streamline this process. LRSDAY can produce chromosome-level end-to-end genome assembly and comprehensive annotations for various genomic features (including centromeres, protein-coding genes, tRNAs, transposable elements and telomere-associated elements) that are ready for downstream analysis. Although tailored for *S. cerevisiae*, we designed LRSDAY to be highly modular and customizable, making it adaptable for virtually any eukaryotic organisms. Applying LRSDAY to a *S. cerevisiae* strain takes ~41 hrs to generate a complete and well-annotated genome from ~100X Pacific Biosciences (PacBio) reads using 4 threads.
+Long-read sequencing technologies have become increasingly popular in genome projects due to their strengths in resolving complex genomic regions. As a leading model organism with small genome size and great biotechnological importance, the budding yeast, *Saccharomyces cerevisiae*, has many isolates currently being sequenced with long reads. However, analyzing long-read sequencing data to produce high-quality genome assembly and annotation remains challenging. Here we present LRSDAY, the first one-stop solution to streamline this process. LRSDAY can produce chromosome-level end-to-end genome assembly and comprehensive annotations for various genomic features (including centromeres, protein-coding genes, tRNAs, transposable elements and telomere-associated elements) that are ready for downstream analysis. Although tailored for *S. cerevisiae*, we designed LRSDAY to be highly modular and customizable, making it adaptable for virtually any eukaryotic organisms. 
 
 
 ## Citations
-Jia-Xing Yue & Gianni Liti. (2018) Long-read sequencing data analysis for yeasts. *Nature Protocols*, 13:1213–1231. (preprint available at http://www.biorxiv.org/content/early/2017/09/05/184572)
+Jia-Xing Yue & Gianni Liti. (2018) Long-read sequencing data analysis for yeasts. *Nature Protocols*, 13:1213–1231. 
 
 Jia-Xing Yue, Jing Li, Louise Aigrain, Johan Hallin, Karl Persson, Karen Oliver, Anders Bergström, Paul Coupland, Jonas Warringer, Marco Cosentino Lagomarsino, Gilles Fischer, Richard Durbin, Gianni Liti. (2017) Contrasting evolutionary genome dynamics between domesticated and wild yeasts. *Nature Genetics*, 49:913-924.
 
 ## Current version
-* v1.0.0 Released on 2018/02/04
-
-An updated version that incorporate a few additonal long-read-based assemblers is currently under active testing and expected to be release soon. 
+* v1.1.0 Released on 2018/07/11
 
 ## License
 LRSDAY itself is distributed under the MIT license. A number of LRSDAY's dependencies (e.g. CAP3, MAKER, GATK, blat, RepBase, etc) are under more restricted licenses, for which commerical use of the software needs to be discussed with the corresponding developers.
@@ -41,7 +39,7 @@ This protocol is designed for a desktop or computing server running an x86-64-bi
 * Python v2.7.9 or newer (https://www.python.org/)
 * Python v3.6 or newer (https://www.python.org/)
 * Tar (https://www.gnu.org/software/tar/)
-* Unzip (http://www.info-zip.org/UnZip.html)
+* Unzip (http://infozip.sourceforge.net/UnZip.html)
 * Virtualenv v15.1.0 or newer (https://virtualenv.pypa.io)
 * Wget (https://www.gnu.org/software/wget/)
 * Zlib (https://zlib.net/)

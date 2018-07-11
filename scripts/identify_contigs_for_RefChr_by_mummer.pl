@@ -6,16 +6,16 @@ use Getopt::Long;
 ##############################################################
 #  script: identify_contigs_for_RefChr_by_mummer.pl
 #  author: Jia-Xing Yue (GitHub ID: yjx1217)
-#  last edited: 2017.06.17
+#  last edited: 2018.05.15
 #  description: identify contigs corresponding to the specified reference chromosome based on mummer show-coords output
-#  example: perl identify_contigs_for_RefChr_by_mummer.pl -i mummer.coords -chr chrMT -cov 90 -o chrMT.match.list
+#  example: perl identify_contigs_for_RefChr_by_mummer.pl -i mummer.coords -query_chr_list query_chr.list -cov 90 -o chrMT.match.list
 ##############################################################
 
 
-my ($input, $output, $chr, $cov);
-$cov = 90;
+my ($input, $output, $query_chr_list, $cov);
+$cov = 75;
 GetOptions('input|i:s' => \$input, # input blast tabular output
-	   'chromosome|chr:s' => \$chr, # the chr id from the reference genome
+	   'query_chr_list|q:s' => \$query_chr_list, # a simple list file containing query chr ids from the reference genome
 	   'coverage|cov:s' => \$cov, # cummulative query contig coverage
 	   'output|o:s' => \$output); # filtered blast tabular output
 
@@ -24,23 +24,30 @@ my $input_fh = read_file($input);
 my %match = ();
 my $output_fh = write_file($output);
 
+my $query_chr_list_fh = read_file($query_chr_list);
+my %query_chr = parse_list_file($query_chr_list_fh);
+my @query_chr = keys %query_chr;
+
 while (<$input_fh>) {
     chomp;
     (1..4) and next;
     /^\#/ and next;
     /^\s*$/ and next;
     my ($ref_start, $ref_end, $query_start, $query_end, $ref_match_length, $query_match_length, $ref_length, $query_length, $ref_cov, $query_cov, $ref_id, $query_id) = split /\t/, $_;
-    if ($ref_id eq $chr) {
-	if (exists $match{$query_id}) {
-	    $match{$query_id} += $query_cov;
-	} else {
-	    $match{$query_id} = $query_cov;
+    foreach my $query_chr (@query_chr) {
+	if ($ref_id =~ /$query_chr/) {
+	    if (exists $match{$query_id}) {
+		$match{$query_id} += $query_cov;
+	    } else {
+		$match{$query_id} = $query_cov;
+	    }
 	}
     }
 }
 
 foreach my $query_id (sort {$match{$b} <=> $match{$a}} keys %match) {
-    if ($match{$query_id} >= 0.5) {
+    print "query_id=$query_id, cov=$match{$query_id}\n";
+    if ($match{$query_id} >= $cov) {
 	print $output_fh "$query_id\n";
     }
 }
@@ -69,5 +76,19 @@ sub write_file {
 }  
 
 
-
-
+sub parse_list_file {
+    my $fh = shift @_;
+    my %list = ();
+    while (<$fh>) {
+	chomp;
+	/^#/ and next;
+	/^\s*$/ and next;
+	my $line = $_;
+	if (not exists $list{$line}) {
+	    $list{$line} = 1;
+	} else {
+	    $list{$line}++;
+	}
+    }
+    return %list;
+}

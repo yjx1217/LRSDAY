@@ -1,30 +1,38 @@
 #!/bin/bash
+# last update: 2018/07/10
+
 set -e -o pipefail
 
 LRSDAY_HOME=$(pwd)
 BUILD="build"
 
-SRA_VERSION="2.8.2-1"
-CANU_VERSION="1.5" # "1.5"
+SRA_VERSION="2.9.0" # "2.8.2-1"
+CANU_VERSION="1.7.1" # "1.5"
+FLYE_VERSION="2.3.4" # "2.3.3"
+SMARTDENOVO_VERSION="" # not available, so we use the github comit hash below for version control
+SMARTDENOVO_GITHUB_COMMIT_VERSION="5cc1356" # committed on 2018.02.19
+MINIMAP2_VERSION="2.11"
 RAGOUT_VERSION="2.0"
+#QUAST_VERSION="4.6.4" # one of its dependency needs "csh" to be pre-installed
 HDF_VERSION="1.10.1"
 SONLIB_VERSION="" # not available, so we use the github comit hash below for version control
 SONLIB_GITHUB_COMMIT_VERSION="1afbd97" # committed on 2017.08.09
 HAL_VERSION="" # not available, so we use the github comit hash below for version control
 HAL_GITHUB_COMMIT_VERSION="a2ad656" # committed on 2017.09.09
+#NANOPOLISH_VERSION="0.9.2"
+#NANOPOLISH_GITHUB_COMMIT_VERSION="ed9b14c" # committed on 2018.06.04
 MUMMER_VERSION="4.0.0beta2"
-MUMMER_LEGACY_VERSION="3.23" # for circlator compatibility
 GNUPLOT_VERSION="4.6.6"
 BEDTOOLS_VERSION="2.27.1"
-SPADES_VERSION="3.11.1" # "3.10.1"
+SPADES_VERSION="3.12.0" # "3.10.1"
 PRODIGAL_VERSION="2.6.3"
 CAP_VERSION="" # see http://seq.cs.iastate.edu/cap3.html
-BWA_VERSION="0.7.16a" # "0.7.15"
-SAMTOOLS_VERSION="1.3" #"1.3"
-CIRCLATOR_VERSION="1.5.1"
+BWA_VERSION="0.7.17" # "0.7.15"
+SAMTOOLS_VERSION="1.8" #"1.3"
+CIRCLATOR_VERSION="1.5.5" # "1.5.1"
 TRIMMOMATIC_VERSION="0.36"
 GATK_VERSION="3.8"
-PICARD_VERSION="2.13.2" # "2.10.3" 
+PICARD_VERSION="2.18.4" # "2.13.2" 
 PILON_VERSION="1.22"
 EXONERATE_VERSION="2.2.0"
 BLAST_VERSION="2.2.31"
@@ -46,14 +54,18 @@ PROTEINORTHO_VERSION="5.16b" # "5.16"
 MAKER_VERSION="3.00.0-beta"
 
 SRA_DOWNLOAD_URL="http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/sratoolkit.${SRA_VERSION}-centos_linux64.tar.gz"
-CANU_DOWNLOAD_URL="https://github.com/marbl/canu/releases/download/v${CANU_VERSION}/canu-${CANU_VERSION}.Linux-amd64.tar.xz"
+CANU_DOWNLOAD_URL="https://github.com/marbl/canu/archive/v${CANU_VERSION}.tar.gz"
+FLYE_DOWNLOAD_URL="https://github.com/fenderglass/Flye/archive/${FLYE_VERSION}.tar.gz"
+SMARTDENOVO_DOWNLOAD_URL="https://github.com/ruanjue/smartdenovo"
+MINIMAP2_DOWNLOAD_URL="https://github.com/lh3/minimap2/releases/download/v${MINIMAP2_VERSION}/minimap2-${MINIMAP2_VERSION}_x64-linux.tar.bz2"
+#QUAST_DOWNLOAD_URL="https://downloads.sourceforge.net/project/quast/quast-${QUAST_VERSION}.tar.gz"
 RAGOUT_DOWNLOAD_URL="https://github.com/fenderglass/Ragout/releases/download/${RAGOUT_VERSION}/ragout-${RAGOUT_VERSION}-linux-x86_64.tar.gz"
 HDF_VERSION_prefix=${HDF_VERSION%.*}
 HDF_DOWNLOAD_URL="https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDF_VERSION_prefix}/hdf5-${HDF_VERSION}/src/hdf5-${HDF_VERSION}.tar.gz"
 SONLIB_DOWNLOAD_URL="https://github.com/benedictpaten/sonLib.git"
 HAL_DOWNLOAD_URL="https://github.com/glennhickey/hal.git"
+#NANOPOLISH_DOWNLOAD_URL="https://github.com/jts/nanopolish.git"
 MUMMER_DOWNLOAD_URL="https://github.com/gmarcais/mummer/releases/download/v${MUMMER_VERSION}/mummer-${MUMMER_VERSION}.tar.gz"
-MUMMER_LEGACY_DOWNLOAD_URL="https://sourceforge.net/projects/mummer/files/mummer/${MUMMER_LEGACY_VERSION}/MUMmer${MUMMER_LEGACY_VERSION}.tar.gz"
 GNUPLOT_DOWNLOAD_URL="https://sourceforge.net/projects/gnuplot/files/gnuplot/${GNUPLOT_VERSION}/gnuplot-${GNUPLOT_VERSION}.tar.gz"
 BEDTOOLS_DOWNLOAD_URL="https://github.com/arq5x/bedtools2/releases/download/v${BEDTOOLS_VERSION}/bedtools-${BEDTOOLS_VERSION}.tar.gz"
 SPADES_DOWNLOAD_URL="http://cab.spbu.ru/files/release${SPADES_VERSION}/SPAdes-${SPADES_VERSION}-Linux.tar.gz"
@@ -72,8 +84,8 @@ BLAST_DOWNLOAD_URL="ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/${BLAST_
 RMBLAST_DOWNLOAD_URL="ftp://ftp.ncbi.nlm.nih.gov/blast/executables/rmblast/${RMBLAST_VERSION}/ncbi-rmblastn-${RMBLAST_VERSION}-x64-linux.tar.gz"
 SNAP_DOWNLOAD_URL="https://github.com/KorfLab/SNAP"
 RAPSEARCH_DOWNLOAD_URL="https://sourceforge.net/projects/rapsearch2/files/RAPSearch${RAPSEARCH_VERSION}_64bits.tar.gz"
-TRNASCAN_DOWNLOAD_URL="http://lowelab.ucsc.edu/software/tRNAscan-SE-${TRNASCAN_VERSION}.tar.gz"
-SNOSCAN_DOWNLOAD_URL="http://lowelab.ucsc.edu/software/snoscan-${SNOSCAN_VERSION}.tar.gz"
+TRNASCAN_DOWNLOAD_URL="http://eddylab.org/software/tRNAscan-SE/tRNAscan-SE.tar.gz"
+SNOSCAN_DOWNLOAD_URL="http://eddylab.org/software/snoscan/snoscan.tar.gz"
 REPEATMASKER_DOWNLOAD_URL="http://repeatmasker.org/RepeatMasker-${REPEATMASKER_VERSION}.tar.gz"
 REANNOTATE_DOWNLOAD_URL="https://github.com/yjx1217/REannotate_LongQueryName/archive/version_${REANNOTATE_VERSION}.tar.gz"
 CLUSTALW_DOWNLOAD_URL="http://www.clustal.org/download/${CLUSTALW_VERSION}/clustalw-${CLUSTALW_VERSION}.tar.gz"
@@ -172,13 +184,53 @@ tar -zxf sratoolkit.${SRA_VERSION}-centos_linux64.tar.gz
 sra_dir="$build_dir/sratoolkit.${SRA_VERSION}-centos_linux64/bin"
 rm sratoolkit.${SRA_VERSION}-centos_linux64.tar.gz
 
+# --------------- minimap2 ------------------
+cd $build_dir
+echo "Download minimap2-v${MINIMAP2_VERSION}"
+download $MINIMAP2_DOWNLOAD_URL "minimap2-${MINIMAP2_VERSION}.tar.bz2"
+tar -xjf minimap2-${MINIMAP2_VERSION}.tar.bz2
+minimap2_dir="$build_dir/minimap2-${MINIMAP2_VERSION}_x64-linux"
+rm minimap2-${MINIMAP2_VERSION}.tar.bz2
+
 # ------------- Canu -------------------
 cd $build_dir
 echo "Download Canu-v${CANU_VERSION}"
-download $CANU_DOWNLOAD_URL "canu-${CANU_VERSION}.tar.xz"
-tar -xf canu-${CANU_VERSION}.tar.xz
+download $CANU_DOWNLOAD_URL "canu-${CANU_VERSION}.tar.gz"
+tar -xzf canu-${CANU_VERSION}.tar.gz
+canu_dir="$build_dir/canu-${CANU_VERSION}"
+cd $canu_dir
+cd src
+make -j 8
 canu_dir="$build_dir/canu-${CANU_VERSION}/Linux-amd64/bin"
-rm canu-${CANU_VERSION}.tar.xz
+cd $canu_dir
+ln -s $minimap2_dir/minimap2 .
+cd $build_dir
+rm canu-${CANU_VERSION}.tar.gz
+
+# ------------- Flye -------------------
+cd $build_dir
+echo "Download Flye-v${FLYE_VERSION}"
+download $FLYE_DOWNLOAD_URL "Flye-${FLYE_VERSION}.tar.gz"
+tar -xzf Flye-${FLYE_VERSION}.tar.gz
+cd Flye-${FLYE_VERSION}
+python2 setup.py build
+cd ..
+flye_dir="$build_dir/Flye-${FLYE_VERSION}/bin"
+rm Flye-${FLYE_VERSION}.tar.gz
+
+# --------------- smartdenovo ------------------
+cd $build_dir
+echo "Download smartdenovo-v${SMARTDENOVO_VERSION}"
+git clone $SMARTDENOVO_DOWNLOAD_URL
+cd smartdenovo
+git reset --hard $SMARTDENOVO_GITHUB_COMMIT_VERSION
+cp wtlay.h wtlay.h.bk
+cat wtlay.h.bk |sed s/inline//g > wtlay.h
+C_INCLUDE_PATH="" 
+make
+cp $LRSDAY_HOME/misc/smartdenovo_customized.pl .
+cd ..
+smartdenovo_dir="$build_dir/smartdenovo"
 
 # --------------- Ragout ------------------
 cd $build_dir
@@ -189,14 +241,14 @@ ragout_dir="$build_dir/ragout-${RAGOUT_VERSION}-linux-x86_64"
 # cp $LRSDAY_HOME/misc/ragout_config.py $ragout_dir/ragout/shared/config.py
 rm ragout-${RAGOUT_VERSION}-linux-x86_64.tar.gz
 
-# --------------- HDF ------------------                                                                                                            
+# --------------- HDF ------------------
 cd $build_dir
 echo "Download HDF-v${HDF_VERSION}"
 download $HDF_DOWNLOAD_URL "hdf5-${HDF_VERSION}.tar.gz"
 tar -zxf hdf5-${HDF_VERSION}.tar.gz
 mkdir hdf5
 cd hdf5-${HDF_VERSION}
-./configure --enable-cxx --prefix $build_dir/hdf5
+./configure --enable-cxx  --prefix $build_dir/hdf5
 make
 make install
 hdf_dir="$build_dir/hdf5/bin"
@@ -221,7 +273,30 @@ git reset --hard $HAL_GITHUB_COMMIT_VERSION
 make
 hal_dir="$build_dir/hal/bin"
 
-# --------------- gnuplot ------------------                                                                                               
+# --------------- samtools -----------------
+cd $build_dir
+echo "Download samtools-v${SAMTOOLS_VERSION}"
+download $SAMTOOLS_DOWNLOAD_URL "samtools-${SAMTOOLS_VERSION}.tar.bz2"
+tar -xjf samtools-${SAMTOOLS_VERSION}.tar.bz2
+samtools_dir="$build_dir/samtools-${SAMTOOLS_VERSION}"
+cd $samtools_dir
+C_INCLUDE_PATH=""
+./configure --without-curses;
+make
+cd $build_dir
+rm samtools-${SAMTOOLS_VERSION}.tar.bz2
+
+# # ------------- NANOPOLISH --------------------
+# cd $build_dir
+# echo "Download nanopolish-v${NANOPOLISH_VERSION}"
+# git clone --recursive $NANOPOLISH_DOWNLOAD_URL
+# nanopolish_dir="$build_dir/nanopolish"
+# cd $nanopolish_dir
+# git reset --hard $NANOPOLISH_GITHUB_COMMIT_VERSION
+# make
+# cd $build_dir
+
+# --------------- gnuplot ------------------
 cd $build_dir
 echo "Download gnuplot-v${GNUPLOT_VERSION}"
 download $GNUPLOT_DOWNLOAD_URL "gnuplot-${GNUPLOT_VERSION}.tar.gz"
@@ -235,31 +310,36 @@ cd $build_dir
 rm gnuplot-${GNUPLOT_VERSION}.tar.gz
 PATH="$gnuplot_dir:${PATH}"
 
+# # ------------- QUAST --------------------
+# cd $build_dir
+# echo "Download QUAST-v${QUAST_VERSION}"
+# download $QUAST_DOWNLOAD_URL "QUAST-${QUAST_VERSION}.tar.gz"
+# tar -xzf QUAST-${QUAST_VERSION}.tar.gz
+# quast_dir="$build_dir/quast-${QUAST_VERSION}"
+# cd $quast_dir
+# virtualenv -p $(which python3) py3_virtualenv_quast
+# source py3_virtualenv_quast/bin/activate
+# py3_virtualenv_quast/bin/pip install joblib
+# py3_virtualenv_quast/bin/pip install simplejson
+# py3_virtualenv_quast/bin/python3 -mpip install -U matplotlib
+# py3_virtualenv_quast/bin/python3 ./setup.py install
+# deactivate
+# cd ..
+# rm QUAST-${QUAST_VERSION}.tar.gz
+
 # --------------- mummer ------------------
 cd $build_dir
 echo "Download mummer-v${MUMMER_VERSION}"
 download $MUMMER_DOWNLOAD_URL "mummer-${MUMMER_VERSION}.tar.gz"
 tar -zxf mummer-${MUMMER_VERSION}.tar.gz
 mummer_dir="$build_dir/mummer-${MUMMER_VERSION}"
+echo "$mummer_dir"
 cd $mummer_dir
 ./configure
 make
-PATH=$mummer_dir:$PATH
+PATH="$mummer_dir:${PATH}"
 cd $build_dir
 rm mummer-${MUMMER_VERSION}.tar.gz
-
-# --------------- mummer legacy ------------------
-cd $build_dir
-echo "Download mummer-v${MUMMER_LEGACY_VERSION}"
-download $MUMMER_LEGACY_DOWNLOAD_URL "MUMmer${MUMMER_LEGACY_VERSION}.tar.gz"
-tar -zxf MUMmer${MUMMER_LEGACY_VERSION}.tar.gz
-mummer_legacy_dir="$build_dir/MUMmer${MUMMER_LEGACY_VERSION}"
-cd $mummer_legacy_dir
-make check
-make install
-PATH=$mummer_legacy_dir:$PATH
-cd $build_dir
-rm MUMmer${MUMMER_LEGACY_VERSION}.tar.gz
 
 # --------------- bedtools ------------------
 cd $build_dir
@@ -310,18 +390,6 @@ make
 cd $build_dir
 rm bwa-${BWA_VERSION}.tar.bz2
 
-# --------------- samtools -----------------
-cd $build_dir
-echo "Download samtools-v${SAMTOOLS_VERSION}"
-download $SAMTOOLS_DOWNLOAD_URL "samtools-${SAMTOOLS_VERSION}.tar.bz2"
-tar -xjf samtools-${SAMTOOLS_VERSION}.tar.bz2
-samtools_dir="$build_dir/samtools-${SAMTOOLS_VERSION}"
-cd $samtools_dir
-./configure --without-curses;
-make
-cd $build_dir
-rm samtools-${SAMTOOLS_VERSION}.tar.bz2
-
 # --------------- Circlator ------------------
 cd $build_dir
 echo "Creating local virtual python3 environment and install Circlator-v${CIRCLATOR_VERSION}"
@@ -331,6 +399,7 @@ virtualenv -p $(which python3) py3_virtualenv_circlator
 source py3_virtualenv_circlator/bin/activate
 py3_virtualenv_circlator/bin/pip3 install "circlator==${CIRCLATOR_VERSION}"
 circlator_dir="$build_dir/py3_virtualenv_circlator/bin"
+deactivate
 # rm v${CIRCLATOR_VERSION}.tar.gz
 
 # --------------- Trimmomatic -----------------
@@ -435,9 +504,11 @@ tar -zxf snoscan-${SNOSCAN_VERSION}.tar.gz
 snoscan_dir="$build_dir/snoscan-${SNOSCAN_VERSION}"
 cd $snoscan_dir
 cd squid-1.5.11
+rm *.o
 make
 cd ..
 cp $LRSDAY_HOME/misc/snoscan.Makefile Makefile
+rm *.o
 make
 cd $build_dir
 rm snoscan-${SNOSCAN_VERSION}.tar.gz
@@ -537,13 +608,14 @@ echo "Download Proteinortho-v${PROTEINORTHO_VERSION}"
 download $PROTEINORTHO_DOWNLOAD_URL "proteinortho_v${PROTEINORTHO_VERSION}.tar.gz"
 tar -zxf proteinortho_v${PROTEINORTHO_VERSION}.tar.gz
 proteinortho_dir="$build_dir/proteinortho_v${PROTEINORTHO_VERSION}"
+cp $LRSDAY_HOME/misc/proteinortho5_better_robustness.pl $proteinortho_dir/proteinortho5.pl
 rm proteinortho_v${PROTEINORTHO_VERSION}.tar.gz
 
-# --------------- GATK ------------------                                                                                                
+# --------------- GATK ------------------
 cd $build_dir
-echo "Create GATK folder for users' manual installation"
-mkdir GATK
-gatk_dir="$build_dir/GATK"
+echo "Create GATK3 folder for users' manual installation"
+mkdir GATK3
+gatk_dir="$build_dir/GATK3"
 
 # --------------- MAKER -----------------
 cd $build_dir
@@ -578,12 +650,16 @@ echo "export PERL5LIB=${PERL5LIB}" >> env.sh
 echo "export cpanm_dir=${cpanm_dir}" >> env.sh
 echo "export sra_dir=${sra_dir}" >> env.sh
 echo "export canu_dir=${canu_dir}" >> env.sh
+echo "export flye_dir=${flye_dir}" >> env.sh
+echo "export smartdenovo_dir=${smartdenovo_dir}" >> env.sh
+echo "export minimap2_dir=${minimap2_dir}" >> env.sh
+#echo "export quast_dir=${quast_dir}" >> env.sh
 echo "export ragout_dir=${ragout_dir}" >> env.sh
 echo "export hdf_dir=${hdf_dir}" >> env.sh
 echo "export h5prefix=${h5prefix}" >> env.sh
 echo "export hal_dir=${hal_dir}" >> env.sh
+#echo "export nanopolish_dir=${nanopolish_dir}" >> env.sh
 echo "export mummer_dir=${mummer_dir}" >> env.sh
-echo "export mummer_legacy_dir=${mummer_legacy_dir}" >> env.sh
 echo "export gnuplot_dir=${gnuplot_dir}" >> env.sh
 echo "export bedtools_dir=${bedtools_dir}" >> env.sh
 echo "export spades_dir=${spades_dir}" >> env.sh
@@ -652,7 +728,7 @@ echo "MAKER is not available for commercial use without a license."
 echo "If wishing to license MAKER for commercial use, please contact Aaron Duffy at University of Utah TVC by email at Aaron.Duffy@tvc.utah.edu."
 echo ""
 echo "5) The following dependencies need manual registration and installation:"
-echo "5.1) Download GATK (v${GATK_VERSION}) from \"https://software.broadinstitute.org/gatk/download/\". Registration might be needed."
+echo "5.1) Download GATK (v${GATK_VERSION}) from \"https://software.broadinstitute.org/gatk/download/archive\". Registration might be needed."
 echo "Once downloaded, use the command \"tar -xjf GenomeAnalysisTK-v${GATK_VERSION}.tar.bz2\" to uncompress the file and"
 echo "move the resulting \"GenomeAnalysisTK.jar\" file into the directory $gatk_dir"
 echo ""

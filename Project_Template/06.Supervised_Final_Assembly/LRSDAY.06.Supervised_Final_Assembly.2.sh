@@ -76,8 +76,8 @@ if [[ $debug == "no" ]]
 then
     rm *.delta
     rm *.delta_filter
-    # rm ref_genome.fa
-    # rm ref_genome.fa.fai
+    rm ref_genome.fa
+    rm ref_genome.fa.fai
     if [[ $vcf == "yes" ]] 
     then
         rm *.filter.coords

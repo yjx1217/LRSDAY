@@ -1,17 +1,17 @@
-total sequence count: 20
-total sequence length: 12261860
-min sequence length: 24410
-max sequence length: 1480198
-mean sequence length: 613093.00
-median sequence length: 637681.50
-N50: 923665
+total sequence count: 33
+total sequence length: 12489291
+min sequence length: 1248
+max sequence length: 1480203
+mean sequence length: 378463.36
+median sequence length: 84648.00
+N50: 923633
 L50: 6
-N90: 462493
-L90: 13
-A%: 30.91
-T%: 30.81
-G%: 19.12
-C%: 19.12
-AT%: 61.72
-GC%: 38.24
+N90: 341463
+L90: 14
+A%: 30.88
+T%: 30.80
+G%: 19.13
+C%: 19.16
+AT%: 61.67
+GC%: 38.29
 N%: 0.04
