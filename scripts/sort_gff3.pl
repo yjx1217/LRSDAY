@@ -6,7 +6,7 @@ use Getopt::Long;
 ##############################################################
 #  script: sort_gff3.pl
 #  author: Jia-Xing Yue (GitHub ID: yjx1217)
-#  last edited: 2018.01.24
+#  last edited: 2018.10.15
 #  description: sort gff3 file by the input multi-fasta genome file
 #  example: perl sort_gff3.pl -i raw.gff3 -t genome_tag -o sorted.gff3 -r genome.fa(.gz)
 ##############################################################
@@ -189,7 +189,7 @@ sub parse_gff_file {
 	    $gff{$gene_id}{'gene_score'} = $score;
 	    $gff{$gene_id}{'gene_phase'} = $phase;
 	    $mRNA_index = 0;
-	} elsif ($type eq "centromere") {
+	} elsif (($type eq "centromere") or ($type eq "rRNA")) {
 	    $gene_type = $type;
 	    ($gene_id, $gene_name) = ($attributes =~ /ID=([^;]+);\S*Name=([^;]+)/);
 	    $gff{$gene_id}{'gene_name'} = $gene_name;

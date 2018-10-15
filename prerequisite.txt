@@ -3,7 +3,7 @@
 #######################################################
 # Hardware, operating system and network requirements
 #######################################################
-This protocol is designed for a desktop or computing server running an x86-64-bit Linux operating system. Multithreaded processors are preferred to speed up the process since many steps can be configured to use multiple threads in parallel. For assembling and analyzing the budding yeast genomes (genome size = ~12 Mb), at least 16 Gb of RAM and 100 Gb of free disk space are reccomended. When adapted for other eukaryotic organisms with larger genome sizes, the RAM and disk space consumption will scale up, majorly during de novo genome assembly (performed by Canu). Plese refer to Canu’s manual (http://canu.readthedocs.io/en/latest/) for suggested RAM and disk space consumption for assembling large genomes. Stable Internet connection is required for the installation and configuration of LRSDAY as well as for retrieving the testing data.
+This protocol is designed for a desktop or computing server running an x86-64-bit Linux operating system. Multithreaded processors are preferred to speed up the process since many steps can be configured to use multiple threads in parallel. For assembling and analyzing the budding yeast genomes (genome size = ~12.5 Mb), at least 16 Gb of RAM and 100 Gb of free disk space are reccomended. When adapted for other eukaryotic organisms with larger genome sizes, the RAM and disk space consumption will scale up, majorly during de novo genome assembly (performed by Canu). Plese refer to Canu’s manual (http://canu.readthedocs.io/en/latest/) for suggested RAM and disk space consumption for assembling large genomes. Stable Internet connection is required for the installation and configuration of LRSDAY as well as for retrieving the testing data.
 
 ########################
 # Software requirements
@@ -11,7 +11,7 @@ This protocol is designed for a desktop or computing server running an x86-64-bi
 ● Bash (https://www.gnu.org/software/bash/)
 ● Bzip2 (http://www.bzip.org/)
 ● Cmake (https://cmake.org/)
-● GCC and G++ v4.7 or newer (https://gcc.gnu.org/)
+● GCC and G++ v4.9.1 or newer (https://gcc.gnu.org/)
 ● Ghostscript (https://www.ghostscript.com)
 ● Git (https://git-scm.com/)
 ● GNU make (https://www.gnu.org/software/make/)

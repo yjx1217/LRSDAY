@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.2.0] - 2018-10-15
+### Added
+- Support for adapter trimming for Nanopore reads (via Porechop).
+- Support for long-read filtering based on both quality and length (via Filtlong).
+- Support for long-read-based polishing for PacBio and Nanopore reads (via Quiver/Arrow for PacBio reads and nanopolish for Nanopore reads).
+- Support for the bax2bam format conversion for the PacBio RSII reads to make it compatible with PacBio's current SMRT pipeline.
+- Support for dedicated mitochondrial gene annotation (via Mfannot).
+### Changed
+- Treat nuclear genome and mitochondrial genome separately in the annotation phase.
+- Better robustness for various processing scripts.
+- Software version or downloading URL updates for a number of dependencies.
+### Fixed
+- Typos in the manual.
+
 ## [1.1.0] - 2018-07-11
 ### Added
 - This change log file: Changelog.md

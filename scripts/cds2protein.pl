@@ -6,13 +6,16 @@ use Getopt::Long;
 ##############################################################
 #  script: cds2protein.pl
 #  author: Jia-Xing Yue (GitHub ID: yjx1217)
-#  last edited: 2018.01.24
+#  last edited: 2018.10.03
 #  description: translate cds sequences into protein sequences
-#  example: perl cds2protein.pl -i input.cds.fa(.gz) -p prefix
+#  example: perl cds2protein.pl -i input.cds.fa(.gz) -t 1 -p prefix
+#  See this link (https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi) for the genetic code table options. Only "1" and "3" are supported so far. 
 ##############################################################
 
-my ($input, $prefix);
+my ($input, $genetic_code_table, $prefix);
+$genetic_code_table = 1;
 GetOptions('input|i:s' => \$input, # input file
+	   'genetic_code_table|t:s' => \$genetic_code_table, # "1" for the standard code and "3" for the yeast mitochondrial code.
 	   'prefix|p:s' => \$prefix); # file name prefix for output files
 
 my $input_fh = read_file($input);
@@ -33,8 +36,13 @@ foreach my $id (@input) {
     # print "id = $id\n";
     my @pseudogene_test = ();
     my $cds = uc $input{$id};
-    if (($cds !~ /^ATG/) or ($cds !~ /(TAA|TAG|TGA)$/)) {
-	push @pseudogene_test, "unexpected start/end codons"
+    $cds =~ tr/U/T/;
+    if (($cds !~ /^ATG/) and ($cds =~ /(TAA|TAG|TGA)$/)) {
+	push @pseudogene_test, "unexpected start codon based on standard genentic code;your selected code table is $genetic_code_table";
+    } elsif (($cds =~ /^ATG/) and ($cds !~ /(TAA|TAG|TGA)$/)) {
+	push @pseudogene_test, "unexpected stop codon based on standard genentic code;your selected code table is $genetic_code_table";
+    } elsif (($cds !~ /^ATG/) and ($cds !~ /(TAA|TAG|TGA)$/)) {
+	push @pseudogene_test, "unexpected start & end codons based on standard genentic code;your selected code table is $genetic_code_table";
     }
     my $cds_length = length $cds;
     my $length_test = $cds_length % 3;
@@ -43,13 +51,13 @@ foreach my $id (@input) {
     if ($length_test != 0) {
 	push @pseudogene_test, "incorrect CDS length";
 	my $cds_phase0 = substr $cds, 0, $cds_length - $length_test;
-	my $pep_phase0 = translate($cds_phase0);
+	my $pep_phase0 = translate($genetic_code_table, $cds_phase0);
 	my $pep_phase0_stop_count = () = $pep_phase0 =~ /\*/g;
 	my $cds_phase1 = substr $cds, 1, $cds_length - $length_test + 1;
-	my $pep_phase1 = translate($cds_phase1);
+	my $pep_phase1 = translate($genetic_code_table, $cds_phase1);
 	my $pep_phase1_stop_count = () = $pep_phase1 =~ /\*/g;
 	my $cds_phase2 = substr $cds, 2, $cds_length - $length_test + 2;
-	my $pep_phase2 = translate($cds_phase2);
+	my $pep_phase2 = translate($genetic_code_table, $cds_phase2);
 	my $pep_phase2_stop_count = () = $pep_phase2 =~ /\*/g;
 	if (($pep_phase0_stop_count <= $pep_phase1_stop_count) and ($pep_phase0_stop_count <= $pep_phase2_stop_count)) {
 	    # print "my guess is phase 0, resulting a total of $pep_phase0_stop_count stop codons\n";
@@ -66,7 +74,7 @@ foreach my $id (@input) {
 	}
     }
     print $trimmed_cds_output_fh ">$id\n$cds_trim\n";
-    my $protein = translate($cds_trim);
+    my $protein = translate($genetic_code_table, $cds_trim);
     # get rid of the ending stop codon for translated protein sequences
     $protein =~ s/\*$//;
     print $pep_output_fh ">$id\n$protein\n";
@@ -124,19 +132,20 @@ sub parse_fasta_file {
 
 
 sub translate {
-    my $dna = shift @_;
+    my ($genetic_code_table, $dna) = @_;
     my $protein = "";
     for (my $i = 0; $i < (length($dna) - 2); $i += 3) {
-	$protein .= codon2aa(substr($dna, $i, 3));
+	$protein .= codon2aa($genetic_code_table, substr($dna, $i, 3));
     }
     return $protein;
 }
 
 
 sub codon2aa {
-    my $codon  = shift @_;
+    my ($genetic_code_table, $codon) = @_;
     $codon = uc $codon;
-    my %genetic_code = (
+    my %genetic_code = ();
+    %{$genetic_code{"1"}} = (
 	'TCA' => 'S',    # Serine
 	'TCC' => 'S',    # Serine
 	'TCG' => 'S',    # Serine
@@ -228,9 +237,104 @@ sub codon2aa {
 	'TRA' => '*',    # Stop
 	'---' => '-'     # alignment gap
 	);
+    for (my $i = 2; $i <= 31; $i++) {
+	%{$genetic_code{$i}} =  %{$genetic_code{"1"}};
+	if ($i eq "2") {
+	    $genetic_code{$i}{'AGA'} = '*'; # Stop
+	    $genetic_code{$i}{'AGG'} = '*'; # Stop
+	    $genetic_code{$i}{'AGR'} = '*'; # Stop
+	    $genetic_code{$i}{'ATA'} = 'M'; # Methionine
+	    $genetic_code{$i}{'TGA'} = 'W'; # Tryptophan
+	} elsif ($i eq "3") {
+	    $genetic_code{$i}{'ATA'} = 'M'; # Methionine
+	    $genetic_code{$i}{'CTT'} = 'T'; # Threonine
+	    $genetic_code{$i}{'CTC'} = 'T'; # Threonine
+	    $genetic_code{$i}{'CTA'} = 'T'; # Threonine
+	    $genetic_code{$i}{'CTG'} = 'T'; # Threonine
+	    $genetic_code{$i}{'CTR'} = 'T'; # Threonine
+	    $genetic_code{$i}{'CTY'} = 'T'; # Threonine
+	    $genetic_code{$i}{'CTS'} = 'T'; # Threonine
+	    $genetic_code{$i}{'CTW'} = 'T'; # Threonine
+	    $genetic_code{$i}{'CTK'} = 'T'; # Threonine
+	    $genetic_code{$i}{'CTM'} = 'T'; # Threonine
+	    $genetic_code{$i}{'CTB'} = 'T'; # Threonine
+	    $genetic_code{$i}{'CTD'} = 'T'; # Threonine
+	    $genetic_code{$i}{'CTH'} = 'T'; # Threonine
+	    $genetic_code{$i}{'CTN'} = 'T'; # Threonine
+	    $genetic_code{$i}{'TGA'} = 'W'; # Trptophan	    
+	} elsif ($i eq "4") {
+	    $genetic_code{$i}{'TGA'} = 'W'; # Tryptophan
+	} elsif ($i eq "5") {
+	    $genetic_code{$i}{'AGA'} = 'S'; # Serine
+	    $genetic_code{$i}{'AGG'} = 'S'; # Serine
+	    $genetic_code{$i}{'AGR'} = 'S'; # Serine
+	    $genetic_code{$i}{'ATA'} = 'M'; # Methionine
+	    $genetic_code{$i}{'TGA'} = 'W'; # Tryptophan
+	} elsif ($i eq "6") {
+	    $genetic_code{$i}{'TAA'} = 'Q'; # Glutamine
+	    $genetic_code{$i}{'TAG'} = 'Q'; # Glutamine
+	    $genetic_code{$i}{'TAR'} = 'Q'; # Glutamine
+	} elsif ($i eq "9") {
+	    $genetic_code{$i}{'AAA'} = 'N'; # Asparagine
+	    $genetic_code{$i}{'AGA'} = 'S'; # Serine
+	    $genetic_code{$i}{'AGG'} = 'S'; # Serine
+	    $genetic_code{$i}{'AGR'} = 'S'; # Serine
+	    $genetic_code{$i}{'TGA'} = 'W'; # Tryptophan
+	} elsif ($i eq "10") {
+	    $genetic_code{$i}{'TGA'} = 'C'; # Cysteine
+	} elsif ($i eq "12") {
+	    $genetic_code{$i}{'CTG'} = 'S'; # Serine
+	} elsif ($i eq "13") {
+	    $genetic_code{$i}{'AGA'} = 'G'; # Glycine
+	    $genetic_code{$i}{'AGG'} = 'G'; # Glycine
+	    $genetic_code{$i}{'AGR'} = 'G'; # Glycine
+	    $genetic_code{$i}{'ATA'} = 'M'; # Methionine
+	    $genetic_code{$i}{'TGA'} = 'W'; # Tryptophan
+	} elsif ($i eq "14") {
+	    $genetic_code{$i}{'AAA'} = 'N'; # Asparagine
+	    $genetic_code{$i}{'AGA'} = 'S'; # Serine
+	    $genetic_code{$i}{'AGG'} = 'S'; # Serine
+	    $genetic_code{$i}{'AGR'} = 'S'; # Serine
+	    $genetic_code{$i}{'TAA'} = 'Y'; # Tyrosine
+	    $genetic_code{$i}{'TGA'} = 'W'; # Tryptophan
+	} elsif ($i eq "16") {
+	    $genetic_code{$i}{'TAG'} = 'L'; # Leucine
+	} elsif ($i eq "21") {
+	    $genetic_code{$i}{'TGA'} = 'W'; # Tryptophan
+	    $genetic_code{$i}{'ATA'} = 'M'; # Methionine
+	    $genetic_code{$i}{'AGA'} = 'S'; # Serine
+	    $genetic_code{$i}{'AGG'} = 'S'; # Serine
+	    $genetic_code{$i}{'AGR'} = 'S'; # Serine
+	    $genetic_code{$i}{'AAA'} = 'N'; # Asparagine
+	} elsif ($i eq "22") {
+	    $genetic_code{$i}{'TAG'} = 'L'; # Leucine
+	} elsif ($i eq "24") {
+	    $genetic_code{$i}{'AGA'} = 'S'; # Serine
+	    $genetic_code{$i}{'AGG'} = 'K'; # Lysine
+	    $genetic_code{$i}{'TGA'} = 'W'; # Tryptophan
+	} elsif ($i eq "25") {
+	    $genetic_code{$i}{'TGA'} = 'G'; # Glycine
+	} elsif ($i eq "26") {
+	    $genetic_code{$i}{'ATG'} = 'A'; # Alanine
+	} elsif ($i eq "27") {
+	    $genetic_code{$i}{'TAG'} = 'Q'; # Glutamine
+	    $genetic_code{$i}{'TAA'} = 'Q'; # Glutamine
+	    $genetic_code{$i}{'TAR'} = 'Q'; # Glutamine
+	} elsif ($i eq "29") {
+	    $genetic_code{$i}{'TAG'} = 'Y'; # Tyrosine
+            $genetic_code{$i}{'TAA'} = 'Y'; # Tyrosine
+            $genetic_code{$i}{'TAR'} = 'Y'; # Tyrosine
+	} elsif ($i eq "30") {
+	    $genetic_code{$i}{'TAG'} = 'E'; # Glutamic Acid
+	    $genetic_code{$i}{'TAA'} = 'E'; # Glutamic Acid
+	    $genetic_code{$i}{'TAR'} = 'E'; # Glutamic Acid
+	} elsif ($i eq "31") {
+	    $genetic_code{$i}{'TGA'} = 'W'; # Tryptophan
+	}
+    }
     
-    if (exists $genetic_code{$codon}) {
-        return $genetic_code{$codon};
+    if (exists $genetic_code{$genetic_code_table}{$codon}) {
+        return $genetic_code{$genetic_code_table}{$codon};
     } else {
 	#print STDERR "Bad codon \"$codon\"!!\n";
 	return 'X';

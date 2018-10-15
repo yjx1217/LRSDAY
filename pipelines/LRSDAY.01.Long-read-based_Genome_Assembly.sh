@@ -7,17 +7,17 @@ PATH=$gnuplot_dir:$PATH
 
 ###########################################
 # set project-specific variables
-prefix="SK1" # file name prefix for the output files
-reads="./../00.Long_Reads/SK1.filtered_subreads.fastq.gz" # path of the long reads file (in fastq or fastq.gz format)
-reads_type="pacbio-raw" # long reads data type: "pacbio-raw" or "pacbio-corrected" or "nanopore-raw" or "nanopore-corrected"
-genome_size="12.5m" # estimated genome size with the format of <number>[g|m|k], e.g. 12.5m for 12.5 Mb
-assembler="canu" # long-read assembler: "canu" (default) or "flye" or "smartdenovo". Based on our test, canu gives better results but takes longer to finish.
-customized_canu_parameters="-correctedErrorRate=0.04" # users can set customized Canu assembly parameters here or simply leave it empty like "" to use Canu's default assembly parameter. For example you could set "-correctedErrorRate=0.04" for high coverage (>60X) PacBio data and "-correctedErrorRate=0.12 -overlapper=mhap -utgReAlign=true" for high coverage (>60X) Nanopore data to improve the assembly speed. More than one customized parameters can be set here as long as they are separeted by space (e.g. "-option1=XXX -option2=YYY -option3=ZZZ"). Please consult Canu's manual "http://canu.readthedocs.io/en/latest/faq.html#what-parameters-can-i-tweak" for advanced customization settings. 
-threads=1 # number of threads to use
-vcf="yes" # use "yes" if prefer to have vcf file generated to show SNP and INDEL differences between the assembled genome and the reference genome.
-dotplot="yes" # use "yes" if prefer to plot genome-wide dotplot based on the comparison with the reference genome below, otherwise use "no"
-ref_genome_raw="./../00.Ref_Genome/S288C.ASM205763v1.fa" # path of the raw reference genome, only needed when dotplot="yes" or vcf="yes".
-debug="no" # use "yes" if prefer to keep intermediate files, otherwise use "no".
+prefix="SK1" # The file name prefix for the output files.
+long_reads="./../00.Long_Reads/SK1.filtered_subreads.fastq.gz" # The file path of the long reads file (in fastq or fastq.gz format).
+long_reads_type="pacbio-raw" # The long reads data type. Use "pacbio-raw" or "pacbio-corrected" or "nanopore-raw" or "nanopore-corrected". Default = "pacbio-raw" for the testing example
+genome_size="12.5m" # The estimated genome size with the format of <number>[g|m|k], e.g. 12.5m for 12.5 Mb. Default = "12.5m".
+assembler="canu" # The long-read assembler: Use "canu" or "flye" or "smartdenovo" or "canu-flye" or "canu-smartdenovo". For "canu-flye" and "canu-smartdenovo", the assembler canu is used first to generate error-corrected reads from the raw reads and then the assembler flye/smartdenovo is used to assemble the genome. Based on our test, assembler="canu" generally gives the best result but will take substantially longer time than the other options.
+customized_canu_parameters="-correctedErrorRate=0.04" # For assembler="canu" only. Users can set customized Canu assembly parameters here or simply leave it empty like "" to use Canu's default assembly parameter. For example you could set "-correctedErrorRate=0.04" for high coverage (>60X) PacBio data and "-correctedErrorRate=0.12 -overlapper=mhap -utgReAlign=true" for high coverage (>60X) Nanopore data to improve the assembly speed. More than one customized parameters can be set here as long as they are separeted by space (e.g. "-option1=XXX -option2=YYY -option3=ZZZ"). Please consult Canu's manual "http://canu.readthedocs.io/en/latest/faq.html#what-parameters-can-i-tweak" for advanced customization settings. Default = "-correctedErrorRate=0.04" for the testing example.
+threads=1 # The number of threads to use. Default = 1.
+vcf="yes" # Use "yes" if prefer to have vcf file generated to show SNP and INDEL differences between the assembled genome and the reference genome for their uniquely alignable regions. Otherwise use "no". Default = "yes".
+dotplot="yes" # Use "yes" if prefer to plot genome-wide dotplot based on the comparison with the reference genome below. Otherwise use "no". Default = "yes".
+ref_genome_raw="./../00.Ref_Genome/S288C.ASM205763v1.fa" # The file path of the raw reference genome. This is only needed when the option "dotplot=" or "vcf=" has been set as "yes".
+debug="no" # Use "yes" if prefer to keep intermediate files. Otherwise use "no". Default = "no".
 
 ###########################################
 # process the pipeline
@@ -26,7 +26,7 @@ debug="no" # use "yes" if prefer to keep intermediate files, otherwise use "no".
 if [[ $vcf == "yes" || $dotplot == "yes" ]]
 then
     # check if ref_genome_raw is defined
-    if [[ -z $ref_genome_raw ]]
+    if [[ -z "$ref_genome_raw" ]]
     then
 	echo "The vcf and doptlot outputs require the variable ref_genome_raw be defined!"
 	echo "Please define this variable in the script; Please delete all the old output files and directories; and re-run this step!"
@@ -41,7 +41,7 @@ then
 	echo ""
 	exit
     else
-	ln -s $ref_genome_raw ref_genome.fa
+	cp $ref_genome_raw ref_genome.fa
     fi
 fi
 
@@ -56,81 +56,130 @@ then
 	maxThreads=$threads \
 	genomeSize=$genome_size \
 	gnuplot=$gnuplot_dir/gnuplot \
-	-${reads_type} $reads \
+	-${long_reads_type} $long_reads \
 	$customized_canu_parameters
     
-    perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i ./$out_dir/$prefix.contigs.fasta -o $prefix.$assembler.fa
+    perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i ./$out_dir/$prefix.contigs.fasta -o $prefix.assembly.$assembler.fa
 elif [[ "$assembler" == "flye" ]]
 then
-    if [[ "$reads_type" == "pacbio-corrected" ]]
+    if [[ "$long_reads_type" == "pacbio-corrected" ]]
     then
 	reads_type="pacbio-corr"
-    elif [[ "$reads_type" == "nanopore-raw" ]]
+    elif [[ "$long_reads_type" == "nanopore-raw" ]]
     then
         reads_type="nano-raw"
-    elif [[ "$reads_type" == "nanopore-corrected" ]]
+    elif [[ "$long_reads_type" == "nanopore-corrected" ]]
     then
         reads_type="nano-corr"
     fi
-    $flye_dir/flye -o $out_dir \
+    $flye_new_dir/flye -o $out_dir \
 	-t $threads \
 	-g $genome_size \
-	--${reads_type} $reads \
-	--min-overlap 7000 \
+	--${long_reads_type} $long_reads \
 	-i 2
-    perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i ./$out_dir/contigs.fasta -o $prefix.$assembler.fa
+    perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i ./$out_dir/contigs.fasta -o $prefix.assembly.$assembler.fa
 elif [[ "$assembler" == "smartdenovo" ]]
 then
     mkdir $out_dir
     cd $out_dir
-    $smartdenovo_dir/smartdenovo_customized.pl -p $prefix -t $threads -c 1 ./../$reads > $prefix.mak
+    # $smartdenovo_dir/smartdenovo.pl -p $prefix -t $threads -c 1 ./../$long_reads > $prefix.mak
+    $smartdenovo_dir/smartdenovo_customized.pl -p $prefix -t $threads -c 1 ./../$long_reads > $prefix.mak
     make -f $prefix.mak
-    perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i $prefix.dmo.cns  -o ./../$prefix.$assembler.fa
     cd ..
+    perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i $out_dir/$prefix.dmo.cns  -o $prefix.assembly.$assembler.fa
+
+elif [[ "$assembler" == "canu-flye" ]]
+then
+    $canu_dir/canu -correct -p $prefix -d $out_dir/canu \
+	useGrid=false \
+	maxThreads=$threads \
+	genomeSize=$genome_size \
+	gnuplot=$gnuplot_dir/gnuplot \
+	-${reads_type} $long_reads \
+	# $customized_canu_parameters
+    
+    if [[ "$long_reads_type" == "pacbio-raw" ]]
+    then
+	long_reads_type="pacbio-corr"
+    elif [[ "$long_reads_type" == "pacbio-corrected" ]]
+    then
+	long_reads_type="pacbio-corr"
+    elif [[ "$long_reads_type" == "nanopore-raw" ]]
+    then
+        long_reads_type="nano-corr"
+    elif [[ "$long_reads_type" == "nanopore-corrected" ]]
+    then
+        long_reads_type="nano-corr"
+    fi
+    $flye_dir/flye -o $out_dir/flye \
+	-t $threads \
+	-g $genome_size \
+	--${long_reads_type} $out_dir/canu/$prefix.correctedReads.fasta.gz \
+	-i 2
+    perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i ./$out_dir/flye/contigs.fasta -o $prefix.assembly.$assembler.fa
+elif [[ "$assembler" == "canu-smartdenovo" ]]
+then
+    $canu_dir/canu -correct -p $prefix -d $out_dir/canu \
+        useGrid=false \
+        maxThreads=$threads \
+        genomeSize=$genome_size \
+        gnuplot=$gnuplot_dir/gnuplot \
+        -${long_reads_type} $long_reads \
+	# $customized_canu_parameters
+
+    mkdir -p $out_dir/smartdenovo
+    cd $out_dir/smartdenovo
+    $smartdenovo_dir/smartdenovo.pl -p $prefix -t $threads -c 1 $out_dir/canu/$prefix.correctedReads.fasta.gz  > $prefix.mak
+    make -f $prefix.mak
+    cd ..
+    perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i $out_dir/smartdenovo/$prefix.dmo.cns  -o $prefix.assembly.$assembler.fa
 fi
 
+ln -s $prefix.assembly.$assembler.fa $prefix.assembly.raw.fa
+
 # generate assembly statistics
-perl $LRSDAY_HOME/scripts/cal_assembly_stats.pl -i $prefix.$assembler.fa -o $prefix.$assembler.stats.txt
+perl $LRSDAY_HOME/scripts/cal_assembly_stats.pl -i $prefix.assembly.raw.fa -o $prefix.assembly.raw.stats.txt
 
 # make the comparison between the assembled genome and the reference genome
-$mummer_dir/nucmer -t $threads --maxmatch --nosimplify  -p $prefix.$assembler  $ref_genome_raw $prefix.$assembler.fa 
-$mummer_dir/delta-filter -m  $prefix.$assembler.delta > $prefix.$assembler.delta_filter
+$mummer_dir/nucmer -t $threads --maxmatch --nosimplify  -p $prefix.assembly.raw  $ref_genome_raw $prefix.assembly.raw.fa 
+$mummer_dir/delta-filter -m  $prefix.assembly.raw.delta > $prefix.assembly.raw.delta_filter
 
 # generate the vcf output
 if [[ $vcf == "yes" ]]
 then
-    $mummer_dir/show-coords -b -T -r -c -l -d   $prefix.$assembler.delta_filter > $prefix.$assembler.filter.coords
-    $mummer_dir/show-snps -C -T -l -r $prefix.$assembler.delta_filter > $prefix.$assembler.filter.snps
-    perl $LRSDAY_HOME/scripts/mummer2vcf.pl -r ref_genome.fa -i $prefix.$assembler.filter.snps -t SNP -p $prefix.$assembler.filter
-    perl $LRSDAY_HOME/scripts/mummer2vcf.pl -r ref_genome.fa -i $prefix.$assembler.filter.snps -t INDEL -p $prefix.$assembler.filter
+    $mummer_dir/show-coords -b -T -r -c -l -d   $prefix.assembly.raw.delta_filter > $prefix.assembly.raw.filter.coords
+    $mummer_dir/show-snps -C -T -l -r $prefix.assembly.raw.delta_filter > $prefix.assembly.raw.filter.snps
+    perl $LRSDAY_HOME/scripts/mummer2vcf.pl -r ref_genome.fa -i $prefix.assembly.raw.filter.snps -t SNP -p $prefix.assembly.raw.filter
+    perl $LRSDAY_HOME/scripts/mummer2vcf.pl -r ref_genome.fa -i $prefix.assembly.raw.filter.snps -t INDEL -p $prefix.assembly.raw.filter
     $samtools_dir/samtools faidx ref_genome.fa 
     awk '{printf("##contig=<ID=%s,length=%d>\n",$1,$2);}' ref_genome.fa.fai > $prefix.vcf_header.txt
-    sed -i -e "/##reference/r $prefix.vcf_header.txt" $prefix.$assembler.filter.mummer2vcf.SNP.vcf
-    sed -i -e "/##reference/r $prefix.vcf_header.txt" $prefix.$assembler.filter.mummer2vcf.INDEL.vcf
+    sed -i -e "/##reference/r $prefix.vcf_header.txt" $prefix.assembly.raw.filter.mummer2vcf.SNP.vcf
+    sed -i -e "/##reference/r $prefix.vcf_header.txt" $prefix.assembly.raw.filter.mummer2vcf.INDEL.vcf
 fi
 
 # generate genome-wide dotplot
 if [[ $dotplot == "yes" ]]
 then
-    $mummer_dir/mummerplot --large --postscript $prefix.$assembler.delta_filter -p $prefix.$assembler.filter
-    perl $LRSDAY_HOME/scripts/fine_tune_gnuplot.pl -i $prefix.$assembler.filter.gp -o $prefix.$assembler.filter_adjust.gp -r ref_genome.fa -q ${prefix}.$assembler.fa
-    $gnuplot_dir/gnuplot < $prefix.$assembler.filter_adjust.gp
+    $mummer_dir/mummerplot --large --postscript $prefix.assembly.raw.delta_filter -p $prefix.assembly.raw.filter
+    perl $LRSDAY_HOME/scripts/fine_tune_gnuplot.pl -i $prefix.assembly.raw.filter.gp -o $prefix.assembly.raw.filter_adjust.gp -r ref_genome.fa -q $prefix.assembly.raw.fa
+    $gnuplot_dir/gnuplot < $prefix.assembly.raw.filter_adjust.gp
 fi
 
 # clean up intermediate files
 if [[ $debug == "no" ]]
 then
-    rm ref_genome.fa
-    rm ref_genome.fa.fai
+    if [[ "$reads_type" == "nanopore-raw" || "$reads_type" == "nanopore-corrected" ]]
+    then
+	rm reads.cleaned.fastq.gz
+    fi
     rm *.delta
     rm *.delta_filter
-    # rm ref_genome.fa
-    # rm ref_genome.fa.fai
+    rm ref_genome.fa
     if [[ $vcf == "yes" ]] 
     then
 	rm *.filter.coords
 	rm $prefix.vcf_header.txt
-	rm $prefix.$assembler.filter.snps
+	rm $prefix.assembly.raw.filter.snps
     fi
     if [[ $dotplot == "yes" ]]
     then

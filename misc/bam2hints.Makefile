@@ -10,9 +10,9 @@
 # Variable definition
 #BAMTOOLS = /usr/bin/bamtools
 #INCLUDES = /usr/include/bamtools
-INCLUDES = $(BAMTOOLS)/include
+INCLUDES = $(BAMTOOLS)/include/bamtools
 #LIBS = -lbamtools -lz
-LIBS = $(BAMTOOLS)/lib/libbamtools.a -lz
+LIBS = $(BAMTOOLS)/lib64/libbamtools.a -lz
 SOURCES = bam2hints.cc 
 OBJECTS = $(SOURCES:.cc=.o)
 CXXFLAGS += -Wall -O2 # -g -p -g -ggdb 

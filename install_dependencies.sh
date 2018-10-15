@@ -1,26 +1,28 @@
 #!/bin/bash
-# last update: 2018/07/10
+# last update: 2018/08/13
 
 set -e -o pipefail
 
 LRSDAY_HOME=$(pwd)
 BUILD="build"
 
-SRA_VERSION="2.9.0" # "2.8.2-1"
+SRA_VERSION="2.9.2" # "2.8.2-1"
+PORECHOP_VERSION="0.2.3" # "0.2.3"
+PORECHOP_GITHUB_COMMIT_VERSION="289d5dc" # committed on 2017.12.06
+FILTLONG_VERSION="0.2.0" 
+FILTLONG_GITHUB_COMMIT_VERSION="d1bb46d" # committed on 2018.05.11
+MINIMAP2_VERSION="2.12"
 CANU_VERSION="1.7.1" # "1.5"
-FLYE_VERSION="2.3.4" # "2.3.3"
+FLYE_VERSION="2.3.6" # "2.3.3"
 SMARTDENOVO_VERSION="" # not available, so we use the github comit hash below for version control
 SMARTDENOVO_GITHUB_COMMIT_VERSION="5cc1356" # committed on 2018.02.19
-MINIMAP2_VERSION="2.11"
-RAGOUT_VERSION="2.0"
-#QUAST_VERSION="4.6.4" # one of its dependency needs "csh" to be pre-installed
+RAGOUT_VERSION="2.1.1"
+#QUAST_VERSION="5.0.0" # one of its dependency needs "csh" to be pre-installed
 HDF_VERSION="1.10.1"
 SONLIB_VERSION="" # not available, so we use the github comit hash below for version control
 SONLIB_GITHUB_COMMIT_VERSION="1afbd97" # committed on 2017.08.09
 HAL_VERSION="" # not available, so we use the github comit hash below for version control
 HAL_GITHUB_COMMIT_VERSION="a2ad656" # committed on 2017.09.09
-#NANOPOLISH_VERSION="0.9.2"
-#NANOPOLISH_GITHUB_COMMIT_VERSION="ed9b14c" # committed on 2018.06.04
 MUMMER_VERSION="4.0.0beta2"
 GNUPLOT_VERSION="4.6.6"
 BEDTOOLS_VERSION="2.27.1"
@@ -28,11 +30,11 @@ SPADES_VERSION="3.12.0" # "3.10.1"
 PRODIGAL_VERSION="2.6.3"
 CAP_VERSION="" # see http://seq.cs.iastate.edu/cap3.html
 BWA_VERSION="0.7.17" # "0.7.15"
-SAMTOOLS_VERSION="1.8" #"1.3"
+SAMTOOLS_VERSION="1.9" #"1.3"
 CIRCLATOR_VERSION="1.5.5" # "1.5.1"
 TRIMMOMATIC_VERSION="0.36"
 GATK_VERSION="3.8"
-PICARD_VERSION="2.18.4" # "2.13.2" 
+PICARD_VERSION="2.18.12" # "2.18.4" 
 PILON_VERSION="1.22"
 EXONERATE_VERSION="2.2.0"
 BLAST_VERSION="2.2.31"
@@ -47,24 +49,47 @@ REANNOTATE_VERSION="17.03.2015-LongQueryName"
 CLUSTALW_VERSION="2.1"
 MUSCLE_VERSION="3.8.31"
 HMMER_VERSION="3.1b2"
-BAMTOOLS_VERSION="2.4.1"
-AUGUSTUS_VERSION="3.2.3"
+BAMTOOLS_VERSION="2.4.2"
+AUGUSTUS_VERSION="3.2.3" 
+#AUGUSTUS_GITHUB_COMMIT_VERSION="79960C5"
 EVM_VERSION="1.1.1"
 PROTEINORTHO_VERSION="5.16b" # "5.16"
 MAKER_VERSION="3.00.0-beta"
+MINICONDA2_VERSION="4.5.11"
+PB_ASSEMBLY_VERSION="0.0.1"
+BAX2BAM_VERSION="0.0.9"
+NANOPOLISH_VERSION="0.10.2"
+NANOPOLISH_GITHUB_COMMIT_VERSION="f1de746" # committed on 2018.09.13
+PARALLEL_VERSION="20180722"
+# for MFannot
+EMBOSS_VERSION="6.5.7"
+ERPIN_VERSION="5.5.4"
+TBL2ASN_VERSION=""
+PIROBJECT_VERSION="1.19"
+PIRMODELS_GITHUB_COMMIT_VERSION="6b223ec" # committed on 2016.08.30
+FLIP_GITHUB_COMMIT_VERSION="00a57cb" # committed on 2016.04.07
+UMAC_GITHUB_COMMIT_VERSION="cae618e" # committed on 2016.08.30
+HMMSEARCHWC_GITHUB_COMMIT_VERSION="9e3b461" # committed on 2016.11.05
+RNAFINDER_GITHUB_COMMIT_VERSION="579dc58" # committed on 2016.12.07
+MF2SQN_GITHUB_COMMIT_VERSION="6faf9f4" # committed on 2016.12.07
+GRAB_FASTA_GITHUB_COMMIT_VERSION="accd32d" # committed on 2017.02.14
+MFANNOT_DATA_GITHUB_COMMIT_VERSION="b039ac5" # committed on 2016.12.07
+MFANNOT_GITHUB_COMMIT_VERSION="a4a8408" # committed on 2018.09.21
 
-SRA_DOWNLOAD_URL="http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/sratoolkit.${SRA_VERSION}-centos_linux64.tar.gz"
+# downloading URLs for dependencies
+SRA_DOWNLOAD_URL="https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/sratoolkit.${SRA_VERSION}-centos_linux64.tar.gz"
+PORECHOP_DOWNLOAD_URL="https://github.com/rrwick/Porechop.git"
+FILTLONG_DOWNLOAD_URL="https://github.com/rrwick/Filtlong.git"
+MINIMAP2_DOWNLOAD_URL="https://github.com/lh3/minimap2/releases/download/v${MINIMAP2_VERSION}/minimap2-${MINIMAP2_VERSION}_x64-linux.tar.bz2"
 CANU_DOWNLOAD_URL="https://github.com/marbl/canu/archive/v${CANU_VERSION}.tar.gz"
 FLYE_DOWNLOAD_URL="https://github.com/fenderglass/Flye/archive/${FLYE_VERSION}.tar.gz"
 SMARTDENOVO_DOWNLOAD_URL="https://github.com/ruanjue/smartdenovo"
-MINIMAP2_DOWNLOAD_URL="https://github.com/lh3/minimap2/releases/download/v${MINIMAP2_VERSION}/minimap2-${MINIMAP2_VERSION}_x64-linux.tar.bz2"
 #QUAST_DOWNLOAD_URL="https://downloads.sourceforge.net/project/quast/quast-${QUAST_VERSION}.tar.gz"
-RAGOUT_DOWNLOAD_URL="https://github.com/fenderglass/Ragout/releases/download/${RAGOUT_VERSION}/ragout-${RAGOUT_VERSION}-linux-x86_64.tar.gz"
+RAGOUT_DOWNLOAD_URL="https://github.com/fenderglass/Ragout/archive/${RAGOUT_VERSION}.tar.gz"
 HDF_VERSION_prefix=${HDF_VERSION%.*}
 HDF_DOWNLOAD_URL="https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDF_VERSION_prefix}/hdf5-${HDF_VERSION}/src/hdf5-${HDF_VERSION}.tar.gz"
 SONLIB_DOWNLOAD_URL="https://github.com/benedictpaten/sonLib.git"
 HAL_DOWNLOAD_URL="https://github.com/glennhickey/hal.git"
-#NANOPOLISH_DOWNLOAD_URL="https://github.com/jts/nanopolish.git"
 MUMMER_DOWNLOAD_URL="https://github.com/gmarcais/mummer/releases/download/v${MUMMER_VERSION}/mummer-${MUMMER_VERSION}.tar.gz"
 GNUPLOT_DOWNLOAD_URL="https://sourceforge.net/projects/gnuplot/files/gnuplot/${GNUPLOT_VERSION}/gnuplot-${GNUPLOT_VERSION}.tar.gz"
 BEDTOOLS_DOWNLOAD_URL="https://github.com/arq5x/bedtools2/releases/download/v${BEDTOOLS_VERSION}/bedtools-${BEDTOOLS_VERSION}.tar.gz"
@@ -93,8 +118,12 @@ MUSCLE_DOWNLOAD_URL="http://www.drive5.com/muscle/downloads${MUSCLE_VERSION}/mus
 HMMER_DOWNLOAD_URL="http://eddylab.org/software/hmmer3/${HMMER_VERSION}/hmmer-${HMMER_VERSION}-linux-intel-x86_64.tar.gz"
 BAMTOOLS_DOWNLOAD_URL="https://github.com/pezmaster31/bamtools/archive/v${BAMTOOLS_VERSION}.tar.gz"
 AUGUSTUS_DOWNLOAD_URL="http://bioinf.uni-greifswald.de/augustus/binaries/old/augustus-${AUGUSTUS_VERSION}.tar.gz"
+#AUGUSTUS_DOWNLOAD_URL="https://github.com/Gaius-Augustus/Augustus.git"
 EVM_DOWNLOAD_URL="https://github.com/EVidenceModeler/EVidenceModeler/archive/v${EVM_VERSION}.tar.gz"
 PROTEINORTHO_DOWNLOAD_URL="https://www.bioinf.uni-leipzig.de/Software/proteinortho/proteinortho_v${PROTEINORTHO_VERSION}.tar.gz"
+MINICONDA2_DOWNLOAD_URL="https://repo.continuum.io/miniconda/Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh"
+NANOPOLISH_DOWNLOAD_URL="https://github.com/jts/nanopolish.git"
+PARALLEL_DOWNLOAD_URL="http://ftp.gnu.org/gnu/parallel/parallel-${PARALLEL_VERSION}.tar.bz2"
 
 # UCSC Utilities
 BLAT_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/blat/blat"
@@ -102,6 +131,23 @@ FASPLIT_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/faSp
 PSLSORT_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/pslSort"
 PSLSCORE_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/pslScore"
 PSLCDNAFILTER_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/pslCDnaFilter"
+
+# for MFannot
+EMBOSS_VERSION_prefix="${EMBOSS_VERSION:0:3}"
+EMBOSS_DOWNLOAD_URL="ftp://emboss.open-bio.org/pub/EMBOSS/old/${EMBOSS_VERSION_prefix}.0/EMBOSS-${EMBOSS_VERSION}.tar.gz"
+ERPIN_DOWNLOAD_URL="http://rna.igmors.u-psud.fr/download/Erpin/erpin${ERPIN_VERSION}.serv.tar.gz"
+TBL2ASN_DOWNLOAD_URL="ftp://ftp.ncbi.nih.gov/toolbox/ncbi_tools/converters/by_program/tbl2asn/linux64.tbl2asn.gz"
+PIROBJECT_DOWNLOAD_URL="https://github.com/prioux/PirObject/archive/v${PIROBJECT_VERSION}.tar.gz"
+PIRMODELS_DOWNLOAD_URL="https://github.com/BFL-lab/PirModels.git"
+FLIP_DOWNLOAD_URL="https://github.com/BFL-lab/Flip.git"
+UMAC_DOWNLOAD_URL="https://github.com/BFL-lab/Umac.git"
+HMMSEARCHWC_DOWNLOAD_URL="https://github.com/BFL-lab/HMMsearchWC.git"
+RNAFINDER_DOWNLOAD_URL="https://github.com/BFL-lab/RNAfinder.git"
+MF2SQN_DOWNLOAD_URL="https://github.com/BFL-lab/Mf2sqn.git"
+GRAB_FASTA_DOWNLOAD_URL="https://github.com/BFL-lab/grab-fasta.git"
+MFANNOT_DATA_DOWNLOAD_URL="https://github.com/BFL-lab/MFannot_data.git"
+MFANNOT_DOWNLOAD_URL="https://github.com/BFL-lab/MFannot.git"
+
 
 # Create the $BUILD directory for dependency installation
 if [[ -d $BUILD ]]
@@ -134,7 +180,6 @@ download () {
   echo "Downloading $url to $download_location"
   wget --no-check-certificate $url -O $download_location
 }
-
 
 # ---------- set Perl & Python environment variables -------------
 PYTHONPATH="$build_dir"
@@ -174,7 +219,9 @@ $cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed threads@2.16
 $cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed PerlIO::gzip@0.20
 $cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed ExtUtils::CBuilder@0.280224 
 $cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed LWP::Simple@6.26
+$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed LWP::UserAgent
 $cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed Bio::Perl@1.007001
+
 
 # ------------- SRA Toolkit -------------------
 cd $build_dir
@@ -183,6 +230,27 @@ download $SRA_DOWNLOAD_URL sratoolkit.${SRA_VERSION}-centos_linux64.tar.gz
 tar -zxf sratoolkit.${SRA_VERSION}-centos_linux64.tar.gz
 sra_dir="$build_dir/sratoolkit.${SRA_VERSION}-centos_linux64/bin"
 rm sratoolkit.${SRA_VERSION}-centos_linux64.tar.gz
+
+# --------------- Porechop ------------------
+cd $build_dir
+echo "Download Porechop-v${PORECHOP_VERSION}"
+git clone $PORECHOP_DOWNLOAD_URL
+cd Porechop
+git reset --hard $PORECHOP_GITHUB_COMMIT_VERSION
+virtualenv -p $(which python3) py3_virtualenv_porechop
+source py3_virtualenv_porechop/bin/activate
+py3_virtualenv_porechop/bin/python3 ./setup.py install
+deactivate
+porechop_dir="$build_dir/Porechop/py3_virtualenv_porechop/bin"
+
+# --------------- Porechop ------------------
+cd $build_dir
+echo "Download Filtlong-v${FILTLONG_VERSION}"
+git clone $FILTLONG_DOWNLOAD_URL
+cd Filtlong
+git reset --hard $FILTLONG_GITHUB_COMMIT_VERSION
+make -j
+filtlong_dir="$build_dir/Filtlong/bin"
 
 # --------------- minimap2 ------------------
 cd $build_dir
@@ -235,11 +303,14 @@ smartdenovo_dir="$build_dir/smartdenovo"
 # --------------- Ragout ------------------
 cd $build_dir
 echo "Download Ragout-v${RAGOUT_VERSION}"
-download $RAGOUT_DOWNLOAD_URL "ragout-${RAGOUT_VERSION}-linux-x86_64.tar.gz"
-tar -zxf ragout-${RAGOUT_VERSION}-linux-x86_64.tar.gz 
-ragout_dir="$build_dir/ragout-${RAGOUT_VERSION}-linux-x86_64"
-# cp $LRSDAY_HOME/misc/ragout_config.py $ragout_dir/ragout/shared/config.py
-rm ragout-${RAGOUT_VERSION}-linux-x86_64.tar.gz
+download $RAGOUT_DOWNLOAD_URL Ragout-${RAGOUT_VERSION}.tar.gz
+tar -zxf Ragout-${RAGOUT_VERSION}.tar.gz
+cd Ragout-${RAGOUT_VERSION}
+python2 setup.py build
+python2 ./scripts/install-sibelia.py
+ragout_dir="$build_dir/Ragout-${RAGOUT_VERSION}/bin"
+cd ..
+rm Ragout-${RAGOUT_VERSION}.tar.gz
 
 # --------------- HDF ------------------
 cd $build_dir
@@ -285,16 +356,6 @@ C_INCLUDE_PATH=""
 make
 cd $build_dir
 rm samtools-${SAMTOOLS_VERSION}.tar.bz2
-
-# # ------------- NANOPOLISH --------------------
-# cd $build_dir
-# echo "Download nanopolish-v${NANOPOLISH_VERSION}"
-# git clone --recursive $NANOPOLISH_DOWNLOAD_URL
-# nanopolish_dir="$build_dir/nanopolish"
-# cd $nanopolish_dir
-# git reset --hard $NANOPOLISH_GITHUB_COMMIT_VERSION
-# make
-# cd $build_dir
 
 # --------------- gnuplot ------------------
 cd $build_dir
@@ -393,14 +454,11 @@ rm bwa-${BWA_VERSION}.tar.bz2
 # --------------- Circlator ------------------
 cd $build_dir
 echo "Creating local virtual python3 environment and install Circlator-v${CIRCLATOR_VERSION}"
-# download $CIRCLATOR_DOWNLOAD_URL "v${CIRCLATOR_VERSION}.tar.gz"
-# tar -zxf v${CIRCLATOR_VERSION}.tar.gz
 virtualenv -p $(which python3) py3_virtualenv_circlator
 source py3_virtualenv_circlator/bin/activate
 py3_virtualenv_circlator/bin/pip3 install "circlator==${CIRCLATOR_VERSION}"
 circlator_dir="$build_dir/py3_virtualenv_circlator/bin"
 deactivate
-# rm v${CIRCLATOR_VERSION}.tar.gz
 
 # --------------- Trimmomatic -----------------
 cd $build_dir
@@ -447,8 +505,13 @@ cd $build_dir
 echo "Download ncbi-blast-v${BLAST_VERSION}"
 download $BLAST_DOWNLOAD_URL "ncbi-blast-${BLAST_VERSION}+-x64-linux.tar.gz"
 tar -zxf ncbi-blast-${BLAST_VERSION}+-x64-linux.tar.gz
-blast_dir="$build_dir/ncbi-blast-${BLAST_VERSION}+/bin"
 rm ncbi-blast-${BLAST_VERSION}+-x64-linux.tar.gz
+cd "ncbi-blast-${BLAST_VERSION}+"
+mkdir matrices
+cd matrices
+wget ftp://ftp.ncbi.nlm.nih.gov/blast/matrices/*
+blast_dir="$build_dir/ncbi-blast-${BLAST_VERSION}+/bin"
+blast_matrices_dir="$build_dir/ncbi-blast-${BLAST_VERSION}+/matrices"
 
 # --------------- ncbi-rmblast ------------------
 cd $build_dir
@@ -468,6 +531,7 @@ snap_dir="$build_dir/SNAP"
 cd $snap_dir
 git reset --hard $SNAP_GITHUB_COMMIT_VERSION
 ZOE="$snap_dir/Zoe"
+cp $LRSDAY_HOME/misc/snap.c .  # temporary fix for snap with gcc-8
 make
 
 # --------------- RAPSearch2 ------------------
@@ -572,8 +636,9 @@ tar -zxf v${BAMTOOLS_VERSION}.tar.gz
 cd $build_dir/bamtools-${BAMTOOLS_VERSION}
 mkdir build
 cd build
-cmake ..
+cmake -DCMAKE_INSTALL_PREFIX="$build_dir/bamtools-${BAMTOOLS_VERSION}" ..
 make
+make install
 bamtools_dir="$build_dir/bamtools-${BAMTOOLS_VERSION}/bin"
 cd $build_dir
 rm v${BAMTOOLS_VERSION}.tar.gz
@@ -593,6 +658,24 @@ augustus_dir="$build_dir/augustus-${AUGUSTUS_VERSION}/bin"
 export AUGUSTUS_CONFIG_PATH="$build_dir/augustus-${AUGUSTUS_VERSION}/config"
 cd $build_dir
 rm augustus-${AUGUSTUS_VERSION}.tar.gz
+
+# cd $build_dir
+# echo "Download Augustus-v${AUGUSTUS_VERSION}"
+# git clone $AUGUSTUS_DOWNLOAD_URL
+# cd Augustus
+# git submodule update --init
+# git reset --hard $AUGUSTUS_GITHUB_COMMIT_VERSION
+# cd $build_dir/augustus-${AUGUSTUS_VERSION}/auxprogs/bam2hints/
+# cp $LRSDAY_HOME/misc/bam2hints.Makefile Makefile
+# cd $build_dir/augustus-${AUGUSTUS_VERSION}/auxprogs/filterBam/src/
+# cp $LRSDAY_HOME/misc/filterBam.Makefile Makefile
+# cd $build_dir/augustus-${AUGUSTUS_VERSION}
+# make BAMTOOLS="$build_dir/bamtools-${BAMTOOLS_VERSION}"
+# augustus_dir="$build_dir/augustus-${AUGUSTUS_VERSION}/bin"
+# export AUGUSTUS_CONFIG_PATH="$build_dir/augustus-${AUGUSTUS_VERSION}/config"
+# cd $build_dir
+# rm augustus-${AUGUSTUS_VERSION}.tar.gz
+
 
 # --------------- EVidenceModeler ------------------
 cd $build_dir
@@ -641,6 +724,176 @@ download $PSLSCORE_DOWNLOAD_URL "pslScore"
 download $PSLCDNAFILTER_DOWNLOAD_URL "pslCDnaFilter"
 chmod 755 $ucsc_dir/*
 
+# ------------- Conda-PacBio --------------------
+cd $build_dir
+download $MINICONDA2_DOWNLOAD_URL "Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh"
+bash Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh -b -p $build_dir/miniconda2
+#export PATH="$build_dir/miniconda2/bin:$PATH"
+miniconda2_dir="$build_dir/miniconda2/bin"
+$miniconda2_dir/conda config --add channels defaults
+$miniconda2_dir/conda config --add channels bioconda
+$miniconda2_dir/conda config --add channels conda-forge
+$miniconda2_dir/conda create -y -p $build_dir/conda_pacbio_env
+source $miniconda2_dir/activate $build_dir/conda_pacbio_env
+$miniconda2_dir/conda install -y -c bioconda pb-assembly=${PB_ASSEMBLY_VERSION}
+$miniconda2_dir/conda install -y -c bioconda bax2bam=${BAX2BAM_VERSION}
+source $miniconda2_dir/deactivate
+rm Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh 
+conda_pacbio_dir=$build_dir/conda_pacbio_env/bin
+
+# ------------- NANOPOLISH --------------------
+cd $build_dir
+echo "Download nanopolish-v${NANOPOLISH_VERSION}"
+git clone --recursive $NANOPOLISH_DOWNLOAD_URL
+nanopolish_dir="$build_dir/nanopolish"
+cd $nanopolish_dir
+git reset --hard $NANOPOLISH_GITHUB_COMMIT_VERSION
+make
+virtualenv -p $(which python3) py3_virtualenv_nanopolish
+source py3_virtualenv_nanopolish/bin/activate
+py3_virtualenv_nanopolish/bin/pip install biopython
+py3_virtualenv_nanopolish/bin/pip install pysam
+deactivate
+rm *.tar.gz
+rm *.tar.bz2
+
+# --------------- parallel ------------------
+cd $build_dir
+echo "Download parallel"
+download $PARALLEL_DOWNLOAD_URL "parallel_v${PARALLEL_VERSION}.tar.bz2"
+tar -jxf parallel_v${PARALLEL_VERSION}.tar.bz2
+cd parallel-${PARALLEL_VERSION}
+./configure --prefix="$build_dir/parallel-${PARALLEL_VERSION}"
+make
+make install
+parallel_dir="$build_dir/parallel-${PARALLEL_VERSION}/bin"
+cd ..
+rm parallel_v${PARALLEL_VERSION}.tar.bz2
+
+# --------------- EMBOSS ------------------
+cd $build_dir
+echo "Download EMBOSS"
+download $EMBOSS_DOWNLOAD_URL "emboss_v${EMBOSS_VERSION}.tar.gz"
+tar -zxf emboss_v${EMBOSS_VERSION}.tar.gz
+cd EMBOSS-${EMBOSS_VERSION}
+./configure
+make
+emboss_dir="$build_dir/EMBOSS-${EMBOSS_VERSION}/emboss"
+cd ..
+rm emboss_v${EMBOSS_VERSION}.tar.gz
+
+# --------------- ERPIN ------------------
+cd $build_dir
+echo "Download ERPIN"
+download $ERPIN_DOWNLOAD_URL "erpin_v${ERPIN_VERSION}.tar.gz"
+tar -zxf erpin_v${ERPIN_VERSION}.tar.gz
+cd erpin${ERPIN_VERSION}.serv
+make
+erpin_dir="$build_dir/erpin${ERPIN_VERSION}.serv/bin"
+cd $build_dir
+rm erpin_v${ERPIN_VERSION}.tar.gz
+
+# --------------- tbl2asn ------------------
+cd $build_dir
+echo "Download tbl2asn"
+download $TBL2ASN_DOWNLOAD_URL "tbl2asn.gz"
+mkdir tbl2asn_dir
+gunzip tbl2asn.gz
+chmod 755 tbl2asn
+mv tbl2asn ./tbl2asn_dir/
+tbl2asn_dir="$build_dir/tbl2asn_dir"
+cd $build_dir
+
+# --------------- PirObject ----------------
+cd $build_dir
+echo "Download PirObject"
+download $PIROBJECT_DOWNLOAD_URL "pirobject_v${PIROBJECT_VERSION}.tar.gz"
+tar -zxf pirobject_v${PIROBJECT_VERSION}.tar.gz
+cd PirObject-${PIROBJECT_VERSION}
+pirobject_dir="$build_dir/PirObject-${PIROBJECT_VERSION}"
+ln -s ./../lib/PirObject.pm .
+cd $build_dir
+rm pirobject_v${PIROBJECT_VERSION}.tar.gz
+
+# --------------- PirModels ------------------
+cd $build_dir
+echo "Download PirModels"
+git clone $PIRMODELS_DOWNLOAD_URL
+cd PirModels
+git reset --hard $PIRMODELS_GITHUB_COMMIT_VERSION
+cd ..
+cp -r PirModels $pirobject_dir
+pirmodels_dir="$perlobject_dir/PirModels"
+
+# --------------- Flip ------------------
+cd $build_dir
+echo "Download Flip"
+git clone $FLIP_DOWNLOAD_URL
+cd Flip
+git reset --hard $FLIP_GITHUB_COMMIT_VERSION
+cd src
+make
+cp flip ./../
+flip_dir="$build_dir/Flip"
+
+# --------------- Umac ------------------
+cd $build_dir
+echo "Download Umac"
+git clone $UMAC_DOWNLOAD_URL
+cd Umac
+git reset --hard $UMAC_GITHUB_COMMIT_VERSION
+umac_dir="$build_dir/Umac"
+
+# --------------- HMMsearchWC ------------------
+cd $build_dir
+echo "Download HMMsearchWC"
+git clone $HMMSEARCHWC_DOWNLOAD_URL
+cd HMMsearchWC
+git reset --hard $HMMSEARCHWC_GITHUB_COMMIT_VERSION
+hmmsearchwc_dir="$build_dir/HMMsearchWC"
+
+# --------------- RNAfinder ------------------
+cd $build_dir
+echo "Download RNAfinder"
+git clone $RNAFINDER_DOWNLOAD_URL
+cd RNAfinder
+git reset --hard $RNAFINDER_GITHUB_COMMIT_VERSION
+rnafinder_dir="$build_dir/RNAfinder"
+
+# --------------- Mf2sqn ------------------
+cd $build_dir
+echo "Download Mf2sqn"
+git clone $MF2SQN_DOWNLOAD_URL
+cd Mf2sqn
+git reset --hard $MF2SQN_GITHUB_COMMIT_VERSION
+mf2sqn_dir="$build_dir/Mf2sqn"
+cp qualifs.pl $build_dir/cpanm/perlmods/lib/perl5
+
+# --------------- grab-fasta ------------------
+cd $build_dir
+echo "Download grab-fasta"
+git clone $GRAB_FASTA_DOWNLOAD_URL
+cd grab-fasta
+git reset --hard $GRAB_FASTA_GITHUB_COMMIT_VERSION
+grab_fasta_dir="$build_dir/grab-fasta"
+
+# --------------- MFannot_data ------------------
+cd $build_dir
+echo "Download MFannot_data"
+git clone $MFANNOT_DATA_DOWNLOAD_URL
+cd MFannot_data
+git reset --hard $MFANNOT_DATA_GITHUB_COMMIT_VERSION
+mfannot_data_dir="$build_dir/MFannot_data"
+
+# --------------- MFannot ------------------
+cd $build_dir
+echo "Download MFannot"
+git clone $MFANNOT_DOWNLOAD_URL
+cd MFannot
+git reset --hard $MFANNOT_GITHUB_COMMIT_VERSION
+mfannot_dir="$build_dir/MFannot"
+
+
 # Configure executable paths
 cd $LRSDAY_HOME
 echo "Configuring executable paths ..."
@@ -649,16 +902,17 @@ echo "export PYTHONPATH=${PYTHONPATH}" >> env.sh
 echo "export PERL5LIB=${PERL5LIB}" >> env.sh 
 echo "export cpanm_dir=${cpanm_dir}" >> env.sh
 echo "export sra_dir=${sra_dir}" >> env.sh
+echo "export porechop_dir=${porechop_dir}" >> env.sh
+echo "export filtlong_dir=${filtlong_dir}" >> env.sh
+echo "export minimap2_dir=${minimap2_dir}" >> env.sh
 echo "export canu_dir=${canu_dir}" >> env.sh
 echo "export flye_dir=${flye_dir}" >> env.sh
 echo "export smartdenovo_dir=${smartdenovo_dir}" >> env.sh
-echo "export minimap2_dir=${minimap2_dir}" >> env.sh
 #echo "export quast_dir=${quast_dir}" >> env.sh
 echo "export ragout_dir=${ragout_dir}" >> env.sh
 echo "export hdf_dir=${hdf_dir}" >> env.sh
 echo "export h5prefix=${h5prefix}" >> env.sh
 echo "export hal_dir=${hal_dir}" >> env.sh
-#echo "export nanopolish_dir=${nanopolish_dir}" >> env.sh
 echo "export mummer_dir=${mummer_dir}" >> env.sh
 echo "export gnuplot_dir=${gnuplot_dir}" >> env.sh
 echo "export bedtools_dir=${bedtools_dir}" >> env.sh
@@ -673,6 +927,7 @@ echo "export picard_dir=${picard_dir}" >> env.sh
 echo "export pilon_dir=${pilon_dir}" >> env.sh
 echo "export exonerate_dir=${exonerate_dir}" >> env.sh
 echo "export blast_dir=${blast_dir}" >> env.sh
+echo "export blast_matrices_dir=${blast_matrices_dir}" >> env.sh
 echo "export rmblast_dir=${blast_dir}" >> env.sh
 echo "export snap_dir=${snap_dir}" >> env.sh
 echo "export ZOE=${snap_dir}/Zoe" >> env.sh
@@ -694,6 +949,27 @@ echo "export maker_dir=${maker_dir}" >> env.sh
 echo "export proteinortho_dir=${proteinortho_dir}" >> env.sh
 echo "export gatk_dir=${gatk_dir}" >> env.sh
 echo "export ucsc_dir=${ucsc_dir}" >> env.sh
+echo "export miniconda2_dir=${miniconda2_dir}" >> env.sh
+echo "export conda_pacbio_dir=${conda_pacbio_dir}" >> env.sh
+echo "export nanopolish_dir=${nanopolish_dir}" >> env.sh
+echo "export parallel_dir=${parallel_dir}" >> env.sh
+
+######### for Mfannot  ###########
+echo "export emboss_dir=${emboss_dir}" >> env.sh
+echo "export erpin_dir=${erpin_dir}" >> env.sh
+echo "export tbl2asn_dir=${tbl2asn_dir}" >> env.sh
+echo "export pirobject_dir=${pirobject_dir}" >> env.sh
+echo "export pirmodels_dir=${pirmodels_dir}" >> env.sh
+echo "export flip_dir=${flip_dir}" >> env.sh
+echo "export umac_dir=${umac_dir}" >> env.sh
+echo "export hmmsearchwc_dir=${hmmsearchwc_dir}" >> env.sh
+echo "export rnafinder_dir=${rnafinder_dir}" >> env.sh
+echo "export mf2sqn_dir=${mf2sqn_dir}" >> env.sh
+echo "export grab_fasta_dir=${grab_fasta_dir}" >> env.sh
+echo "export mfannot_data_dir=${mfannot_data_dir}" >> env.sh
+echo "export mfannot_dir=${mfannot_dir}" >> env.sh
+
+
 echo ""
 echo "uncompress large supporting files ..."
 gunzip $LRSDAY_HOME/data/Proteome_DB_for_annotation.CDhit_I95.fa.gz

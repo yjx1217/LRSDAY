@@ -6,22 +6,23 @@ use Getopt::Long;
 ##############################################################
 #  script: collect_maker_evidences.pl
 #  author: Jia-Xing Yue (GitHub ID: yjx1217)
-#  last edited: 2017.06.17
+#  last edited: 2018.10.04
 #  description: collect MAKER annotation evidences (EST and protein alignment in GFF3 format).
-#  example: perl collect_maker_evidences.pl -t genome_tag
+#  example: perl collect_maker_evidences.pl -t genome_tag -p output_prefix
 ##############################################################
 
 
-my ($tag);
-GetOptions('tag|t:s' => \$tag); # genome_tag 
+my ($tag, $prefix);
+GetOptions('tag|t:s' => \$tag,
+	   'prefix|p:s' => \$prefix); # genome_tag 
 
 my $index = "\.\/$tag.maker.output\/${tag}_master_datastore_index\.log";
 my $index_fh = read_file($index);
 
 my %data = ();
-my $output1 = "$tag.est_evidence.gff3";
+my $output1 = "$prefix.est_evidence.gff3";
 my $output1_fh = write_file($output1);
-my $output2 = "$tag.protein_evidence.gff3";
+my $output2 = "$prefix.protein_evidence.gff3";
 my $output2_fh = write_file($output2);
 
 

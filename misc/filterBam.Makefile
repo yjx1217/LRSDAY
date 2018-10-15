@@ -10,9 +10,9 @@ PROGRAM = filterBam
 OBJECTS = $(SOURCES:.cc=.o)
 #BAMTOOLS = /usr/include/bamtools
 #INCLUDES = -I$(BAMTOOLS) -Iheaders -I./bamtools
-INCLUDES = -I$(BAMTOOLS)/include -Iheaders -I./bamtools
+INCLUDES = -I$(BAMTOOLS)/include/bamtools -Iheaders -I./bamtools
 #LIBS = -lbamtools -lz
-LIBS = $(BAMTOOLS)/lib/libbamtools.a -lz
+LIBS = $(BAMTOOLS)/lib64/libbamtools.a -lz
 CFLAGS = -std=c++0x
 VPATH = functions
 
