@@ -977,6 +977,7 @@ gunzip $LRSDAY_HOME/data/SGDref.PoFF.ffn.gz
 gunzip $LRSDAY_HOME/data/SGDref.PoFF.faa.gz
 gunzip $LRSDAY_HOME/data/te_proteins.fasta.gz
 gunzip $LRSDAY_HOME/Example_Outputs/SK1.assembly.final.fa.gz
+gunzip $LRSDAY_HOME/Example_Outputs/SK1.final.gff3.gz
 gunzip $LRSDAY_HOME/Example_Outputs/SK1.final.trimmed_cds.fa.gz
 gunzip $LRSDAY_HOME/Example_Outputs/SK1.final.cds.fa.gz
 gunzip $LRSDAY_HOME/Example_Outputs/SK1.final.pep.fa.gz
