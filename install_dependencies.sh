@@ -976,12 +976,12 @@ gunzip $LRSDAY_HOME/data/Proteome_DB_for_annotation.CDhit_I95.fa.gz
 gunzip $LRSDAY_HOME/data/SGDref.PoFF.ffn.gz
 gunzip $LRSDAY_HOME/data/SGDref.PoFF.faa.gz
 gunzip $LRSDAY_HOME/data/te_proteins.fasta.gz
-gunzip $LRSDAY_HOME/Example_Outputs/SK1.final.fa.gz
+gunzip $LRSDAY_HOME/Example_Outputs/SK1.assembly.final.fa.gz
 gunzip $LRSDAY_HOME/Example_Outputs/SK1.final.trimmed_cds.fa.gz
 gunzip $LRSDAY_HOME/Example_Outputs/SK1.final.cds.fa.gz
 gunzip $LRSDAY_HOME/Example_Outputs/SK1.final.pep.fa.gz
-gunzip $LRSDAY_HOME/Example_Outputs/SK1.final.filter.mummer2vcf.SNP.vcf.gz
-gunzip $LRSDAY_HOME/Example_Outputs/SK1.final.filter.mummer2vcf.INDEL.vcf.gz
+gunzip $LRSDAY_HOME/Example_Outputs/SK1.assembly.final.filter.mummer2vcf.SNP.vcf.gz
+gunzip $LRSDAY_HOME/Example_Outputs/SK1.assembly.final.filter.mummer2vcf.INDEL.vcf.gz
 echo "done!"
 echo ""
 echo ""
