@@ -11,8 +11,8 @@ prefix="SK1" # The file name prefix for the output files.
 long_reads="./../00.Long_Reads/SK1.filtered_subreads.fastq.gz" # The file path of the long reads file (in fastq or fastq.gz format).
 long_reads_type="pacbio-raw" # The long reads data type. Use "pacbio-raw" or "pacbio-corrected" or "nanopore-raw" or "nanopore-corrected". Default = "pacbio-raw" for the testing example
 genome_size="12.5m" # The estimated genome size with the format of <number>[g|m|k], e.g. 12.5m for 12.5 Mb. Default = "12.5m".
-assembler="canu" # The long-read assembler: Use "canu" or "flye" or "smartdenovo" or "canu-flye" or "canu-smartdenovo". For "canu-flye" and "canu-smartdenovo", the assembler canu is used first to generate error-corrected reads from the raw reads and then the assembler flye/smartdenovo is used to assemble the genome. Based on our test, assembler="canu" generally gives the best result but will take substantially longer time than the other options.
-customized_canu_parameters="-correctedErrorRate=0.04" # For assembler="canu" only. Users can set customized Canu assembly parameters here or simply leave it empty like "" to use Canu's default assembly parameter. For example you could set "-correctedErrorRate=0.04" for high coverage (>60X) PacBio data and "-correctedErrorRate=0.12 -overlapper=mhap -utgReAlign=true" for high coverage (>60X) Nanopore data to improve the assembly speed. More than one customized parameters can be set here as long as they are separeted by space (e.g. "-option1=XXX -option2=YYY -option3=ZZZ"). Please consult Canu's manual "http://canu.readthedocs.io/en/latest/faq.html#what-parameters-can-i-tweak" for advanced customization settings. Default = "-correctedErrorRate=0.04" for the testing example.
+assembler="canu" # The long-read assembler: Use "canu" or "flye" or "wtdbg2" or "smartdenovo" or "canu-flye" or "canu-wtdbg2" or "canu-smartdenovo". For "canu-flye", "canu-wtdbg2", and "canu-smartdenovo", the assembler canu is used first to generate error-corrected reads from the raw reads and then the assembler flye/wtdbg2/smartdenovo is used to assemble the genome. Based on our test, assembler="canu" generally gives the best result but will take substantially longer time than the other options.
+customized_canu_parameters="-correctedErrorRate=0.04" # For assembler="canu" only. Users can set customized Canu assembly parameters here or simply leave it empty like "" to use Canu's default assembly parameter. For example you could set "-correctedErrorRate=0.04" for high coverage (>60X) PacBio data and "-overlapper=mhap -utgReAlign=true" for high coverage (>60X) Nanopore data to improve the assembly speed. More than one customized parameters can be set here as long as they are separeted by space (e.g. "-option1=XXX -option2=YYY -option3=ZZZ"). Please consult Canu's manual "http://canu.readthedocs.io/en/latest/faq.html#what-parameters-can-i-tweak" for advanced customization settings. Default = "-correctedErrorRate=0.04" for the testing example.
 threads=1 # The number of threads to use. Default = 1.
 vcf="yes" # Use "yes" if prefer to have vcf file generated to show SNP and INDEL differences between the assembled genome and the reference genome for their uniquely alignable regions. Otherwise use "no". Default = "yes".
 dotplot="yes" # Use "yes" if prefer to plot genome-wide dotplot based on the comparison with the reference genome below. Otherwise use "no". Default = "yes".
@@ -59,25 +59,33 @@ then
 	-${long_reads_type} $long_reads \
 	$customized_canu_parameters
     
-    perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i ./$out_dir/$prefix.contigs.fasta -o $prefix.assembly.$assembler.fa
+    perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i $out_dir/$prefix.contigs.fasta -o $prefix.assembly.$assembler.fa
 elif [[ "$assembler" == "flye" ]]
 then
     if [[ "$long_reads_type" == "pacbio-corrected" ]]
     then
-	reads_type="pacbio-corr"
+	long_reads_type="pacbio-corr"
     elif [[ "$long_reads_type" == "nanopore-raw" ]]
     then
-        reads_type="nano-raw"
+        long_reads_type="nano-raw"
     elif [[ "$long_reads_type" == "nanopore-corrected" ]]
     then
-        reads_type="nano-corr"
+        long_reads_type="nano-corr"
     fi
-    $flye_new_dir/flye -o $out_dir \
+    $flye_dir/flye -o $out_dir \
 	-t $threads \
 	-g $genome_size \
 	--${long_reads_type} $long_reads \
 	-i 2
-    perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i ./$out_dir/contigs.fasta -o $prefix.assembly.$assembler.fa
+    perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i $out_dir/scaffolds.fasta -o $prefix.assembly.$assembler.fa
+elif [[ "$assembler" == "wtdbg2" ]]
+then
+    mkdir $out_dir
+    cd $out_dir
+    $wtdbg2_dir/wtdbg2 -t $threads -L 5000 -i ./../$long_reads -fo $prefix
+    $wtdbg2_dir/wtpoa-cns -t $threads -i $prefix.ctg.lay.gz -fo $prefix.ctg.lay.fa
+    cd ..
+    perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i $out_dir/$prefix.ctg.lay.fa -o $prefix.assembly.$assembler.fa
 elif [[ "$assembler" == "smartdenovo" ]]
 then
     mkdir $out_dir
@@ -95,7 +103,7 @@ then
 	maxThreads=$threads \
 	genomeSize=$genome_size \
 	gnuplot=$gnuplot_dir/gnuplot \
-	-${reads_type} $long_reads \
+	-${long_reads_type} $long_reads \
 	# $customized_canu_parameters
     
     if [[ "$long_reads_type" == "pacbio-raw" ]]
@@ -116,7 +124,23 @@ then
 	-g $genome_size \
 	--${long_reads_type} $out_dir/canu/$prefix.correctedReads.fasta.gz \
 	-i 2
-    perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i ./$out_dir/flye/contigs.fasta -o $prefix.assembly.$assembler.fa
+    perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i $out_dir/flye/scaffolds.fasta -o $prefix.assembly.$assembler.fa
+elif [[ "$assembler" == "canu-wtdbg2" ]]
+then
+    $canu_dir/canu -correct -p $prefix -d $out_dir/canu \
+        useGrid=false \
+        maxThreads=$threads \
+        genomeSize=$genome_size \
+        gnuplot=$gnuplot_dir/gnuplot \
+        -${long_reads_type} $long_reads \
+	# $customized_canu_parameters
+
+    mkdir -p $out_dir/wtdbg2
+    cd $out_dir/wtdbg2
+    $wtdbg2_dir/wtdbg2 -t $threads -L 5000 -i ./../canu/$prefix.correctedReads.fasta.gz -fo $prefix
+    $wtdbg2_dir/wtpoa-cns -t $threads -i $prefix.ctg.lay.gz -fo $prefix.ctg.lay.fa
+    cd ../..
+    perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i $out_dir/wtdbg2/$prefix.ctg.lay.fa -o $prefix.assembly.$assembler.fa
 elif [[ "$assembler" == "canu-smartdenovo" ]]
 then
     $canu_dir/canu -correct -p $prefix -d $out_dir/canu \
@@ -129,9 +153,9 @@ then
 
     mkdir -p $out_dir/smartdenovo
     cd $out_dir/smartdenovo
-    $smartdenovo_dir/smartdenovo.pl -p $prefix -t $threads -c 1 $out_dir/canu/$prefix.correctedReads.fasta.gz  > $prefix.mak
+    $smartdenovo_dir/smartdenovo.pl -p $prefix -t $threads -c 1 ./../canu/$prefix.correctedReads.fasta.gz  > $prefix.mak
     make -f $prefix.mak
-    cd ..
+    cd ../..
     perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i $out_dir/smartdenovo/$prefix.dmo.cns  -o $prefix.assembly.$assembler.fa
 fi
 
@@ -168,13 +192,10 @@ fi
 # clean up intermediate files
 if [[ $debug == "no" ]]
 then
-    if [[ "$reads_type" == "nanopore-raw" || "$reads_type" == "nanopore-corrected" ]]
-    then
-	rm reads.cleaned.fastq.gz
-    fi
     rm *.delta
     rm *.delta_filter
     rm ref_genome.fa
+    rm ref_genome.fa.fai
     if [[ $vcf == "yes" ]] 
     then
 	rm *.filter.coords

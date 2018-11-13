@@ -1,23 +1,25 @@
 #!/bin/bash
-# last update: 2018/08/13
+# last update: 2018/10/26
 
 set -e -o pipefail
 
 LRSDAY_HOME=$(pwd)
 BUILD="build"
 
-SRA_VERSION="2.9.2" # "2.8.2-1"
-PORECHOP_VERSION="0.2.3" # "0.2.3"
-PORECHOP_GITHUB_COMMIT_VERSION="289d5dc" # committed on 2017.12.06
+SRA_VERSION="2.9.2" # "2.9.2"
+PORECHOP_VERSION="0.2.4" # "0.2.3"
+PORECHOP_GITHUB_COMMIT_VERSION="109e437" # committed on 2018.10.19
 FILTLONG_VERSION="0.2.0" 
 FILTLONG_GITHUB_COMMIT_VERSION="d1bb46d" # committed on 2018.05.11
-MINIMAP2_VERSION="2.12"
-CANU_VERSION="1.7.1" # "1.5"
-FLYE_VERSION="2.3.6" # "2.3.3"
+MINIMAP2_VERSION="2.13"
+CANU_VERSION="1.8" # "1.7.1"
+FLYE_VERSION="2.3.6" # "2.3.6"
+WTDBG2_VERSION="2.2"
+WTDBG2_GITHUB_COMMIT_VERSION="db346b3" # committed on 2018.11.05
 SMARTDENOVO_VERSION="" # not available, so we use the github comit hash below for version control
 SMARTDENOVO_GITHUB_COMMIT_VERSION="5cc1356" # committed on 2018.02.19
 RAGOUT_VERSION="2.1.1"
-#QUAST_VERSION="5.0.0" # one of its dependency needs "csh" to be pre-installed
+#QUAST_VERSION="5.0.1" # one of its dependency needs "csh" to be pre-installed
 HDF_VERSION="1.10.1"
 SONLIB_VERSION="" # not available, so we use the github comit hash below for version control
 SONLIB_GITHUB_COMMIT_VERSION="1afbd97" # committed on 2017.08.09
@@ -26,15 +28,15 @@ HAL_GITHUB_COMMIT_VERSION="a2ad656" # committed on 2017.09.09
 MUMMER_VERSION="4.0.0beta2"
 GNUPLOT_VERSION="4.6.6"
 BEDTOOLS_VERSION="2.27.1"
-SPADES_VERSION="3.12.0" # "3.10.1"
+SPADES_VERSION="3.13.0" # "3.12.0"
 PRODIGAL_VERSION="2.6.3"
 CAP_VERSION="" # see http://seq.cs.iastate.edu/cap3.html
 BWA_VERSION="0.7.17" # "0.7.15"
 SAMTOOLS_VERSION="1.9" #"1.3"
 CIRCLATOR_VERSION="1.5.5" # "1.5.1"
 TRIMMOMATIC_VERSION="0.36"
-GATK_VERSION="3.8"
-PICARD_VERSION="2.18.12" # "2.18.4" 
+GATK_VERSION="3.6-6"
+PICARD_VERSION="2.18.15" # "2.18.12" 
 PILON_VERSION="1.22"
 EXONERATE_VERSION="2.2.0"
 BLAST_VERSION="2.2.31"
@@ -45,10 +47,11 @@ RAPSEARCH_VERSION="2.24"
 TRNASCAN_VERSION="1.3.1"
 SNOSCAN_VERSION="0.9.1"
 REPEATMASKER_VERSION="open-4-0-7"
+TRF_VERSION="409"
 REANNOTATE_VERSION="17.03.2015-LongQueryName"
 CLUSTALW_VERSION="2.1"
 MUSCLE_VERSION="3.8.31"
-HMMER_VERSION="3.1b2"
+HMMER_VERSION="3.2.1"
 BAMTOOLS_VERSION="2.4.2"
 AUGUSTUS_VERSION="3.2.3" 
 #AUGUSTUS_GITHUB_COMMIT_VERSION="79960C5"
@@ -56,10 +59,10 @@ EVM_VERSION="1.1.1"
 PROTEINORTHO_VERSION="5.16b" # "5.16"
 MAKER_VERSION="3.00.0-beta"
 MINICONDA2_VERSION="4.5.11"
-PB_ASSEMBLY_VERSION="0.0.1"
+PB_ASSEMBLY_VERSION="0.0.2"
 BAX2BAM_VERSION="0.0.9"
 NANOPOLISH_VERSION="0.10.2"
-NANOPOLISH_GITHUB_COMMIT_VERSION="f1de746" # committed on 2018.09.13
+NANOPOLISH_GITHUB_COMMIT_VERSION="d7c09ab" # committed on 2018.11.02
 PARALLEL_VERSION="20180722"
 # for MFannot
 EMBOSS_VERSION="6.5.7"
@@ -74,7 +77,8 @@ RNAFINDER_GITHUB_COMMIT_VERSION="579dc58" # committed on 2016.12.07
 MF2SQN_GITHUB_COMMIT_VERSION="6faf9f4" # committed on 2016.12.07
 GRAB_FASTA_GITHUB_COMMIT_VERSION="accd32d" # committed on 2017.02.14
 MFANNOT_DATA_GITHUB_COMMIT_VERSION="b039ac5" # committed on 2016.12.07
-MFANNOT_GITHUB_COMMIT_VERSION="a4a8408" # committed on 2018.09.21
+MFANNOT_VERSION="1.35"
+MFANNOT_GITHUB_COMMIT_VERSION="6472b97" # committed on 2018.10.31
 
 # downloading URLs for dependencies
 SRA_DOWNLOAD_URL="https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/sratoolkit.${SRA_VERSION}-centos_linux64.tar.gz"
@@ -83,6 +87,7 @@ FILTLONG_DOWNLOAD_URL="https://github.com/rrwick/Filtlong.git"
 MINIMAP2_DOWNLOAD_URL="https://github.com/lh3/minimap2/releases/download/v${MINIMAP2_VERSION}/minimap2-${MINIMAP2_VERSION}_x64-linux.tar.bz2"
 CANU_DOWNLOAD_URL="https://github.com/marbl/canu/archive/v${CANU_VERSION}.tar.gz"
 FLYE_DOWNLOAD_URL="https://github.com/fenderglass/Flye/archive/${FLYE_VERSION}.tar.gz"
+WTDBG2_DOWNLOAD_URL="https://github.com/ruanjue/wtdbg2.git"
 SMARTDENOVO_DOWNLOAD_URL="https://github.com/ruanjue/smartdenovo"
 #QUAST_DOWNLOAD_URL="https://downloads.sourceforge.net/project/quast/quast-${QUAST_VERSION}.tar.gz"
 RAGOUT_DOWNLOAD_URL="https://github.com/fenderglass/Ragout/archive/${RAGOUT_VERSION}.tar.gz"
@@ -112,10 +117,12 @@ RAPSEARCH_DOWNLOAD_URL="https://sourceforge.net/projects/rapsearch2/files/RAPSea
 TRNASCAN_DOWNLOAD_URL="http://eddylab.org/software/tRNAscan-SE/tRNAscan-SE.tar.gz"
 SNOSCAN_DOWNLOAD_URL="http://eddylab.org/software/snoscan/snoscan.tar.gz"
 REPEATMASKER_DOWNLOAD_URL="http://repeatmasker.org/RepeatMasker-${REPEATMASKER_VERSION}.tar.gz"
+TRF_DOWNLOAD_URL="http://tandem.bu.edu/trf/downloads/trf${TRF_VERSION}.linux64"
 REANNOTATE_DOWNLOAD_URL="https://github.com/yjx1217/REannotate_LongQueryName/archive/version_${REANNOTATE_VERSION}.tar.gz"
 CLUSTALW_DOWNLOAD_URL="http://www.clustal.org/download/${CLUSTALW_VERSION}/clustalw-${CLUSTALW_VERSION}.tar.gz"
 MUSCLE_DOWNLOAD_URL="http://www.drive5.com/muscle/downloads${MUSCLE_VERSION}/muscle${MUSCLE_VERSION}_i86linux64.tar.gz"
-HMMER_DOWNLOAD_URL="http://eddylab.org/software/hmmer3/${HMMER_VERSION}/hmmer-${HMMER_VERSION}-linux-intel-x86_64.tar.gz"
+#HMMER_DOWNLOAD_URL="http://eddylab.org/software/hmmer3/${HMMER_VERSION}/hmmer-${HMMER_VERSION}-linux-intel-x86_64.tar.gz"
+HMMER_DOWNLOAD_URL="http://eddylab.org/software/hmmer/hmmer-${HMMER_VERSION}.tar.gz"
 BAMTOOLS_DOWNLOAD_URL="https://github.com/pezmaster31/bamtools/archive/v${BAMTOOLS_VERSION}.tar.gz"
 AUGUSTUS_DOWNLOAD_URL="http://bioinf.uni-greifswald.de/augustus/binaries/old/augustus-${AUGUSTUS_VERSION}.tar.gz"
 #AUGUSTUS_DOWNLOAD_URL="https://github.com/Gaius-Augustus/Augustus.git"
@@ -285,6 +292,16 @@ python2 setup.py build
 cd ..
 flye_dir="$build_dir/Flye-${FLYE_VERSION}/bin"
 rm Flye-${FLYE_VERSION}.tar.gz
+
+# --------------- wtdbg2 ------------------
+cd $build_dir
+echo "Download wtdbg2-v${WTDBG2_VERSION}"
+git clone $WTDBG2_DOWNLOAD_URL
+cd wtdbg2
+git reset --hard $WTDBG2_GITHUB_COMMIT_VERSION
+C_INCLUDE_PATH="" 
+make
+wtdbg2_dir="$build_dir/wtdbg2"
 
 # --------------- smartdenovo ------------------
 cd $build_dir
@@ -583,7 +600,22 @@ echo "Download Repeatmasker-v${REPEATMASKER_VERSION}"
 download $REPEATMASKER_DOWNLOAD_URL "RepeatMasker-${REPEATMASKER_VERSION}.tar.gz"
 tar -zxf RepeatMasker-${REPEATMASKER_VERSION}.tar.gz
 repeatmasker_dir="$build_dir/RepeatMasker"
+cd $repeatmasker_dir
+echo "Download and setup RepBase library"
+REPBASE_VERSION="20170127"
+wget https://github.com/yjx1217/RMRB/raw/master/RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
+tar xzf RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
+rm RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
+cd .. 
 rm RepeatMasker-${REPEATMASKER_VERSION}.tar.gz
+
+# --------------- TRF ------------------
+cd $repeatmasker_dir
+echo "Download TRF-v${TRF_VERSION}"
+download $TRF_DOWNLOAD_URL "trf${TRF_VERSION}.linux64"
+mv trf${TRF_VERSION}.linux64 trf
+chmod 755 trf
+trf_dir=$repeatmasker_dir
 
 # --------------- REannotate ------------------
 cd $build_dir
@@ -625,7 +657,16 @@ cd $build_dir
 echo "Download hmmer-v${HMMER_VERSION}"
 download $HMMER_DOWNLOAD_URL "hmmer-${HMMER_VERSION}-linux-intel-x86_64.tar.gz"
 tar -zxf hmmer-${HMMER_VERSION}-linux-intel-x86_64.tar.gz
-hmmer_dir="$build_dir/hmmer-${HMMER_VERSION}-linux-intel-x86_64/binaries"
+hmmer_dir="$build_dir/hmmer-${HMMER_VERSION}"
+cd $hmmer_dir
+./configure --prefix=$hmmer_dir
+make
+make install
+cd easel
+make install
+cd ..
+cd ..
+hmmer_dir="$build_dir/hmmer-${HMMER_VERSION}/bin"
 rm hmmer-${HMMER_VERSION}-linux-intel-x86_64.tar.gz
 
 # --------------- bamtools ------------------
@@ -698,6 +739,9 @@ rm proteinortho_v${PROTEINORTHO_VERSION}.tar.gz
 cd $build_dir
 echo "Create GATK3 folder for users' manual installation"
 mkdir GATK3
+cd GATK3
+wget https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/GenomeAnalysisTK.jar
+chmod 755 GenomeAnalysisTK.jar
 gatk_dir="$build_dir/GATK3"
 
 # --------------- MAKER -----------------
@@ -907,6 +951,7 @@ echo "export filtlong_dir=${filtlong_dir}" >> env.sh
 echo "export minimap2_dir=${minimap2_dir}" >> env.sh
 echo "export canu_dir=${canu_dir}" >> env.sh
 echo "export flye_dir=${flye_dir}" >> env.sh
+echo "export wtdbg2_dir=${wtdbg2_dir}" >> env.sh
 echo "export smartdenovo_dir=${smartdenovo_dir}" >> env.sh
 #echo "export quast_dir=${quast_dir}" >> env.sh
 echo "export ragout_dir=${ragout_dir}" >> env.sh
@@ -935,7 +980,7 @@ echo "export rapsearch_dir=${rapsearch_dir}" >> env.sh
 echo "export trnascan_dir=${trnascan_dir}" >> env.sh
 echo "export snoscan_dir=${snoscan_dir}" >> env.sh
 echo "export repeatmasker_dir=${repeatmasker_dir}" >> env.sh
-echo "export trf_dir=${repeatmasker_dir}" >> env.sh
+echo "export trf_dir=${trf_dir}" >> env.sh
 echo "export reannotate_dir=${reannotate_dir}" >> env.sh
 echo "export clustalw_dir=${clustalw_dir}" >> env.sh
 echo "export muscle_dir=${muscle_dir}" >> env.sh
@@ -1004,14 +1049,11 @@ echo "or the GNU General Public License developed by the Free Software Foundatio
 echo "MAKER is not available for commercial use without a license."
 echo "If wishing to license MAKER for commercial use, please contact Aaron Duffy at University of Utah TVC by email at Aaron.Duffy@tvc.utah.edu."
 echo ""
-echo "5) The following dependencies need manual registration and installation:"
-echo "5.1) Download GATK (v${GATK_VERSION}) from \"https://software.broadinstitute.org/gatk/download/archive\". Registration might be needed."
-echo "Once downloaded, use the command \"tar -xjf GenomeAnalysisTK-v${GATK_VERSION}.tar.bz2\" to uncompress the file and"
-echo "move the resulting \"GenomeAnalysisTK.jar\" file into the directory $gatk_dir"
-echo ""
-echo "5.2) RepeatMasker need manual configuration."
-echo "Please refer to our user manual or the protocol paper describing LRSDAY to configure RepeatMasker."
+echo "5) RepeatMasker need manual configuration."
+echo "Please refer to our latest LRSDAY Manual for proper configuration of RepeatMasker."
 echo "When making configuration for RepeatMasker, please use $trf_dir for configuring TRF and use $rmblast_dir for configuring rmblast."
+echo ""
+echo "6) The RepeatMasker dependency library Repbase (https://www.girinst.org/repbase/) will be switched to subscription-based model soon. Please consider subscribing this library for keeping up with the latest version of their product."
 echo ""
 
 echo "#########################################################"

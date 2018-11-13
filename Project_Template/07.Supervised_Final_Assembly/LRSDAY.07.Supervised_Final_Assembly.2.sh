@@ -12,6 +12,7 @@ prefix="SK1" # The file name prefix for the output files.
 vcf="yes" # Whether to generate a vcf file generated to show SNP and INDEL differences between the assembled genome and the reference genome for their uniquely alignable regions. Use "yes" if prefer to have vcf file generated to show SNP and INDEL differences between the assembled genome and the reference genome. Default = "yes".
 dotplot="yes" # Whether to plot genome-wide dotplot based on the comparison with the reference genome below. Use "yes" if prefer to plot, otherwise use "no". Default = "yes".
 ref_genome_raw="./../00.Ref_Genome/S288C.ASM205763v1.fa" # The path of the raw reference genome, only needed when dotplot="yes" or vcf="yes".
+threads=1 # The number of threads to use. Default = 1.
 debug="no" # Whether to keep intermediate files for debugging. Use "yes" if prefer to keep intermediate files, otherwise use "no". Default = "no".
 
 #######################################
@@ -46,13 +47,13 @@ then
 fi
 
 # make the comparison between the assembled genome and the reference genome
-$mummer_dir/nucmer --maxmatch --nosimplify  -p $prefix.assembly.final  $ref_genome_raw $prefix.assembly.final.fa 
-$mummer_dir/delta-filter -m  $prefix.assembly.final.delta > $prefix.assembly.final.delta_filter
+$mummer_dir/nucmer -t $threads --maxmatch --nosimplify  -p $prefix.assembly.final  $ref_genome_raw $prefix.assembly.final.fa 
+$mummer_dir/delta-filter -m $prefix.assembly.final.delta > $prefix.assembly.final.delta_filter
 
 # generate the vcf output
 if [[ $vcf == "yes" ]]
 then
-    $mummer_dir/show-coords -b -T -r -c -l -d   $prefix.assembly.final.delta_filter > $prefix.assembly.final.filter.coords
+    $mummer_dir/show-coords -b -T -r -c -l -d $prefix.assembly.final.delta_filter > $prefix.assembly.final.filter.coords
     $mummer_dir/show-snps -C -T -l -r $prefix.assembly.final.delta_filter > $prefix.assembly.final.filter.snps
     perl $LRSDAY_HOME/scripts/mummer2vcf.pl -r ref_genome.fa -i $prefix.assembly.final.filter.snps -t SNP -p $prefix.assembly.final.filter
     perl $LRSDAY_HOME/scripts/mummer2vcf.pl -r ref_genome.fa -i $prefix.assembly.final.filter.snps -t INDEL -p $prefix.assembly.final.filter
@@ -75,8 +76,8 @@ if [[ $debug == "no" ]]
 then
     rm *.delta
     rm *.delta_filter
-    # rm ref_genome.fa
-    # rm ref_genome.fa.fai
+    rm ref_genome.fa
+    rm ref_genome.fa.fai
     if [[ $vcf == "yes" ]] 
     then
         rm *.filter.coords

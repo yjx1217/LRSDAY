@@ -1,12 +1,15 @@
 # LRSDAY
+
 **LRSDAY: Long-read Sequencing Data Analysis for Yeasts**
 
 A highly transparent, automated and powerful computational framework for high-quality genome assembly and annotation.
 
-![LRSDAY_flowchart](https://github.com/yjx1217/LRSDAY/blob/master/LRSDAY_flowchart.png)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Description
 Long-read sequencing technologies have become increasingly popular in genome projects due to their strengths in resolving complex genomic regions. As a leading model organism with small genome size and great biotechnological importance, the budding yeast, *Saccharomyces cerevisiae*, has many isolates currently being sequenced with long reads. However, analyzing long-read sequencing data to produce high-quality genome assembly and annotation remains challenging. Here we present LRSDAY, the first one-stop solution to streamline this process. LRSDAY can produce chromosome-level end-to-end genome assembly and comprehensive annotations for various genomic features (including centromeres, protein-coding genes, tRNAs, transposable elements and telomere-associated elements) that are ready for downstream analysis. Although tailored for *S. cerevisiae*, we designed LRSDAY to be highly modular and customizable, making it adaptable for virtually any eukaryotic organisms. 
+
+![LRSDAY_flowchart](https://github.com/yjx1217/LRSDAY/blob/master/LRSDAY_flowchart.png)
 
 
 ## Citations
@@ -15,6 +18,7 @@ Jia-Xing Yue & Gianni Liti. (2018) Long-read sequencing data analysis for yeasts
 Jia-Xing Yue, Jing Li, Louise Aigrain, Johan Hallin, Karl Persson, Karen Oliver, Anders Bergström, Paul Coupland, Jonas Warringer, Marco Cosentino Lagomarsino, Gilles Fischer, Richard Durbin, Gianni Liti. (2017) Contrasting evolutionary genome dynamics between domesticated and wild yeasts. *Nature Genetics*, 49:913-924.
 
 ## Release history
+* v1.3.0 Released on 2018/11/13
 * v1.2.0 Released on 2018/10/15
 * v1.1.0 Released on 2018/07/11
 * v1.0.0 Released on 2018/02/04

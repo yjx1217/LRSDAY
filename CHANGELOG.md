@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.3.0] - 2018-11-13
+### Added
+- Support for one more alternative assembler: wtdbg2.
+### Changed
+- Substantially more automated installation/setup process.
+- Software version or downloading URL updates for a number of dependencies.
+### Fixed
+- Bugs introduced due to changes made for file/parameter names in the LRSDAY.01.Long-read-based_Genome_Assembly.sh script when using some alternative assemblers.
+- Mismatched step numbers and file names in the manual due to previous version changes.
+- Typos in the manual.
+
 ## [1.2.0] - 2018-10-15
 ### Added
 - Support for adapter trimming for Nanopore reads (via Porechop).
