@@ -83,20 +83,24 @@ fi
 # clean up intermediate files
 if [[ $debug == "no" ]]
 then
-    rm *.filter.fplot
-    rm *.filter.rplot
-    rm *.delta
-    rm *.delta_filter
-    rm $prefix.assembly.mt_contig.*
-    rm $prefix.assembly.non_mt_contig.*
-    rm $prefix.assembly.mt_improved.chrMT.filter.ps
-    rm $prefix.assembly.mt_improved.chrMT.filter.gp
-    rm $prefix.assembly.mt_improved.chrMT.filter_adjust.gp
-    rm ref.chrMT.list
-    rm ref.chrMT.fa
-    rm $prefix.assembly.non_primary_contig.list
-    rm $prefix.assembly.primary_contig.fa
-    rm $prefix.assembly.non_primary_contig.fa
+
+    if [[ $(egrep -c "^>" "$prefix.assembly.mt_contig.fa") -ne 0 ]]
+    then
+	rm *.filter.fplot
+	rm *.filter.rplot
+	rm *.delta
+	rm *.delta_filter
+	rm $prefix.assembly.mt_contig.*
+	rm $prefix.assembly.non_mt_contig.*
+	rm $prefix.assembly.mt_improved.chrMT.filter.ps
+	rm $prefix.assembly.mt_improved.chrMT.filter.gp
+	rm $prefix.assembly.mt_improved.chrMT.filter_adjust.gp
+	rm ref.chrMT.list
+	rm ref.chrMT.fa
+	rm $prefix.assembly.non_primary_contig.list
+	rm $prefix.assembly.primary_contig.fa
+	rm $prefix.assembly.non_primary_contig.fa
+    fi
     if [ -e "$prefix.assembly.for_fixstart.for_skip.fa" ]
     then
 	rm $prefix.assembly.for_fixstart.for_skip.fa

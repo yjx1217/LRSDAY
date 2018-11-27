@@ -24,7 +24,7 @@ echo "genome_size=$genome_size, post_filtering_coverage=$post_filtering_coverage
 echo ""
 if [[ "$reads_type" == "nanopore-raw" || "$reads_type" == "nanopore-corrected" ]]
 then
-    $porechop_dir/porechop -i $reads -o $prefix.porechop.fastq.gz --threads $threads > $prefix.porechop.summary.txt
+    $porechop_dir/porechop -i $reads -o $prefix.porechop.fastq.gz --discard_middle --threads $threads > $prefix.porechop.summary.txt
     if [[ "$run_filtering" == "yes" ]]
     then
 	$filtlong_dir/filtlong --min_length 1000 --keep_percent 90 --target_bases $filtlong_target_bases $prefix.porechop.fastq.gz | gzip > $prefix.filtlong.fastq.gz

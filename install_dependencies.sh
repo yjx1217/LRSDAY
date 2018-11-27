@@ -1,74 +1,74 @@
 #!/bin/bash
-# last update: 2018/10/26
+# last update: 2019/01/18
 
 set -e -o pipefail
 
 LRSDAY_HOME=$(pwd)
 BUILD="build"
 
-SRA_VERSION="2.9.2" # "2.9.2"
-PORECHOP_VERSION="0.2.4" # "0.2.3"
+SRA_VERSION="2.9.2" # released on 2018.09.26
+PORECHOP_VERSION="0.2.4" # 
 PORECHOP_GITHUB_COMMIT_VERSION="109e437" # committed on 2018.10.19
-FILTLONG_VERSION="0.2.0" 
+FILTLONG_VERSION="0.2.0" #
 FILTLONG_GITHUB_COMMIT_VERSION="d1bb46d" # committed on 2018.05.11
-MINIMAP2_VERSION="2.13"
-CANU_VERSION="1.8" # "1.7.1"
-FLYE_VERSION="2.3.6" # "2.3.6"
-WTDBG2_VERSION="2.2"
-WTDBG2_GITHUB_COMMIT_VERSION="db346b3" # committed on 2018.11.05
-SMARTDENOVO_VERSION="" # not available, so we use the github comit hash below for version control
+MINIMAP2_VERSION="2.13" # released on 2018.10.11
+CANU_VERSION="1.8" # released on 2018.10.23
+FLYE_VERSION="2.4" # released on 2018.01.15
+WTDBG2_VERSION="2.3" # 
+WTDBG2_GITHUB_COMMIT_VERSION="4a39621" # committed on 2019.01.15
+SMARTDENOVO_VERSION="" # 
 SMARTDENOVO_GITHUB_COMMIT_VERSION="5cc1356" # committed on 2018.02.19
-RAGOUT_VERSION="2.1.1"
+RAGOUT_VERSION="2.1.1" # released on 2018.07.30
 #QUAST_VERSION="5.0.1" # one of its dependency needs "csh" to be pre-installed
-HDF_VERSION="1.10.1"
-SONLIB_VERSION="" # not available, so we use the github comit hash below for version control
+HDF_VERSION="1.10.1" # 
+SONLIB_VERSION="" # 
 SONLIB_GITHUB_COMMIT_VERSION="1afbd97" # committed on 2017.08.09
 HAL_VERSION="" # not available, so we use the github comit hash below for version control
 HAL_GITHUB_COMMIT_VERSION="a2ad656" # committed on 2017.09.09
-MUMMER_VERSION="4.0.0beta2"
-GNUPLOT_VERSION="4.6.6"
-BEDTOOLS_VERSION="2.27.1"
-SPADES_VERSION="3.13.0" # "3.12.0"
-PRODIGAL_VERSION="2.6.3"
+MUMMER_VERSION="4.0.0beta2" # released on 2017.10.14
+GNUPLOT_VERSION="4.6.6" # released on 2015.02.18
+BEDTOOLS_VERSION="2.27.1" # released on 2017.12.14
+SPADES_VERSION="3.13.0" # released on 2018.10.16
+PRODIGAL_VERSION="2.6.3" # released on 2016.02.12
 CAP_VERSION="" # see http://seq.cs.iastate.edu/cap3.html
-BWA_VERSION="0.7.17" # "0.7.15"
-SAMTOOLS_VERSION="1.9" #"1.3"
-CIRCLATOR_VERSION="1.5.5" # "1.5.1"
-TRIMMOMATIC_VERSION="0.36"
-GATK_VERSION="3.6-6"
-PICARD_VERSION="2.18.15" # "2.18.12" 
-PILON_VERSION="1.22"
-EXONERATE_VERSION="2.2.0"
-BLAST_VERSION="2.2.31"
-RMBLAST_VERSION="2.2.28"
-SNAP_VERSION="" # not available, so we use the github comit hash below for version control
+BWA_VERSION="0.7.17" # released on 2017.10.23
+SAMTOOLS_VERSION="1.9" # released on 2018.07.18
+CIRCLATOR_VERSION="1.5.5" # released on 2018.01.31
+TRIMMOMATIC_VERSION="0.36" # 
+GATK_VERSION="3.6-6" #
+PICARD_VERSION="2.18.15" # released on 2018.10.22
+PILON_VERSION="1.22" # released on 2017.03.15
+EXONERATE_VERSION="2.2.0" # 
+BLAST_VERSION="2.2.31" # 
+RMBLAST_VERSION="2.2.28" # 
+SNAP_VERSION="" # 
 SNAP_GITHUB_COMMIT_VERSION="a89d68e" # committed on 2017.05.18
-RAPSEARCH_VERSION="2.24"
-TRNASCAN_VERSION="1.3.1"
-SNOSCAN_VERSION="0.9.1"
-REPEATMASKER_VERSION="open-4-0-7"
-TRF_VERSION="409"
+RAPSEARCH_VERSION="2.24" #
+TRNASCAN_VERSION="1.3.1" #
+SNOSCAN_VERSION="0.9.1" #
+REPEATMASKER_VERSION="open-4-0-7" #
+TRF_VERSION="409" #
 REANNOTATE_VERSION="17.03.2015-LongQueryName"
-CLUSTALW_VERSION="2.1"
-MUSCLE_VERSION="3.8.31"
-HMMER_VERSION="3.2.1"
-BAMTOOLS_VERSION="2.4.2"
-AUGUSTUS_VERSION="3.2.3" 
-#AUGUSTUS_GITHUB_COMMIT_VERSION="79960C5"
-EVM_VERSION="1.1.1"
-PROTEINORTHO_VERSION="5.16b" # "5.16"
-MAKER_VERSION="3.00.0-beta"
-MINICONDA2_VERSION="4.5.11"
-PB_ASSEMBLY_VERSION="0.0.2"
-BAX2BAM_VERSION="0.0.9"
-NANOPOLISH_VERSION="0.10.2"
-NANOPOLISH_GITHUB_COMMIT_VERSION="d7c09ab" # committed on 2018.11.02
-PARALLEL_VERSION="20180722"
+CLUSTALW_VERSION="2.1" #
+MUSCLE_VERSION="3.8.31" #
+HMMER_VERSION="3.2.1" # released on 2018.06.13
+BAMTOOLS_VERSION="2.4.2" # released on 2017.11.02
+AUGUSTUS_VERSION="3.2.3" # 
+#AUGUSTUS_GITHUB_COMMIT_VERSION="79960c5"
+EVM_VERSION="1.1.1" # released on 2015.07.03
+PROTEINORTHO_VERSION="5.16b" # released on 2017.09.22
+MAKER_VERSION="3.00.0-beta" #
+MINICONDA2_VERSION="4.5.11" #
+PB_ASSEMBLY_VERSION="0.0.2" #
+BAX2BAM_VERSION="0.0.9" #
+NANOPOLISH_VERSION="0.11.0" #
+NANOPOLISH_GITHUB_COMMIT_VERSION="3180474" # commited on 2019.01.18 
+PARALLEL_VERSION="20180722" # released on 2018.07.22
 # for MFannot
-EMBOSS_VERSION="6.5.7"
-ERPIN_VERSION="5.5.4"
-TBL2ASN_VERSION=""
-PIROBJECT_VERSION="1.19"
+EMBOSS_VERSION="6.5.7" # released on 2012.07.25
+ERPIN_VERSION="5.5.4" # 
+TBL2ASN_VERSION="" #
+PIROBJECT_VERSION="1.19" #
 PIRMODELS_GITHUB_COMMIT_VERSION="6b223ec" # committed on 2016.08.30
 FLIP_GITHUB_COMMIT_VERSION="00a57cb" # committed on 2016.04.07
 UMAC_GITHUB_COMMIT_VERSION="cae618e" # committed on 2016.08.30
@@ -77,7 +77,7 @@ RNAFINDER_GITHUB_COMMIT_VERSION="579dc58" # committed on 2016.12.07
 MF2SQN_GITHUB_COMMIT_VERSION="6faf9f4" # committed on 2016.12.07
 GRAB_FASTA_GITHUB_COMMIT_VERSION="accd32d" # committed on 2017.02.14
 MFANNOT_DATA_GITHUB_COMMIT_VERSION="b039ac5" # committed on 2016.12.07
-MFANNOT_VERSION="1.35"
+MFANNOT_VERSION="1.35" #
 MFANNOT_GITHUB_COMMIT_VERSION="6472b97" # committed on 2018.10.31
 
 # downloading URLs for dependencies
@@ -185,7 +185,7 @@ download () {
   url=$1
   download_location=$2
   echo "Downloading $url to $download_location"
-  wget --no-check-certificate $url -O $download_location
+  wget -nv --no-check-certificate $url -O $download_location
 }
 
 # ---------- set Perl & Python environment variables -------------
@@ -196,7 +196,7 @@ PERL5LIB="$build_dir/cpanm/perlmods/lib/perl5:$PERL5LIB"
 mkdir -p  $build_dir/cpanm
 cpanm_dir=$build_dir/cpanm
 cd $cpanm_dir
-wget --no-check-certificate -O - https://cpanmin.us/ > cpanm
+wget -nv --no-check-certificate -O - https://cpanmin.us/ > cpanm
 chmod +x cpanm
 mkdir perlmods
 $cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed Test::More@1.302086
@@ -243,7 +243,7 @@ cd $build_dir
 echo "Download Porechop-v${PORECHOP_VERSION}"
 git clone $PORECHOP_DOWNLOAD_URL
 cd Porechop
-git reset --hard $PORECHOP_GITHUB_COMMIT_VERSION
+git checkout -f -q $PORECHOP_GITHUB_COMMIT_VERSION
 virtualenv -p $(which python3) py3_virtualenv_porechop
 source py3_virtualenv_porechop/bin/activate
 py3_virtualenv_porechop/bin/python3 ./setup.py install
@@ -255,7 +255,7 @@ cd $build_dir
 echo "Download Filtlong-v${FILTLONG_VERSION}"
 git clone $FILTLONG_DOWNLOAD_URL
 cd Filtlong
-git reset --hard $FILTLONG_GITHUB_COMMIT_VERSION
+git checkout -f -q $FILTLONG_GITHUB_COMMIT_VERSION
 make -j
 filtlong_dir="$build_dir/Filtlong/bin"
 
@@ -298,7 +298,7 @@ cd $build_dir
 echo "Download wtdbg2-v${WTDBG2_VERSION}"
 git clone $WTDBG2_DOWNLOAD_URL
 cd wtdbg2
-git reset --hard $WTDBG2_GITHUB_COMMIT_VERSION
+git checkout -f -q $WTDBG2_GITHUB_COMMIT_VERSION
 C_INCLUDE_PATH="" 
 make
 wtdbg2_dir="$build_dir/wtdbg2"
@@ -308,7 +308,7 @@ cd $build_dir
 echo "Download smartdenovo-v${SMARTDENOVO_VERSION}"
 git clone $SMARTDENOVO_DOWNLOAD_URL
 cd smartdenovo
-git reset --hard $SMARTDENOVO_GITHUB_COMMIT_VERSION
+git checkout -f -q $SMARTDENOVO_GITHUB_COMMIT_VERSION
 cp wtlay.h wtlay.h.bk
 cat wtlay.h.bk |sed s/inline//g > wtlay.h
 C_INCLUDE_PATH="" 
@@ -349,7 +349,7 @@ rm hdf5-${HDF_VERSION}.tar.gz
 cd $build_dir
 git clone $SONLIB_DOWNLOAD_URL
 cd sonLib
-git reset --hard $SONLIB_GITHUB_COMMIT_VERSION
+git checkout -f -q $SONLIB_GITHUB_COMMIT_VERSION
 make
 
 # ---------------- HAL -------------------
@@ -357,7 +357,7 @@ cd $build_dir
 echo "Download HAL-v${HAL_VERSION}"
 git clone $HAL_DOWNLOAD_URL
 cd hal
-git reset --hard $HAL_GITHUB_COMMIT_VERSION
+git checkout -f -q $HAL_GITHUB_COMMIT_VERSION
 make
 hal_dir="$build_dir/hal/bin"
 
@@ -546,7 +546,7 @@ echo "Download snap-v${SNAP_VERSION}"
 git clone $SNAP_DOWNLOAD_URL
 snap_dir="$build_dir/SNAP"
 cd $snap_dir
-git reset --hard $SNAP_GITHUB_COMMIT_VERSION
+git checkout -f -q $SNAP_GITHUB_COMMIT_VERSION
 ZOE="$snap_dir/Zoe"
 cp $LRSDAY_HOME/misc/snap.c .  # temporary fix for snap with gcc-8
 make
@@ -705,7 +705,7 @@ rm augustus-${AUGUSTUS_VERSION}.tar.gz
 # git clone $AUGUSTUS_DOWNLOAD_URL
 # cd Augustus
 # git submodule update --init
-# git reset --hard $AUGUSTUS_GITHUB_COMMIT_VERSION
+# git checkout -f -q $AUGUSTUS_GITHUB_COMMIT_VERSION
 # cd $build_dir/augustus-${AUGUSTUS_VERSION}/auxprogs/bam2hints/
 # cp $LRSDAY_HOME/misc/bam2hints.Makefile Makefile
 # cd $build_dir/augustus-${AUGUSTUS_VERSION}/auxprogs/filterBam/src/
@@ -791,7 +791,7 @@ echo "Download nanopolish-v${NANOPOLISH_VERSION}"
 git clone --recursive $NANOPOLISH_DOWNLOAD_URL
 nanopolish_dir="$build_dir/nanopolish"
 cd $nanopolish_dir
-git reset --hard $NANOPOLISH_GITHUB_COMMIT_VERSION
+git checkout -f -q $NANOPOLISH_GITHUB_COMMIT_VERSION
 make
 virtualenv -p $(which python3) py3_virtualenv_nanopolish
 source py3_virtualenv_nanopolish/bin/activate
@@ -864,7 +864,7 @@ cd $build_dir
 echo "Download PirModels"
 git clone $PIRMODELS_DOWNLOAD_URL
 cd PirModels
-git reset --hard $PIRMODELS_GITHUB_COMMIT_VERSION
+git checkout -f -q $PIRMODELS_GITHUB_COMMIT_VERSION
 cd ..
 cp -r PirModels $pirobject_dir
 pirmodels_dir="$perlobject_dir/PirModels"
@@ -874,7 +874,7 @@ cd $build_dir
 echo "Download Flip"
 git clone $FLIP_DOWNLOAD_URL
 cd Flip
-git reset --hard $FLIP_GITHUB_COMMIT_VERSION
+git checkout -f -q $FLIP_GITHUB_COMMIT_VERSION
 cd src
 make
 cp flip ./../
@@ -885,7 +885,7 @@ cd $build_dir
 echo "Download Umac"
 git clone $UMAC_DOWNLOAD_URL
 cd Umac
-git reset --hard $UMAC_GITHUB_COMMIT_VERSION
+git checkout -f -q $UMAC_GITHUB_COMMIT_VERSION
 umac_dir="$build_dir/Umac"
 
 # --------------- HMMsearchWC ------------------
@@ -893,7 +893,7 @@ cd $build_dir
 echo "Download HMMsearchWC"
 git clone $HMMSEARCHWC_DOWNLOAD_URL
 cd HMMsearchWC
-git reset --hard $HMMSEARCHWC_GITHUB_COMMIT_VERSION
+git checkout -f -q $HMMSEARCHWC_GITHUB_COMMIT_VERSION
 hmmsearchwc_dir="$build_dir/HMMsearchWC"
 
 # --------------- RNAfinder ------------------
@@ -901,7 +901,7 @@ cd $build_dir
 echo "Download RNAfinder"
 git clone $RNAFINDER_DOWNLOAD_URL
 cd RNAfinder
-git reset --hard $RNAFINDER_GITHUB_COMMIT_VERSION
+git checkout -f -q $RNAFINDER_GITHUB_COMMIT_VERSION
 rnafinder_dir="$build_dir/RNAfinder"
 
 # --------------- Mf2sqn ------------------
@@ -909,7 +909,7 @@ cd $build_dir
 echo "Download Mf2sqn"
 git clone $MF2SQN_DOWNLOAD_URL
 cd Mf2sqn
-git reset --hard $MF2SQN_GITHUB_COMMIT_VERSION
+git checkout -f -q $MF2SQN_GITHUB_COMMIT_VERSION
 mf2sqn_dir="$build_dir/Mf2sqn"
 cp qualifs.pl $build_dir/cpanm/perlmods/lib/perl5
 
@@ -918,7 +918,7 @@ cd $build_dir
 echo "Download grab-fasta"
 git clone $GRAB_FASTA_DOWNLOAD_URL
 cd grab-fasta
-git reset --hard $GRAB_FASTA_GITHUB_COMMIT_VERSION
+git checkout -f -q $GRAB_FASTA_GITHUB_COMMIT_VERSION
 grab_fasta_dir="$build_dir/grab-fasta"
 
 # --------------- MFannot_data ------------------
@@ -926,7 +926,7 @@ cd $build_dir
 echo "Download MFannot_data"
 git clone $MFANNOT_DATA_DOWNLOAD_URL
 cd MFannot_data
-git reset --hard $MFANNOT_DATA_GITHUB_COMMIT_VERSION
+git checkout -f -q $MFANNOT_DATA_GITHUB_COMMIT_VERSION
 mfannot_data_dir="$build_dir/MFannot_data"
 
 # --------------- MFannot ------------------
@@ -934,7 +934,7 @@ cd $build_dir
 echo "Download MFannot"
 git clone $MFANNOT_DOWNLOAD_URL
 cd MFannot
-git reset --hard $MFANNOT_GITHUB_COMMIT_VERSION
+git checkout -f -q $MFANNOT_GITHUB_COMMIT_VERSION
 mfannot_dir="$build_dir/MFannot"
 
 

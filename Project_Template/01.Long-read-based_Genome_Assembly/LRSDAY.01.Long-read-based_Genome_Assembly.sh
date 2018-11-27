@@ -12,8 +12,8 @@ long_reads="./../00.Long_Reads/SK1.filtered_subreads.fastq.gz" # The file path o
 long_reads_type="pacbio-raw" # The long reads data type. Use "pacbio-raw" or "pacbio-corrected" or "nanopore-raw" or "nanopore-corrected". Default = "pacbio-raw" for the testing example
 genome_size="12.5m" # The estimated genome size with the format of <number>[g|m|k], e.g. 12.5m for 12.5 Mb. Default = "12.5m".
 assembler="canu" # The long-read assembler: Use "canu" or "flye" or "wtdbg2" or "smartdenovo" or "canu-flye" or "canu-wtdbg2" or "canu-smartdenovo". For "canu-flye", "canu-wtdbg2", and "canu-smartdenovo", the assembler canu is used first to generate error-corrected reads from the raw reads and then the assembler flye/wtdbg2/smartdenovo is used to assemble the genome. Based on our test, assembler="canu" generally gives the best result but will take substantially longer time than the other options.
-customized_canu_parameters="-correctedErrorRate=0.04" # For assembler="canu" only. Users can set customized Canu assembly parameters here or simply leave it empty like "" to use Canu's default assembly parameter. For example you could set "-correctedErrorRate=0.04" for high coverage (>60X) PacBio data and "-overlapper=mhap -utgReAlign=true" for high coverage (>60X) Nanopore data to improve the assembly speed. More than one customized parameters can be set here as long as they are separeted by space (e.g. "-option1=XXX -option2=YYY -option3=ZZZ"). Please consult Canu's manual "http://canu.readthedocs.io/en/latest/faq.html#what-parameters-can-i-tweak" for advanced customization settings. Default = "-correctedErrorRate=0.04" for the testing example.
-threads=1 # The number of threads to use. Default = 1.
+customized_canu_parameters="correctedErrorRate=0.04" # For assembler="canu" only. Users can set customized Canu assembly parameters here or simply leave it empty like customized_canu_parameters="" to use Canu's default assembly parameter. For example you could set customized_canu_parameters="correctedErrorRate=0.04" for high coverage (>60X) PacBio data and customized_canu_parameters="overlapper=mhap;utgReAlign=true" for high coverage (>60X) Nanopore data to improve the assembly speed. When assembling genomes with high heterozygosity, you can could set customized_canu_parameters="corOutCoverage=200;batOptions=-dg 3 -db 3 -dr 1 -ca 500 -cp 50" to avoid collasping haplotypes. As shown in these examples, more than one customized parameters can be set here as long as they are separeted by a semicolon and contained in a pair of double quotes (e.g. customized_canu_parameters="option1=XXX;option2=YYY;option3=ZZZ"). Please consult Canu's manual "http://canu.readthedocs.io/en/latest/faq.html#what-parameters-can-i-tweak" for advanced customization settings. Default = "correctedErrorRate=0.04" for the testing example.
+threads=2 # The number of threads to use. Default = 2.
 vcf="yes" # Use "yes" if prefer to have vcf file generated to show SNP and INDEL differences between the assembled genome and the reference genome for their uniquely alignable regions. Otherwise use "no". Default = "yes".
 dotplot="yes" # Use "yes" if prefer to plot genome-wide dotplot based on the comparison with the reference genome below. Otherwise use "no". Default = "yes".
 ref_genome_raw="./../00.Ref_Genome/S288C.ASM205763v1.fa" # The file path of the raw reference genome. This is only needed when the option "dotplot=" or "vcf=" has been set as "yes".
@@ -45,20 +45,23 @@ then
     fi
 fi
 
-
-
 out_dir=${prefix}_${assembler}_out
 
 if [[ "$assembler" == "canu" ]]
 then
+    OLDIFS=$IFS;
+    IFS=";"
+    customized_canu_parameters_array=($customized_canu_parameters)
+    IFS=$OLDIFS;
+    printf "%s\n" "${customized_canu_parameters_array[@]}" > $prefix.customized_canu_parameters.spec
     $canu_dir/canu -p $prefix -d $out_dir \
+	-s $prefix.customized_canu_parameters.spec \
 	useGrid=false \
 	maxThreads=$threads \
 	genomeSize=$genome_size \
 	gnuplot=$gnuplot_dir/gnuplot \
-	-${long_reads_type} $long_reads \
-	$customized_canu_parameters
-    
+	-${long_reads_type} $long_reads
+    mv $prefix.customized_canu_parameters.spec ./$out_dir/
     perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i $out_dir/$prefix.contigs.fasta -o $prefix.assembly.$assembler.fa
 elif [[ "$assembler" == "flye" ]]
 then
@@ -104,7 +107,6 @@ then
 	genomeSize=$genome_size \
 	gnuplot=$gnuplot_dir/gnuplot \
 	-${long_reads_type} $long_reads \
-	# $customized_canu_parameters
     
     if [[ "$long_reads_type" == "pacbio-raw" ]]
     then
@@ -133,7 +135,6 @@ then
         genomeSize=$genome_size \
         gnuplot=$gnuplot_dir/gnuplot \
         -${long_reads_type} $long_reads \
-	# $customized_canu_parameters
 
     mkdir -p $out_dir/wtdbg2
     cd $out_dir/wtdbg2
@@ -149,7 +150,6 @@ then
         genomeSize=$genome_size \
         gnuplot=$gnuplot_dir/gnuplot \
         -${long_reads_type} $long_reads \
-	# $customized_canu_parameters
 
     mkdir -p $out_dir/smartdenovo
     cd $out_dir/smartdenovo
@@ -195,7 +195,6 @@ then
     rm *.delta
     rm *.delta_filter
     rm ref_genome.fa
-    rm ref_genome.fa.fai
     if [[ $vcf == "yes" ]] 
     then
 	rm *.filter.coords

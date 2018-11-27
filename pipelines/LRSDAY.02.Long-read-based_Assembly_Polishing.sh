@@ -17,7 +17,7 @@ pacbio_reads_type="RSII" # The sequencing machine used to generate the input Pac
 
 ### When long_read_technology="nanopore" ###
 nanopore_fast5_files="./../00.Long_Reads/nanopore_fast5_files" # The file path to the directory containing raw Oxford Nanopore FAST5 files.
-nanopore_albacore_sequencing_summary="./../00.Long_Reads/nanopore_fast5_files/sequencing_summary.txt" # The file path to the albacore basecaller sequencing summary output. This summary file is not necessary but it can help the polishing step to run much faster when available. When this file is unavailable, set nanopore_albacore_sequencing_summary="".
+nanopore_basecalling_sequencing_summary="./../00.Long_Reads/nanopore_fast5_files/sequencing_summary.txt" # The file path to the nanopore albacore/guppy basecaller sequencing summary output. This summary file is not necessary but it can help the polishing step to run much faster when available. When this file is unavailable, set nanopore_albacore_sequencing_summary="".
 
 prefix="SK1" # The file name prefix for the output files. Default = "SK1" for the testing example.
 
@@ -46,7 +46,7 @@ then
 	    $conda_pacbio_dir/variantCaller --algorithm=quiver -x 5 -X 120 -q 20 -v -j $threads $prefix.pbalign.bam -r $prefix.assembly.raw.fa -o $prefix.assembly.consensus.fa -o $prefix.assembly.consensus.fq -o $prefix.assembly.consensus.vcf --diploid 
 	fi
     else
-	$conda_pacbio_dir/pbalign --nproc $threads --algorithm blasr --tmpDir ./tmp $pacbio_fofn_file $prefix.assembly.raw.fa $prefix.pbalign.bam
+	$conda_pacbio_dir/pbalign --nproc $threads --algorithm blasr --tmpDir ./tmp $pacbio_bam_fofn_file $prefix.assembly.raw.fa $prefix.pbalign.bam
 	if [[ $ploidy == "1" ]]
 	then
 	    $conda_pacbio_dir/variantCaller --algorithm=arrow -x 5 -X 120 -q 20 -v -j $threads $prefix.pbalign.bam -r $prefix.assembly.raw.fa -o $prefix.assembly.consensus.fa -o $prefix.assembly.consensus.fq -o $prefix.assembly.consensus.vcf
@@ -61,11 +61,11 @@ then
 else
     # perform correction using the minimap2-nanopolish pipeline
     source $nanopolish_dir/py3_virtualenv_nanopolish/bin/activate
-    if [[ -z "$nanopore_albacore_sequencing_summary" ]]
+    if [[ -z "$nanopore_basecalling_sequencing_summary" ]]
     then
 	$nanopolish_dir/nanopolish index -d $nanopore_fast5_files $long_reads_in_fastq
     else
-	$nanopolish_dir/nanopolish index -d $nanopore_fast5_files -s $nanopore_albacore_sequencing_summary $long_reads_in_fastq
+	$nanopolish_dir/nanopolish index -d $nanopore_fast5_files -s $nanopore_basecalling_sequencing_summary $long_reads_in_fastq
     fi
     java -Djava.io.tmpdir=./tmp -XX:ParallelGCThreads=$threads -jar $picard_dir/picard.jar CreateSequenceDictionary  REFERENCE=$prefix.assembly.raw.fa OUTPUT=$prefix.assembly.raw.dict
     $minimap2_dir/minimap2 -ax map-ont $prefix.assembly.raw.fa $long_reads_in_fastq > $prefix.minimap2.sam

@@ -19,7 +19,7 @@ This protocol is designed for a desktop or computing server running an x86-64-bi
 ● Java runtime environment (JRE) v1.8.0 or newer (https://www.java.com)
 ● Perl v5.12 or newer (https://www.perl.org/)
 ● Python v2.7.9 or newer (https://www.python.org/)
-● Python v3.6 or newer (https://www.python.org/)
+● Python v3.4 or newer (https://www.python.org/)
 ● Tar (https://www.gnu.org/software/tar/)
 ● Unzip (http://infozip.sourceforge.net/UnZip.html)
 ● Virtualenv v15.1.0 or newer (https://virtualenv.pypa.io)

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.3.1] - 2019-01-22
+### Added
+- A script for generated demultiplexed fastq reads based on nanopore's guppy demultiplexing summary file.
+- A script for extracting all read IDs from the input fastq file.
+- A script for calculating the sequence length of each enclosed sequences from the input fasta file.
+### Changed
+- Software version updates for a number of dependencies. Importantly, nanopolish was bumped up to v0.11.0 to support the new multi-fast5 nanopore reads.
+- Downloading URL updates for testing data due to changes on the EBI data server. 
+- Adopting picard tools' new commandline syntax.
+### Fixed
+- A bug that prevents correct parameter parsing when multiple customized canu parameters are specified.
+- Minor bugs related with deleting intermediate files in special cases.
+
 ## [1.3.0] - 2018-11-13
 ### Added
 - Support for one more alternative assembler: wtdbg2.
