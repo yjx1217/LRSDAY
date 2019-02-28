@@ -1,5 +1,5 @@
 #!/bin/bash
-# last update: 2019/01/18
+# last update: 2019/02/28
 
 set -e -o pipefail
 
@@ -85,7 +85,8 @@ SRA_DOWNLOAD_URL="https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/srat
 PORECHOP_DOWNLOAD_URL="https://github.com/rrwick/Porechop.git"
 FILTLONG_DOWNLOAD_URL="https://github.com/rrwick/Filtlong.git"
 MINIMAP2_DOWNLOAD_URL="https://github.com/lh3/minimap2/releases/download/v${MINIMAP2_VERSION}/minimap2-${MINIMAP2_VERSION}_x64-linux.tar.bz2"
-CANU_DOWNLOAD_URL="https://github.com/marbl/canu/archive/v${CANU_VERSION}.tar.gz"
+CANU_DOWNLOAD_URL="https://github.com/marbl/canu/releases/download/v${CANU_VERSION}/canu-${CANU_VERSION}.Linux-amd64.tar.xz"
+#CANU_DOWNLOAD_URL="https://github.com/marbl/canu/archive/v${CANU_VERSION}.tar.gz"
 FLYE_DOWNLOAD_URL="https://github.com/fenderglass/Flye/archive/${FLYE_VERSION}.tar.gz"
 WTDBG2_DOWNLOAD_URL="https://github.com/ruanjue/wtdbg2.git"
 SMARTDENOVO_DOWNLOAD_URL="https://github.com/ruanjue/smartdenovo"
@@ -250,7 +251,7 @@ py3_virtualenv_porechop/bin/python3 ./setup.py install
 deactivate
 porechop_dir="$build_dir/Porechop/py3_virtualenv_porechop/bin"
 
-# --------------- Porechop ------------------
+# --------------- Filtlong ------------------
 cd $build_dir
 echo "Download Filtlong-v${FILTLONG_VERSION}"
 git clone $FILTLONG_DOWNLOAD_URL
@@ -270,17 +271,29 @@ rm minimap2-${MINIMAP2_VERSION}.tar.bz2
 # ------------- Canu -------------------
 cd $build_dir
 echo "Download Canu-v${CANU_VERSION}"
-download $CANU_DOWNLOAD_URL "canu-${CANU_VERSION}.tar.gz"
-tar -xzf canu-${CANU_VERSION}.tar.gz
+download $CANU_DOWNLOAD_URL "canu-${CANU_VERSION}.tar.xz"
+tar -xf canu-${CANU_VERSION}.tar.xz
 canu_dir="$build_dir/canu-${CANU_VERSION}"
 cd $canu_dir
-cd src
-make -j 8
 canu_dir="$build_dir/canu-${CANU_VERSION}/Linux-amd64/bin"
 cd $canu_dir
 ln -s $minimap2_dir/minimap2 .
 cd $build_dir
-rm canu-${CANU_VERSION}.tar.gz
+rm canu-${CANU_VERSION}.tar.xz
+
+# cd $build_dir
+# echo "Download Canu-v${CANU_VERSION}"
+# download $CANU_DOWNLOAD_URL "canu-${CANU_VERSION}.tar.gz"
+# tar -xzf canu-${CANU_VERSION}.tar.gz
+# canu_dir="$build_dir/canu-${CANU_VERSION}"
+# cd $canu_dir
+# cd src
+# make -j 8
+# canu_dir="$build_dir/canu-${CANU_VERSION}/Linux-amd64/bin"
+# cd $canu_dir
+# ln -s $minimap2_dir/minimap2 .
+# cd $build_dir
+# rm canu-${CANU_VERSION}.tar.gz
 
 # ------------- Flye -------------------
 cd $build_dir
@@ -526,7 +539,7 @@ rm ncbi-blast-${BLAST_VERSION}+-x64-linux.tar.gz
 cd "ncbi-blast-${BLAST_VERSION}+"
 mkdir matrices
 cd matrices
-wget ftp://ftp.ncbi.nlm.nih.gov/blast/matrices/*
+wget -nv --no-check-certificate ftp://ftp.ncbi.nlm.nih.gov/blast/matrices/*
 blast_dir="$build_dir/ncbi-blast-${BLAST_VERSION}+/bin"
 blast_matrices_dir="$build_dir/ncbi-blast-${BLAST_VERSION}+/matrices"
 
@@ -603,7 +616,7 @@ repeatmasker_dir="$build_dir/RepeatMasker"
 cd $repeatmasker_dir
 echo "Download and setup RepBase library"
 REPBASE_VERSION="20170127"
-wget https://github.com/yjx1217/RMRB/raw/master/RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
+wget -nv --no-check-certificate https://github.com/yjx1217/RMRB/raw/master/RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
 tar xzf RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
 rm RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
 cd .. 
@@ -740,7 +753,7 @@ cd $build_dir
 echo "Create GATK3 folder for users' manual installation"
 mkdir GATK3
 cd GATK3
-wget https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/GenomeAnalysisTK.jar
+wget -nv --no-check-certificate https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/GenomeAnalysisTK.jar
 chmod 755 GenomeAnalysisTK.jar
 gatk_dir="$build_dir/GATK3"
 
