@@ -218,25 +218,22 @@ SK1_G0056290|SK1_G0056290.mRNA.1	unexpected start & end codons based on standard
 SK1_G0057300|SK1_G0057300.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;incorrect CDS length
 SK1_G0057390|SK1_G0057390.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
 SK1_G0057410|SK1_G0057410.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
-SK1_G0057460|SK1_G0057460.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
-SK1_G0057480|SK1_G0057480.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
+SK1_G0057470|SK1_G0057470.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
+SK1_G0057490|SK1_G0057490.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
 SK1_G0057500|SK1_G0057500.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
-SK1_G0057510|SK1_G0057510.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
-SK1_G0057570|SK1_G0057570.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
-SK1_G0057590|SK1_G0057590.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
-SK1_G0057750|SK1_G0057750.mRNA.1	incorrect CDS length
-SK1_G0057780|SK1_G0057780.mRNA.1	incorrect CDS length
-SK1_G0057800|SK1_G0057800.mRNA.1	incorrect CDS length
+SK1_G0057560|SK1_G0057560.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
+SK1_G0057580|SK1_G0057580.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
+SK1_G0057770|SK1_G0057770.mRNA.1	incorrect CDS length
+SK1_G0057950|SK1_G0057950.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
 SK1_G0057960|SK1_G0057960.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
 SK1_G0057970|SK1_G0057970.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
-SK1_G0057980|SK1_G0057980.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
+SK1_G0058000|SK1_G0058000.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
 SK1_G0058010|SK1_G0058010.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
 SK1_G0058020|SK1_G0058020.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
-SK1_G0058030|SK1_G0058030.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
-SK1_G0058070|SK1_G0058070.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
-SK1_G0058160|SK1_G0058160.mRNA.1	unexpected start codon based on standard genentic code;your selected code table is 1;incorrect CDS length
-SK1_G0058260|SK1_G0058260.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
-SK1_G0058280|SK1_G0058280.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
+SK1_G0058060|SK1_G0058060.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
+SK1_G0058150|SK1_G0058150.mRNA.1	unexpected start codon based on standard genentic code;your selected code table is 1;incorrect CDS length
+SK1_G0058250|SK1_G0058250.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
+SK1_G0058270|SK1_G0058270.mRNA.1	unexpected start & end codons based on standard genentic code;your selected code table is 1;internal stop codon(s)
 cox2|cox2.mRNA.1	unexpected stop codon based on standard genentic code;your selected code table is 3;incorrect CDS length
 orf474|orf474.mRNA.1	unexpected start codon based on standard genentic code;your selected code table is 3;incorrect CDS length
 orf90|orf90.mRNA.1	unexpected start codon based on standard genentic code;your selected code table is 3

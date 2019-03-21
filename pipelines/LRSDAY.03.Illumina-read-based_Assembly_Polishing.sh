@@ -9,6 +9,8 @@ source ./../../env.sh
 
 input_assembly="./../02.Long-read-based_Assembly_Polishing/SK1.assembly.long_read_polished.fa" # The file path of the input assembly before Illumina-based correction
 prefix="SK1" # The file name prefix for the output files.
+trim_illumina_reads="yes" # Whether to trim the input Illumina reads. Use "yes" if prefer to perform trimming, otherwise use "no". Default = "yes". 
+rounds_of_successive_polishing=1 # The number of total rounds of Illumina-read-based assembly polishing. Default = "1" for the testing example.
 threads=1 # The number of threads to use. Default = "1".
 mode="PE" # Illumina sequencing mode, "PE" for paired-end sequencing and "SE" for single-end sequencing. Default = "PE".
 fixlist="snps,indels" # The types of errors for Illumina-read-based correction by Pilon; see Pilon's manual for more details. Default = "snps,indels".
@@ -34,137 +36,147 @@ else
     ln -s $reads_SE raw.fq.gz;
 fi
 
-ln -s $input_assembly refseq.fa
-
+cp  $input_assembly refseq.tmp.fa
 cp $adapter adapter.fa
 
 mkdir tmp
-if [[ $mode == "PE" ]]
+
+if [[ $trim_illumina_reads == "yes" ]]
 then
-    java -Djava.io.tmpdir=./tmp -XX:ParallelGCThreads=$threads -jar $trimmomatic_dir/trimmomatic.jar PE -threads $threads -phred33  raw.R1.fq.gz  raw.R2.fq.gz  trimmed.R1.fq.gz trimmed.unpaired.R1.fq.gz trimmed.R2.fq.gz trimmed.unpaired.R2.fq.gz ILLUMINACLIP:adapter.fa:2:30:10  SLIDINGWINDOW:5:20 MINLEN:36
-    rm trimmed.unpaired.R1.fq.gz
-    rm trimmed.unpaired.R2.fq.gz 
+    if [[ $mode == "PE" ]]
+    then
+	java -Djava.io.tmpdir=./tmp -XX:ParallelGCThreads=$threads -jar $trimmomatic_dir/trimmomatic.jar PE -threads $threads -phred33  raw.R1.fq.gz  raw.R2.fq.gz  trimmed.R1.fq.gz trimmed.unpaired.R1.fq.gz trimmed.R2.fq.gz trimmed.unpaired.R2.fq.gz ILLUMINACLIP:adapter.fa:2:30:10  SLIDINGWINDOW:5:20 MINLEN:36
+	rm trimmed.unpaired.R1.fq.gz
+	rm trimmed.unpaired.R2.fq.gz 
+	mv trimmed.R1.fq.gz clean.R1.fq.gz
+	mv trimmed.R2.fq.gz clean.R2.fq.gz
+    else
+	java -Djava.io.tmpdir=./tmp -XX:ParallelGCThreads=$threads -jar $trimmomatic_dir/trimmomatic.jar SE -threads $threads -phred33  raw.fq.gz  trimmed.fq.gz ILLUMINACLIP:adapter.fa:2:30:10 SLIDINGWINDOW:5:20 MINLEN:36
+	mv trimmed.fq.gz clean.fq.gz
+    fi
 else
-    java -Djava.io.tmpdir=./tmp -XX:ParallelGCThreads=$threads -jar $trimmomatic_dir/trimmomatic.jar SE -threads $threads -phred33  raw.fq.gz  trimmed.fq.gz ILLUMINACLIP:adapter.fa:2:30:10 SLIDINGWINDOW:5:20 MINLEN:36
+    if [[ $mode == "PE" ]]
+    then
+	cp raw.R1.fq.gz clean.R1.fq.gz
+	cp raw.R2.fq.gz clean.R2.fq.gz
+    else
+	cp raw.fq.gz clean.fq.gz
+    fi
 fi
 
 # bwa mapping
-$bwa_dir/bwa index refseq.fa
+for i in $(seq 1 1 $rounds_of_successive_polishing)
+do
+    $bwa_dir/bwa index refseq.tmp.fa
 
-if [[ $mode == "PE" ]]
-then
-    $bwa_dir/bwa mem -t $threads -M refseq.fa  trimmed.R1.fq.gz trimmed.R2.fq.gz >$prefix.sam
-else
-    $bwa_dir/bwa mem -t $threads -M refseq.fa  trimmed.fq.gz >$prefix.sam
-fi
+    if [[ $mode == "PE" ]]
+    then
+	$bwa_dir/bwa mem -t $threads -M refseq.tmp.fa clean.R1.fq.gz clean.R2.fq.gz >$prefix.round_${i}.sam
+    else
+	$bwa_dir/bwa mem -t $threads -M refseq.tmp.fa clean.fq.gz >$prefix.round_${i}.sam
+    fi
 
-# index reference sequence
-$samtools_dir/samtools faidx refseq.fa
-java -Djava.io.tmpdir=./tmp -Dpicard.useLegacyParser=false -XX:ParallelGCThreads=$threads -jar $picard_dir/picard.jar CreateSequenceDictionary \
-    -REFERENCE refseq.fa \
-    -OUTPUT refseq.dict
+    # index reference sequence
+    $samtools_dir/samtools faidx refseq.tmp.fa
+    java -Djava.io.tmpdir=./tmp -Dpicard.useLegacyParser=false -XX:ParallelGCThreads=$threads -jar $picard_dir/picard.jar CreateSequenceDictionary \
+	-REFERENCE refseq.tmp.fa \
+	-OUTPUT refseq.tmp.dict
 
-# sort bam file by picard-tools SortSam
-java -Djava.io.tmpdir=./tmp -Dpicard.useLegacyParser=false -XX:ParallelGCThreads=$threads -jar $picard_dir/picard.jar SortSam \
-    -INPUT $prefix.sam \
-    -OUTPUT $prefix.sort.bam \
-    -SORT_ORDER coordinate
+    # sort bam file by picard-tools SortSam
+    java -Djava.io.tmpdir=./tmp -Dpicard.useLegacyParser=false -XX:ParallelGCThreads=$threads -jar $picard_dir/picard.jar SortSam \
+	-INPUT $prefix.round_${i}.sam \
+	-OUTPUT $prefix.round_${i}.sort.bam \
+	-SORT_ORDER coordinate
 
-# fixmate
-java -Djava.io.tmpdir=./tmp -Dpicard.useLegacyParser=false -XX:ParallelGCThreads=$threads -jar $picard_dir/picard.jar FixMateInformation \
-    -INPUT $prefix.sort.bam \
-    -OUTPUT $prefix.fixmate.bam
+    # fixmate
+    java -Djava.io.tmpdir=./tmp -Dpicard.useLegacyParser=false -XX:ParallelGCThreads=$threads -jar $picard_dir/picard.jar FixMateInformation \
+	-INPUT $prefix.round_${i}.sort.bam \
+	-OUTPUT $prefix.round_${i}.fixmate.bam
 
-# add or replace read groups and sort
-java -Djava.io.tmpdir=./tmp -Dpicard.useLegacyParser=false -XX:ParallelGCThreads=$threads -jar $picard_dir/picard.jar AddOrReplaceReadGroups \
-    -INPUT $prefix.fixmate.bam \
-    -OUTPUT $prefix.rdgrp.bam \
-    -SORT_ORDER coordinate \
-    -RGID $prefix \
-    -RGLB $prefix \
-    -RGPL "Illumina" \
-    -RGPU $prefix \
-    -RGSM $prefix \
-    -RGCN "RGCN"
+    # add or replace read groups and sort
+    java -Djava.io.tmpdir=./tmp -Dpicard.useLegacyParser=false -XX:ParallelGCThreads=$threads -jar $picard_dir/picard.jar AddOrReplaceReadGroups \
+	-INPUT $prefix.round_${i}.fixmate.bam \
+	-OUTPUT $prefix.round_${i}.rdgrp.bam \
+	-SORT_ORDER coordinate \
+	-RGID $prefix \
+	-RGLB $prefix \
+	-RGPL "Illumina" \
+	-RGPU $prefix \
+	-RGSM $prefix \
+	-RGCN "RGCN"
 
-# remove duplicates
-java -Djava.io.tmpdir=./tmp -Dpicard.useLegacyParser=false -XX:ParallelGCThreads=$threads -jar $picard_dir/picard.jar MarkDuplicates \
-    -INPUT $prefix.rdgrp.bam \
-    -REMOVE_DUPLICATES true  \
-    -METRICS_FILE $prefix.dedup.matrics \
-    -OUTPUT $prefix.dedup.bam 
+    # remove duplicates
+    java -Djava.io.tmpdir=./tmp -Dpicard.useLegacyParser=false -XX:ParallelGCThreads=$threads -jar $picard_dir/picard.jar MarkDuplicates \
+	-INPUT $prefix.round_${i}.rdgrp.bam \
+	-REMOVE_DUPLICATES true \
+	-METRICS_FILE $prefix.round_${i}.dedup.matrics \
+	-OUTPUT $prefix.round_${i}.dedup.bam 
 
-# index the dedup.bam file
-$samtools_dir/samtools index $prefix.dedup.bam
+    # index the dedup.bam file
+    $samtools_dir/samtools index $prefix.round_${i}.dedup.bam
 
-# GATK local realign
-# find realigner targets
-java -Djava.io.tmpdir=./tmp -Dpicard.useLegacyParser=false -XX:ParallelGCThreads=$threads -jar $gatk_dir/GenomeAnalysisTK.jar \
-    -R refseq.fa \
-    -T RealignerTargetCreator \
-    -I $prefix.dedup.bam \
-    -o $prefix.realn.intervals
-# run realigner
-java -Djava.io.tmpdir=./tmp -Dpicard.useLegacyParser=false -XX:ParallelGCThreads=$threads -jar $gatk_dir/GenomeAnalysisTK.jar \
-    -R refseq.fa \
-    -T IndelRealigner \
-    -I $prefix.dedup.bam \
-    -targetIntervals $prefix.realn.intervals \
-    -o $prefix.realn.bam
+    # GATK local realign
+    # find realigner targets
+    java -Djava.io.tmpdir=./tmp -XX:ParallelGCThreads=$threads -jar $gatk_dir/GenomeAnalysisTK.jar \
+	-R refseq.tmp.fa \
+	-T RealignerTargetCreator \
+	-I $prefix.round_${i}.dedup.bam \
+	-o $prefix.round_${i}.realn.intervals
+    # run realigner
+    java -Djava.io.tmpdir=./tmp -XX:ParallelGCThreads=$threads -jar $gatk_dir/GenomeAnalysisTK.jar \
+	-R refseq.tmp.fa \
+	-T IndelRealigner \
+	-I $prefix.round_${i}.dedup.bam \
+	-targetIntervals $prefix.round_${i}.realn.intervals \
+	-o $prefix.round_${i}.realn.bam
 
-# index final bam file
-$samtools_dir/samtools index $prefix.realn.bam
+    # index final bam file
+    $samtools_dir/samtools index $prefix.round_${i}.realn.bam
 
-# for PE sequencing
-if [[ $mode == "PE" ]]
-then
-    java -Djava.io.tmpdir=./tmp -Xmx16G -XX:ParallelGCThreads=$threads -jar $pilon_dir/pilon.jar \
-	--genome $input_assembly \
-	--frags $prefix.realn.bam \
-	--fix $fixlist \
-	--vcf \
-	--changes \
-	--output $prefix.assembly.illumina_read_polished \
-	>$prefix.log
-else
-    java -Djava.io.tmpdir=./tmp -Xmx16G -XX:ParallelGCThreads=$threads -jar $pilon_dir/pilon.jar \
-	--genome $input_assembly \
-	--unpaired $prefix.realn.bam \
-	--fix $fixlist \
-	--vcf \
-	--changes \
-	--output $prefix.assembly.illumina_read_polished \
-	>$prefix.log
-fi
+    # for PE sequencing
+    if [[ $mode == "PE" ]]
+    then
+	java -Djava.io.tmpdir=./tmp -Xmx16G -XX:ParallelGCThreads=$threads -jar $pilon_dir/pilon.jar \
+	    --genome refseq.tmp.fa \
+	    --frags $prefix.round_${i}.realn.bam \
+	    --fix $fixlist \
+	    --vcf \
+	    --changes \
+	    --output $prefix.assembly.pilon.round_${i} \
+	    >$prefix.pilon.round_${i}.log
+    else
+	java -Djava.io.tmpdir=./tmp -Xmx16G -XX:ParallelGCThreads=$threads -jar $pilon_dir/pilon.jar \
+	    --genome refseq.tmp.fa \
+	    --unpaired $prefix.round_${i}.realn.bam \
+	    --fix $fixlist \
+	    --vcf \
+	    --changes \
+	    --output $prefix.assembly.pilon.round_${i} \
+	    >$prefix.pilon.round_${i}.log
+    fi
+    perl $LRSDAY_HOME/scripts/summarize_pilon_correction.pl -i $prefix.assembly.pilon.round_${i}.changes
+    gzip $prefix.assembly.pilon.round_${i}.vcf
+    rm refseq.tmp.*
+    rm $prefix.round_${i}.sam
+    rm $prefix.round_${i}.sort.bam
+    rm $prefix.round_${i}.fixmate.bam
+    rm $prefix.round_${i}.rdgrp.bam
+    rm $prefix.round_${i}.dedup.bam
+    rm $prefix.round_${i}.dedup.matrics
+    rm $prefix.round_${i}.dedup.bam.bai
+    rm $prefix.round_${i}.realn.intervals
+    cp $prefix.assembly.pilon.round_${i}.fasta refseq.tmp.fa
+done
 
-perl $LRSDAY_HOME/scripts/summarize_pilon_correction.pl -i $prefix.assembly.illumina_read_polished.changes
-mv $prefix.assembly.illumina_read_polished.fasta $prefix.assembly.illumina_read_polished.fa
-gzip $prefix.assembly.illumina_read_polished.vcf
-
+ln -s $prefix.assembly.pilon.round_${rounds_of_successive_polishing}.fasta $prefix.assembly.illumina_read_polished.fa
+rm refseq.tmp.fa
 rm -r tmp
 
 # clean up intermediate files
 if [[ $debug == "no" ]]
 then
     rm adapter.fa
-    rm refseq.fa
-    rm refseq.fa.fai
-    rm refseq.dict
-    rm refseq.fa.bwt
-    rm refseq.fa.pac
-    rm refseq.fa.ann
-    rm refseq.fa.amb
-    rm refseq.fa.sa
-    rm $prefix.sam
-    rm $prefix.sort.bam
-    rm $prefix.fixmate.bam
-    rm $prefix.rdgrp.bam
-    rm $prefix.dedup.bam
-    rm $prefix.dedup.matrics
-    rm $prefix.dedup.bam.bai
-    rm $prefix.realn.intervals
     rm *.fq.gz
-    rm $prefix.realn.bam.bai
 fi
 
    

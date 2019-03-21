@@ -1,5 +1,5 @@
 #!/bin/bash
-# last update: 2019/02/28
+# last update: 2019/03/07
 
 set -e -o pipefail
 
@@ -11,15 +11,16 @@ PORECHOP_VERSION="0.2.4" #
 PORECHOP_GITHUB_COMMIT_VERSION="109e437" # committed on 2018.10.19
 FILTLONG_VERSION="0.2.0" #
 FILTLONG_GITHUB_COMMIT_VERSION="d1bb46d" # committed on 2018.05.11
-MINIMAP2_VERSION="2.13" # released on 2018.10.11
+MINIMAP2_VERSION="2.16" # released on 2019.2.28
 CANU_VERSION="1.8" # released on 2018.10.23
-FLYE_VERSION="2.4" # released on 2018.01.15
+FLYE_VERSION="2.4.1" # released on 2019.03.07
 WTDBG2_VERSION="2.3" # 
-WTDBG2_GITHUB_COMMIT_VERSION="4a39621" # committed on 2019.01.15
+WTDBG2_GITHUB_COMMIT_VERSION="59a39a6" # committed on 2019.03.06
 SMARTDENOVO_VERSION="" # 
 SMARTDENOVO_GITHUB_COMMIT_VERSION="5cc1356" # committed on 2018.02.19
 RAGOUT_VERSION="2.1.1" # released on 2018.07.30
-#QUAST_VERSION="5.0.1" # one of its dependency needs "csh" to be pre-installed
+# GUPPY_VERSION="2.3.5" # released on 2019.02.26
+# QUAST_VERSION="5.0.1" # one of its dependency needs "csh" to be pre-installed
 HDF_VERSION="1.10.1" # 
 SONLIB_VERSION="" # 
 SONLIB_GITHUB_COMMIT_VERSION="1afbd97" # committed on 2017.08.09
@@ -34,10 +35,10 @@ CAP_VERSION="" # see http://seq.cs.iastate.edu/cap3.html
 BWA_VERSION="0.7.17" # released on 2017.10.23
 SAMTOOLS_VERSION="1.9" # released on 2018.07.18
 CIRCLATOR_VERSION="1.5.5" # released on 2018.01.31
-TRIMMOMATIC_VERSION="0.36" # 
+TRIMMOMATIC_VERSION="0.38" # 
 GATK_VERSION="3.6-6" #
-PICARD_VERSION="2.18.15" # released on 2018.10.22
-PILON_VERSION="1.22" # released on 2017.03.15
+PICARD_VERSION="2.18.23" # released on 2019.02.25
+PILON_VERSION="1.23" # released on 2018.11.27
 EXONERATE_VERSION="2.2.0" # 
 BLAST_VERSION="2.2.31" # 
 RMBLAST_VERSION="2.2.28" # 
@@ -62,7 +63,7 @@ MINICONDA2_VERSION="4.5.11" #
 PB_ASSEMBLY_VERSION="0.0.2" #
 BAX2BAM_VERSION="0.0.9" #
 NANOPOLISH_VERSION="0.11.0" #
-NANOPOLISH_GITHUB_COMMIT_VERSION="3180474" # commited on 2019.01.18 
+NANOPOLISH_GITHUB_COMMIT_VERSION="8b5e605" # commited on 2019.02.22 
 PARALLEL_VERSION="20180722" # released on 2018.07.22
 # for MFannot
 EMBOSS_VERSION="6.5.7" # released on 2012.07.25
@@ -86,11 +87,11 @@ PORECHOP_DOWNLOAD_URL="https://github.com/rrwick/Porechop.git"
 FILTLONG_DOWNLOAD_URL="https://github.com/rrwick/Filtlong.git"
 MINIMAP2_DOWNLOAD_URL="https://github.com/lh3/minimap2/releases/download/v${MINIMAP2_VERSION}/minimap2-${MINIMAP2_VERSION}_x64-linux.tar.bz2"
 CANU_DOWNLOAD_URL="https://github.com/marbl/canu/releases/download/v${CANU_VERSION}/canu-${CANU_VERSION}.Linux-amd64.tar.xz"
-#CANU_DOWNLOAD_URL="https://github.com/marbl/canu/archive/v${CANU_VERSION}.tar.gz"
 FLYE_DOWNLOAD_URL="https://github.com/fenderglass/Flye/archive/${FLYE_VERSION}.tar.gz"
 WTDBG2_DOWNLOAD_URL="https://github.com/ruanjue/wtdbg2.git"
 SMARTDENOVO_DOWNLOAD_URL="https://github.com/ruanjue/smartdenovo"
-#QUAST_DOWNLOAD_URL="https://downloads.sourceforge.net/project/quast/quast-${QUAST_VERSION}.tar.gz"
+# GUPPY_DOWNLOAD_URL="https://mirror.oxfordnanoportal.com/software/analysis/ont-guppy-cpu_${GUPPY_VERSION}_linux64.tar.gz"
+# QUAST_DOWNLOAD_URL="https://downloads.sourceforge.net/project/quast/quast-${QUAST_VERSION}.tar.gz"
 RAGOUT_DOWNLOAD_URL="https://github.com/fenderglass/Ragout/archive/${RAGOUT_VERSION}.tar.gz"
 HDF_VERSION_prefix=${HDF_VERSION%.*}
 HDF_DOWNLOAD_URL="https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDF_VERSION_prefix}/hdf5-${HDF_VERSION}/src/hdf5-${HDF_VERSION}.tar.gz"
@@ -281,20 +282,6 @@ ln -s $minimap2_dir/minimap2 .
 cd $build_dir
 rm canu-${CANU_VERSION}.tar.xz
 
-# cd $build_dir
-# echo "Download Canu-v${CANU_VERSION}"
-# download $CANU_DOWNLOAD_URL "canu-${CANU_VERSION}.tar.gz"
-# tar -xzf canu-${CANU_VERSION}.tar.gz
-# canu_dir="$build_dir/canu-${CANU_VERSION}"
-# cd $canu_dir
-# cd src
-# make -j 8
-# canu_dir="$build_dir/canu-${CANU_VERSION}/Linux-amd64/bin"
-# cd $canu_dir
-# ln -s $minimap2_dir/minimap2 .
-# cd $build_dir
-# rm canu-${CANU_VERSION}.tar.gz
-
 # ------------- Flye -------------------
 cd $build_dir
 echo "Download Flye-v${FLYE_VERSION}"
@@ -400,6 +387,14 @@ gnuplot_dir="$build_dir/gnuplot-${GNUPLOT_VERSION}/bin"
 cd $build_dir
 rm gnuplot-${GNUPLOT_VERSION}.tar.gz
 PATH="$gnuplot_dir:${PATH}"
+
+# # --------------- Guppy --------------------
+# cd $build_dir
+# echo "Download Guppy-v${GUPPY_VERSION}"
+# download $GUPPY_DOWNLOAD_URL "ont-guppy-cpu_${GUPPY_VERSION}_linux64.tar.gz"
+# tar -xzf ont-guppy-cpu_${GUPPY_VERSION}_linux64.tar.gz
+# guppy_dir="$build_dir/ont-guppy-cpu/bin"
+# rm "ont-guppy-cpu_${GUPPY_VERSION}_linux64.tar.gz"
 
 # # ------------- QUAST --------------------
 # cd $build_dir
@@ -792,6 +787,8 @@ $miniconda2_dir/conda config --add channels bioconda
 $miniconda2_dir/conda config --add channels conda-forge
 $miniconda2_dir/conda create -y -p $build_dir/conda_pacbio_env
 source $miniconda2_dir/activate $build_dir/conda_pacbio_env
+$miniconda2_dir/conda install -y hdf5=${HDF_VERSION}
+$miniconda2_dir/conda install -y -c bioconda samtools=${SAMTOOLS_VERSION} openssl=1.0
 $miniconda2_dir/conda install -y -c bioconda pb-assembly=${PB_ASSEMBLY_VERSION}
 $miniconda2_dir/conda install -y -c bioconda bax2bam=${BAX2BAM_VERSION}
 source $miniconda2_dir/deactivate
@@ -868,7 +865,7 @@ download $PIROBJECT_DOWNLOAD_URL "pirobject_v${PIROBJECT_VERSION}.tar.gz"
 tar -zxf pirobject_v${PIROBJECT_VERSION}.tar.gz
 cd PirObject-${PIROBJECT_VERSION}
 pirobject_dir="$build_dir/PirObject-${PIROBJECT_VERSION}"
-ln -s ./../lib/PirObject.pm .
+ln -s ./lib/PirObject.pm .
 cd $build_dir
 rm pirobject_v${PIROBJECT_VERSION}.tar.gz
 
@@ -880,7 +877,7 @@ cd PirModels
 git checkout -f -q $PIRMODELS_GITHUB_COMMIT_VERSION
 cd ..
 cp -r PirModels $pirobject_dir
-pirmodels_dir="$perlobject_dir/PirModels"
+pirmodels_dir="$pirobject_dir/PirModels"
 
 # --------------- Flip ------------------
 cd $build_dir
@@ -966,7 +963,8 @@ echo "export canu_dir=${canu_dir}" >> env.sh
 echo "export flye_dir=${flye_dir}" >> env.sh
 echo "export wtdbg2_dir=${wtdbg2_dir}" >> env.sh
 echo "export smartdenovo_dir=${smartdenovo_dir}" >> env.sh
-#echo "export quast_dir=${quast_dir}" >> env.sh
+# echo "export guppy_dir=${guppy_dir}" >> env.sh
+# echo "export quast_dir=${quast_dir}" >> env.sh
 echo "export ragout_dir=${ragout_dir}" >> env.sh
 echo "export hdf_dir=${hdf_dir}" >> env.sh
 echo "export h5prefix=${h5prefix}" >> env.sh

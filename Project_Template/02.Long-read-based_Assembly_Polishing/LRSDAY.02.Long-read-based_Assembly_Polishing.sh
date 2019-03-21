@@ -23,13 +23,15 @@ prefix="SK1" # The file name prefix for the output files. Default = "SK1" for th
 
 threads=1  # The number of threads to use. Default = "1".
 ploidy=1 # The ploidy status of the sequenced genome. use "1" for haploid genome and "2" for diploid genome. Default = "1" for the testing example.
+rounds_of_successive_polishing=1 # The number of total rounds of long-read-based assembly polishing. Default = "1" for the testing example.
 debug="no" # Use "yes" if prefer to keep intermediate files, otherwise use "no". Default = "no"
 
 ###########################################
 # process the pipeline
 
 ln -s $input_assembly $prefix.assembly.raw.fa
-$samtools_dir/samtools faidx $prefix.assembly.raw.fa
+cp $prefix.assembly.raw.fa $prefix.assembly.tmp.fa
+
 mkdir tmp
 
 if [[ $long_read_technology == "pacbio" ]]
@@ -38,25 +40,42 @@ then
     source $miniconda2_dir/activate $conda_pacbio_dir/../../conda_pacbio_env
     if [[ $pacbio_reads_type == "RSII" ]]
     then
-	$conda_pacbio_dir/pbalign --nproc $threads --algorithm blasr --tmpDir ./tmp $pacbio_bam_fofn_file $prefix.assembly.raw.fa $prefix.pbalign.bam
-	if [[ $ploidy == "1" ]]
-	then
-	    $conda_pacbio_dir/variantCaller --algorithm=quiver -x 5 -X 120 -q 20 -v -j $threads $prefix.pbalign.bam -r $prefix.assembly.raw.fa -o $prefix.assembly.consensus.fa -o $prefix.assembly.consensus.fq -o $prefix.assembly.consensus.vcf
-	else
-	    $conda_pacbio_dir/variantCaller --algorithm=quiver -x 5 -X 120 -q 20 -v -j $threads $prefix.pbalign.bam -r $prefix.assembly.raw.fa -o $prefix.assembly.consensus.fa -o $prefix.assembly.consensus.fq -o $prefix.assembly.consensus.vcf --diploid 
-	fi
+	for i in $(seq 1 1 $rounds_of_successive_polishing)
+	do
+	    $samtools_dir/samtools faidx $prefix.assembly.tmp.fa
+	    $conda_pacbio_dir/pbalign --nproc $threads --algorithm blasr --tmpDir ./tmp $pacbio_bam_fofn_file $prefix.assembly.tmp.fa $prefix.pbalign.round_${i}.bam
+	    if [[ $ploidy == "1" ]]
+	    then
+		$conda_pacbio_dir/variantCaller --algorithm=quiver -x 5 -X 120 -q 20 -v -j $threads $prefix.pbalign.round_${i}.bam -r $prefix.assembly.tmp.fa -o $prefix.assembly.consensus.round_${i}.fa -o $prefix.assembly.consensus.round_${i}.fq -o $prefix.assembly.consensus.round_${i}.vcf
+	    else
+		$conda_pacbio_dir/variantCaller --algorithm=quiver -x 5 -X 120 -q 20 -v -j $threads $prefix.pbalign.round_${i}.bam -r $prefix.assembly.tmp.fa -o $prefix.assembly.consensus.round_${i}.fa -o $prefix.assembly.consensus.round_${i}.fq -o $prefix.assembly.consensus.round_${i}.vcf --diploid 
+	    fi
+	    rm $prefix.assembly.tmp.fa
+            rm $prefix.assembly.tmp.fa.fai
+	    cp $prefix.assembly.consensus.round_${i}.fa $prefix.assembly.tmp.fa
+	    rm $prefix.assembly.consensus.round_${i}.fq
+	    rm $prefix.assembly.consensus.round_${i}.vcf
+	done
     else
-	$conda_pacbio_dir/pbalign --nproc $threads --algorithm blasr --tmpDir ./tmp $pacbio_bam_fofn_file $prefix.assembly.raw.fa $prefix.pbalign.bam
-	if [[ $ploidy == "1" ]]
-	then
-	    $conda_pacbio_dir/variantCaller --algorithm=arrow -x 5 -X 120 -q 20 -v -j $threads $prefix.pbalign.bam -r $prefix.assembly.raw.fa -o $prefix.assembly.consensus.fa -o $prefix.assembly.consensus.fq -o $prefix.assembly.consensus.vcf
-	else
-	    $conda_pacbio_dir/variantCaller --algorithm=arrow -x 5 -X 120 -q 20 -v -j $threads $prefix.pbalign.bam -r $prefix.assembly.raw.fa -o $prefix.assembly.consensus.fa -o $prefix.assembly.consensus.fq -o $prefix.assembly.consensus.vcf --diploid 
-	fi
+	for i in $(seq 1 1 $rounds_of_successive_polishing)
+        do
+	    $samtools_dir/samtools faidx $prefix.assembly.tmp.fa
+	    $conda_pacbio_dir/pbalign --nproc $threads --algorithm blasr --tmpDir ./tmp $pacbio_bam_fofn_file $prefix.assembly.tmp.fa $prefix.pbalign.round_${i}.bam
+	    if [[ $ploidy == "1" ]]
+	    then
+		$conda_pacbio_dir/variantCaller --algorithm=arrow -x 5 -X 120 -q 20 -v -j $threads $prefix.pbalign.round_${i}.bam -r $prefix.assembly.tmp.fa -o $prefix.assembly.consensus.round_${i}.fa -o $prefix.assembly.consensus.round_${i}.fq -o $prefix.assembly.consensus.round_${i}.vcf
+	    else
+		$conda_pacbio_dir/variantCaller --algorithm=arrow -x 5 -X 120 -q 20 -v -j $threads $prefix.pbalign.round_${i}.bam -r $prefix.assembly.tmp.fa -o $prefix.assembly.consensus.round_${i}.fa -o $prefix.assembly.consensus.round_${i}.fq -o $prefix.assembly.consensus.round_${i}.vcf --diploid 
+	    fi
+	    rm $prefix.assembly.tmp.fa
+            rm $prefix.assembly.tmp.fa.fai
+	    cp $prefix.assembly.consensus.round_${i}.fa $prefix.assembly.tmp.fa
+	    gzip $prefix.assembly.consensus.round_${i}.fq
+	    gzip $prefix.assembly.consensus.round_${i}.vcf
+	done
     fi
-    gzip $prefix.assembly.consensus.fq
-    gzip $prefix.assembly.consensus.vcf
-    ln -s $prefix.assembly.consensus.fa $prefix.assembly.long_read_polished.fa
+    ln -s $prefix.assembly.consensus.round_${rounds_of_successive_polishing}.fa $prefix.assembly.long_read_polished.fa
+    rm $prefix.assembly.tmp.fa
     source $miniconda2_dir/deactivate
 else
     # perform correction using the minimap2-nanopolish pipeline
@@ -67,16 +86,23 @@ else
     else
 	$nanopolish_dir/nanopolish index -d $nanopore_fast5_files -s $nanopore_basecalling_sequencing_summary $long_reads_in_fastq
     fi
-    java -Djava.io.tmpdir=./tmp -XX:ParallelGCThreads=$threads -jar $picard_dir/picard.jar CreateSequenceDictionary  REFERENCE=$prefix.assembly.raw.fa OUTPUT=$prefix.assembly.raw.dict
-    $minimap2_dir/minimap2 -ax map-ont $prefix.assembly.raw.fa $long_reads_in_fastq > $prefix.minimap2.sam
-    java -Djava.io.tmpdir=./tmp -XX:ParallelGCThreads=$threads -jar $picard_dir/picard.jar SortSam  INPUT=$prefix.minimap2.sam OUTPUT=$prefix.minimap2.bam SORT_ORDER=coordinate
-    $samtools_dir/samtools index $prefix.minimap2.bam
-    rm $prefix.minimap2.sam
-    python3 $nanopolish_dir/scripts/nanopolish_makerange.py $prefix.assembly.raw.fa | $parallel_dir/parallel --results ${prefix}_nanopolish_results -P 1 \
-     	$nanopolish_dir/nanopolish variants --consensus -o $prefix.polished.{1}.vcf -w {1} --ploidy $ploidy -r $long_reads_in_fastq -b $prefix.minimap2.bam -g $prefix.assembly.raw.fa -t $threads  --min-candidate-frequency 0.2  || true 
-    $nanopolish_dir/nanopolish vcf2fasta -g $prefix.assembly.raw.fa $prefix.polished.*.vcf > $prefix.assembly.nanopolish.fa
-    ln -s $prefix.assembly.nanopolish.fa $prefix.assembly.long_read_polished.fa
-    mv $prefix.polished.*.vcf ${prefix}_nanopolish_results
+    for i in $(seq 1 1 $rounds_of_successive_polishing)
+    do
+	java -Djava.io.tmpdir=./tmp -Dpicard.useLegacyParser=false -XX:ParallelGCThreads=$threads -jar $picard_dir/picard.jar CreateSequenceDictionary -REFERENCE $prefix.assembly.tmp.fa -OUTPUT $prefix.assembly.tmp.dict
+	$minimap2_dir/minimap2 -ax map-ont $prefix.assembly.tmp.fa $long_reads_in_fastq > $prefix.minimap2.round_${i}.sam
+	java -Djava.io.tmpdir=./tmp -Dpicard.useLegacyParser=false -XX:ParallelGCThreads=$threads -jar $picard_dir/picard.jar SortSam -INPUT $prefix.minimap2.round_${i}.sam -OUTPUT $prefix.minimap2.round_${i}.bam -SORT_ORDER coordinate
+	$samtools_dir/samtools index $prefix.minimap2.round_${i}.bam
+	rm $prefix.minimap2.round_${i}.sam
+	python3 $nanopolish_dir/scripts/nanopolish_makerange.py $prefix.assembly.tmp.fa | $parallel_dir/parallel --results ${prefix}_nanopolish_round_${i}_results -P 1 \
+     	$nanopolish_dir/nanopolish variants --consensus -o $prefix.polished.{1}.vcf -w {1} --ploidy $ploidy -r $long_reads_in_fastq -b $prefix.minimap2.round_${i}.bam -g $prefix.assembly.tmp.fa -t $threads --min-candidate-frequency 0.2  || true 
+	$nanopolish_dir/nanopolish vcf2fasta -g $prefix.assembly.tmp.fa $prefix.polished.*.vcf > $prefix.assembly.nanopolish.round_${i}.fa
+	rm $prefix.assembly.tmp.fa
+	rm $prefix.assembly.tmp.dict
+	cp $prefix.assembly.nanopolish.round_${i}.fa $prefix.assembly.tmp.fa
+	mv $prefix.polished.*.vcf ${prefix}_nanopolish_round_${i}_results
+    done
+    ln -s $prefix.assembly.nanopolish.round_${rounds_of_successive_polishing}.fa $prefix.assembly.long_read_polished.fa
+    rm $prefix.assembly.tmp.fa
 fi
 
 rm -r tmp

@@ -18,6 +18,7 @@ Jia-Xing Yue & Gianni Liti. (2018) Long-read sequencing data analysis for yeasts
 Jia-Xing Yue, Jing Li, Louise Aigrain, Johan Hallin, Karl Persson, Karen Oliver, Anders Bergström, Paul Coupland, Jonas Warringer, Marco Cosentino Lagomarsino, Gilles Fischer, Richard Durbin, Gianni Liti. (2017) Contrasting evolutionary genome dynamics between domesticated and wild yeasts. *Nature Genetics*, 49:913-924.
 
 ## Release history
+* v1.4.0 Released on 2019/03/21
 * v1.3.1 Released on 2019/01/22
 * v1.3.0 Released on 2018/11/13
 * v1.2.0 Released on 2018/10/15
@@ -49,7 +50,7 @@ This protocol is designed for a desktop or computing server running an x86-64-bi
 * Tar (https://www.gnu.org/software/tar/)
 * Unzip (http://infozip.sourceforge.net/UnZip.html)
 * Virtualenv v15.1.0 or newer (https://virtualenv.pypa.io)
-* Wget (https://www.gnu.org/software/wget/)
+* Wget v1.14 or newer (https://www.gnu.org/software/wget/)
 * Zlib (https://zlib.net/)
 
 

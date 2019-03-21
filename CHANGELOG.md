@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.4.0] - 2019-03-21
+### Changed
+- Supports for multi-round assembly polishing using both long and short reads.
+- Setting adjustment for long-read filtering and downsampling.
+- Software version updates for a number of dependencies. 
+### Fixed
+- Compatibility issues due to recent version updates of conda an bioconda.
+- Typos in the installation script.
+
 ## [1.3.1] - 2019-01-22
 ### Added
 - A script for generated demultiplexed fastq reads based on nanopore's guppy demultiplexing summary file.
