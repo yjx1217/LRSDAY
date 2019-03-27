@@ -1,5 +1,9 @@
 # LRSDAY
 
+<p align="center">
+  <img src="https://github.com/yjx1217/LRSDAY/blob/master/LRSDAY.logo.png" alt="LRSDAY logo" width="627" height="242"/>
+</p>
+
 **LRSDAY: Long-read Sequencing Data Analysis for Yeasts**
 
 A highly transparent, automated and powerful computational framework for high-quality genome assembly and annotation.

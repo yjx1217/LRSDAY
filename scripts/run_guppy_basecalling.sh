@@ -1,7 +1,7 @@
 #!/bin/bash
-# last update: 2019.03.07
+# last update: 2019.03.27
 
-source ./../env.sh
+#source ./../../env.sh
 guppy_dir="$LRSDAY_HOME/build/ont-guppy-cpu/bin"
 
 flowcell_version="FLO-MIN106" # Please check your own flowcell version
@@ -14,9 +14,9 @@ basecalling_output_directory="$LRSDAY_HOME/$project_name/00.Long_Reads/Guppy_Bas
 demultiplexing_output_directory="$LRSDAY_HOME/$project_name/00.Long_Reads/Guppy_Demultiplexing_out"
 
 qual=5 # read quality filter for guppy basecalling
-num_callers=1 # num_callers for guppy
+num_callers=8 # num_callers for guppy
 threads_per_caller=1 # threads_per_caller for guppy
-demultiplexing_threads=1 # threads to use for demultiplexing
+demultiplexing_threads=8 # threads to use for demultiplexing
 
 $guppy_dir/guppy_basecaller \
     --flowcell $flowcell_version \
@@ -47,10 +47,10 @@ cd $demultiplexing_output_directory
 for b in barcode*
 do 
     echo "barcode=$b"
-    cat ./$b/*.fastq |gzip -c $project_name.basecalled_reads.Q${qual}.pass.$b.fastq.gz
+    cat ./$b/*.fastq |gzip -c > $project_name.basecalled_reads.Q${qual}.pass.$b.fastq.gz
 done
 
-cat ./unclassified/*.fastq |gzip -c $project_name.basecalled_reads.Q${qual}.pass.$b.fastq.gz
+cat ./unclassified/*.fastq |gzip -c > $project_name.basecalled_reads.Q${qual}.pass.unclassified.fastq.gz
 
 
 
