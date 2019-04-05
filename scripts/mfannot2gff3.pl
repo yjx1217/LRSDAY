@@ -8,7 +8,7 @@ use Getopt::Long;
 #  author: Jia-Xing Yue (GitHub ID: yjx1217)
 #  last edited: 2018.09.01
 #  description: converting the mfannot output to the GFF3 format 
-#  example: perl mfannot2gff3.pl -i genome.mfannot.out -g genome.mfannot.gff3 -m lite 
+#  example: perl mfannot2gff3.pl -i genome.mfannot.out -o genome.mfannot.gff3 -m lite 
 ##############################################################
 
 my ($input, $output, $mode);
