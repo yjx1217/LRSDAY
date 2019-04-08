@@ -542,7 +542,7 @@ fi
 
 # --------------- Prodigal ------------------
 prodigal_dir="$build_dir/Prodigal-${PRODIGAL_VERSION}"
-if [$(check_installed $prodigal_dir) ]; then
+if [ -z $(check_installed $prodigal_dir) ]; then
     cd $build_dir
     echo "Download Prodigal-v${PRODIGAL_VERSION}"
     download_and_extract $PRODIGAL_DOWNLOAD_URL "v${PRODIGAL_VERSION}.tar.gz"
@@ -562,7 +562,7 @@ fi
 
 # ------------- BWA -------------------
 bwa_dir="$build_dir/bwa-${BWA_VERSION}"
-if [$(check_installed $bwa_dir) ]; then
+if [ -z $(check_installed $bwa_dir) ]; then
     cd $build_dir
     echo "Download BWA-v${BWA_VERSION}"
     download_and_extract $BWA_DOWNLOAD_URL "bwa-${BWA_VERSION}.tar.bz2"
