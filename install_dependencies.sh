@@ -248,7 +248,6 @@ download_and_extract() {
     download_location=$2
     echo "Downloading $url to $download_location"
     wget -nv --no-check-certificate $url -O $download_location
-    download $url $download_location
     if [[ $download_location =~ \.bz2$ ]]; then
         extract_command="tar -xjf"
     elif [[ $download_location =~ \.xz$ || $download_location =~ \.tar$ ]]; then
