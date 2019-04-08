@@ -735,7 +735,7 @@ fi
 
 # --------------- TRF ------------------
 trf_dir=$repeatmasker_dir
-if [! -e "$repeatmasker_dir/trf"]; then
+if [ ! -e "$repeatmasker_dir/trf" ]; then
     cd $repeatmasker_dir
     echo "Download TRF-v${TRF_VERSION}"
     download $TRF_DOWNLOAD_URL "trf${TRF_VERSION}.linux64"
