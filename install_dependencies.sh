@@ -464,7 +464,7 @@ fi
 
 # --------------- gnuplot ------------------
 gnuplot_dir="$build_dir/gnuplot-${GNUPLOT_VERSION}/bin"
-if [$(check_installed $gnuplot_dir) ]; then
+if [ -z $(check_installed $gnuplot_dir) ]; then
     cd $build_dir
     echo "Download gnuplot-v${GNUPLOT_VERSION}"
     download_and_extract $GNUPLOT_DOWNLOAD_URL "gnuplot-${GNUPLOT_VERSION}.tar.gz"
