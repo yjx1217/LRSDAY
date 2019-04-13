@@ -16,7 +16,7 @@ This protocol is designed for a desktop or computing server running an x86-64-bi
 ● Git (https://git-scm.com/)
 ● GNU make (https://www.gnu.org/software/make/)
 ● Gzip (https://www.gnu.org/software/gzip/)
-● Java runtime environment (JRE) v1.8.0 or newer (https://www.java.com)
+● Java runtime environment (JRE) v1.8.0 (https://www.java.com)
 ● Perl v5.12 or newer (https://www.perl.org/)
 ● Python v2.7.9 or newer (https://www.python.org/)
 ● Python v3.4 or newer (https://www.python.org/)

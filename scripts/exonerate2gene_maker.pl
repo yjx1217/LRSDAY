@@ -6,7 +6,7 @@ use Getopt::Long;
 ##############################################################
 #  script: exonerate2gene_maker.pl
 #  author: Jia-Xing Yue (GitHub ID: yjx1217)
-#  last edited: 2018.01.30
+#  last edited: 2019.04.13
 #  description: turn exonerate hits in maker evidence to gene models
 #  example: perl exonerate2gene_maker.pl -i input.exonerate_hit.gff3 -o output.exonerate_hit.gene_model.gff3
 ##############################################################
@@ -26,6 +26,8 @@ my $mRNA_id;
 my $exon_id;
 my $cds_id;
 my $exon_index = 0;
+my %primary_id = ();
+
 while (<$input_fh>) {
     chomp;
     /^##FASTA/ and last;
@@ -37,12 +39,16 @@ while (<$input_fh>) {
 	$mRNA_id = "$gene_id.mRNA";
 	print $output_fh "$chr\tmaker_complementary\tmRNA\t$start\t$end\t$score\t$strand\t$phase\tID=$mRNA_id;Parent=$gene_id\n";
 	$exon_index = 0;
+	$primary_id{$gene_id} = 1;
     } elsif ($type =~ /match_part/) {
-	$exon_index++;
-	$exon_id = "$mRNA_id.exon.$exon_index";
-	$cds_id = "$mRNA_id.cds.$exon_index";
-	print $output_fh "$chr\tmaker_complementary\texon\t$start\t$end\t$score\t$strand\t$phase\tID=$exon_id;Parent=$mRNA_id\n";
-	print $output_fh "$chr\tmaker_complementary\tCDS\t$start\t$end\t$score\t$strand\t$phase\tID=$cds_id;Parent=$mRNA_id\n";
+	my ($parent_id) = ($attributes =~ /Parent=([^;]+)/);
+	if (exists $primary_id{$parent_id}) {
+	    $exon_index++;
+	    $exon_id = "$mRNA_id.exon.$exon_index";
+	    $cds_id = "$mRNA_id.cds.$exon_index";
+	    print $output_fh "$chr\tmaker_complementary\texon\t$start\t$end\t$score\t$strand\t$phase\tID=$exon_id;Parent=$mRNA_id\n";
+	    print $output_fh "$chr\tmaker_complementary\tCDS\t$start\t$end\t$score\t$strand\t$phase\tID=$cds_id;Parent=$mRNA_id\n";
+	}
     } else {
 	die "unrecognized feature type: $type\n";
     }
