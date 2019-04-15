@@ -18,11 +18,10 @@ export PATH="$flip_dir:$blast_dir:$muscle_dir:$umac_dir:$hmmer_dir:$erpin_dir:$t
 
 #######################################
 # set project-specific variables
-genome="./../07.Supervised_Final_Assembly/SK1.assembly.final.fa" # The file path of the input genome assembly.
+prefix="SK1" # The file name prefix for the processing sample. Default = "SK1" for the testing example.
+genome="./../07.Supervised_Final_Assembly/$prefix.assembly.final.fa" # The file path of the input genome assembly.
 chrMT_tag="chrMT" # The sequence name for the mitochondrial genome in the input genome assembly, if there are multiple corresponding contigs/scaffolds, use a single ';' to separate them. e.g. "chrMT_1;chrMT_2". Default = "chrMT". 
 genetic_code_table=3 # The NCBI genetic code table (https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi) for the annotated mitochondrial genome. Default = 3 (i.e. Yeast Mitochondria)
-
-prefix="SK1" # The file name prefix for the output files.
 debug="no" # Whehter to keep intermediate files for debugging. Use "yes" if prefer to keep intermediate files, otherwise use "no". Default = "no".
 
 ######################################

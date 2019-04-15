@@ -6,16 +6,16 @@ source ./../../env.sh
 
 #######################################
 # set project-specific variables
-prefix="SK1" # The file name prefix for the output files.
+prefix="SK1" # The file name prefix for the processing sample. Default = "SK1" for the testing example.
 threads=1 # The number of threads to use. Default = "1".
 
-input_nuclear_gene_gff="./../09.Nuclear_Gene_Annotation/SK1.nuclear_genome.EVM.gff3" # The file path of the input nuclear gene gff3 file generated in the task 09.Nuclear_Gene_Annotation. Set this variable as well as the following two variables to "" if you want to skip this step for the nuclear gene annotation. 
-query_nuclear_gene_PoFF_faa="./../09.Nuclear_Gene_Annotation/SK1.nuclear_genome.EVM.PoFF.faa" # The file path of the PoFF.faa file generated in the task 09.Nuclear_Gene_Annotation.
-query_nuclear_gene_PoFF_gff="./../09.Nuclear_Gene_Annotation/SK1.nuclear_genome.EVM.PoFF.gff" # The file path of the PoFF.gff file generated in the task 09.Nuclear_Gene_Annotation.
+input_nuclear_gene_gff="./../09.Nuclear_Gene_Annotation/$prefix.nuclear_genome.EVM.gff3" # The file path of the input nuclear gene gff3 file generated in the task 09.Nuclear_Gene_Annotation. Set this variable as well as the following two variables to "" if you want to skip this step for the nuclear gene annotation. 
+query_nuclear_gene_PoFF_faa="./../09.Nuclear_Gene_Annotation/$prefix.nuclear_genome.EVM.PoFF.faa" # The file path of the PoFF.faa file generated in the task 09.Nuclear_Gene_Annotation.
+query_nuclear_gene_PoFF_gff="./../09.Nuclear_Gene_Annotation/$prefix.nuclear_genome.EVM.PoFF.gff" # The file path of the PoFF.gff file generated in the task 09.Nuclear_Gene_Annotation.
 
-input_mitochondrial_gene_gff="./../10.Mitochondrial_Gene_Annotation/SK1.mitochondrial_genome.mfannot.gff3" # The file path of the input mitochondrial gene gff3 file generated in the task 10.Mitochondrial_Gene_Annotation. Set this variable as well as the following two variables to "" if you want to skip this step for the mitochondrial gene annotation. 
-query_mitochondrial_gene_PoFF_faa="./../10.Mitochondrial_Gene_Annotation/SK1.mitochondrial_genome.mfannot.PoFF.faa" # The file path of the PoFF.faa file generated in the task 10.Mitochondrial_Gene_Annotation.
-query_mitochondrial_gene_PoFF_gff="./../10.Mitochondrial_Gene_Annotation/SK1.mitochondrial_genome.mfannot.PoFF.gff" # The file path of the PoFF.gff file generated in the task 10.Mitochondrial_Gene_Annotation.
+input_mitochondrial_gene_gff="./../10.Mitochondrial_Gene_Annotation/$prefix.mitochondrial_genome.mfannot.gff3" # The file path of the input mitochondrial gene gff3 file generated in the task 10.Mitochondrial_Gene_Annotation. Set this variable as well as the following two variables to "" if you want to skip this step for the mitochondrial gene annotation. 
+query_mitochondrial_gene_PoFF_faa="./../10.Mitochondrial_Gene_Annotation/$prefix.mitochondrial_genome.mfannot.PoFF.faa" # The file path of the PoFF.faa file generated in the task 10.Mitochondrial_Gene_Annotation.
+query_mitochondrial_gene_PoFF_gff="./../10.Mitochondrial_Gene_Annotation/$prefix.mitochondrial_genome.mfannot.PoFF.gff" # The file path of the PoFF.gff file generated in the task 10.Mitochondrial_Gene_Annotation.
 
 ref_PoFF_faa="$LRSDAY_HOME/data/SGDref.PoFF.faa" # The file path of the reference proteome file in FASTA format: for S. cerevisiae and its close relatives, you can directly use the pre-shipped file: SGDref.PoFF.faa; if you work with other organisms, you can check ProteinOrtho's manual for details on how to prepare such file.
 ref_PoFF_gff="$LRSDAY_HOME/data/SGDref.PoFF.gff" # The path of the reference gene GFF file in GFF format: for S. cerevisiae and its close relatives, you can directly use the pre-shipped file: SGDref.PoFF.gff; if you work with other organisms, you can check ProteinOrtho's manual for details on how to prepare such file.

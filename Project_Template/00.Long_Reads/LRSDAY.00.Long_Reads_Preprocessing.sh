@@ -7,13 +7,13 @@ source ./../../env.sh
 #######################################
 # set project-specific variables
 
-prefix="YGL3210" # The file name prefix for the output files
-reads="./../00.Long_Reads/YGL3210.fq.gz" # The file path of the long reads file (in fastq or fastq.gz format).
-reads_type="nanopore-raw" # The long reads data type: "pacbio-raw" or "pacbio-corrected" or "nanopore-raw" or "nanopore-corrected".
-run_filtering="yes" # Whether to filter the reads: "yes" or "no". Default = "yes".
+prefix="SK1" # The file name prefix for the processing sample. Default = "SK1" for the testing example.
+reads="./../00.Long_Reads/$prefix.filtered_subreads.fastq.gz" # The file path of the long reads file (in fastq or fastq.gz format).
+reads_type="pacbio-raw" # The long reads data type: "pacbio-raw" or "pacbio-corrected" or "nanopore-raw" or "nanopore-corrected".
+run_filtering="yes" # Whether to filter and downsample the reads: "yes" or "no". Default = "yes".
 genome_size="12500000" # The haploid genome size (in bp) of sequenced organism. Default = "12500000" (i.e. 12.5 Mb for the budding yeast S. cereviaie genome). This is used to calculate targeted sequencing coverage after read filtering (see below). 
-post_filtering_coverage="40" # Targeted sequencing coverage after read filtering. Default = "40" (i.e. 40x coverage).
-threads=1 # The number of threads to use. Default = "1".
+post_filtering_coverage="60" # Targeted sequencing coverage after read filtering and downsampling. Default = "60" (i.e. 60x coverage).
+threads=4 # The number of threads to use. Default = "1".
 
 #######################################
 # process the pipeline

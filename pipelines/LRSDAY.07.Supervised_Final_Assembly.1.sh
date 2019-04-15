@@ -6,8 +6,9 @@ source ./../../env.sh
 
 #######################################
 # set project-specific variables
-genome="./../06.Mitochondrial_Genome_Assembly_Improvement/SK1.assembly.mt_improved.fa" # The file name of the input genome assembly.
-prefix="SK1" # The file name prefix for the output files.
+prefix="SK1" # The file name prefix for the processing sample. Default = "SK1" for the testing example.
+genome="./../06.Mitochondrial_Genome_Assembly_Improvement/$prefix.assembly.mt_improved.fa" # The file name of the input genome assembly.
+
 
 #######################################
 # process the pipeline

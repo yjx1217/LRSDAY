@@ -6,8 +6,8 @@ source ./../../env.sh
 
 #######################################
 # set project-specific variables
-genome="./../04.Reference-guided_Assembly_Scaffolding/SK1.assembly.ref_based_scaffolded.fa" # The file path of the input genome assembly
-prefix="SK1" # The file name prefix for the output files
+prefix="SK1" # The file name prefix for the processing sample. Default = "SK1" for the testing example.
+genome="./../04.Reference-guided_Assembly_Scaffolding/$prefix.assembly.ref_based_scaffolded.fa" # The file path of the input genome assembly
 query="$LRSDAY_HOME/data/S288C.centromere.fa" # S. cerevisiae S288C reference centromere sequences based on Yue et al. (2017) Nature Genetics. 
 debug="no" # Whether to keep intermediate files for debugging. Use "yes" if prefer to keep intermediate files, otherwise use "no". Default = "no".
 

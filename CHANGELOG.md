@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.5.0] - 2019-05-13
+### Added
+- Supports for native ONT nanopore basecalling, demultiplexing, and read profile plotting.
+- An lite-weight bash script for generating dotplot for any pairs of fasta files.
+### Changed
+- Better robustness for the dependency installation script. 
+- Reducing the requirements of setting output prefix by assuming the same prefix was used across different modules.
+- Setting adjustment for long-read filtering and downsampling.
+- Applying read filtering/downsampling for the testing example.
+- Software version updates for a number of dependencies.
+### Fixed
+- A bug that might lead to missing gene annotation in certain genomic region.
+- Typos in the installation script.
+- Typos in the manual.
+
 ## [1.4.0] - 2019-03-21
 ### Changed
 - Supports for multi-round assembly polishing using both long and short reads.

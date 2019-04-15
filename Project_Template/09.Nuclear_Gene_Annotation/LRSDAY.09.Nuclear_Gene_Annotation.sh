@@ -6,8 +6,8 @@ source ./../../env.sh
 
 #######################################
 # set project-specific variables
-genome_assembly="./../07.Supervised_Final_Assembly/SK1.assembly.final.fa" # The file path of the input genome assembly.
-genome_tag="SK1" # The file name prefix for the output files.
+prefix="SK1" # The file name prefix for the processing sample. Default = "SK1" for the testing example.
+genome_assembly="./../07.Supervised_Final_Assembly/$prefix.assembly.final.fa" # The file path of the input genome assembly.
 chrMT_tag="chrMT" # The sequence name for the mitochondrial genome in the final assembly. If there are multiple sequences, use a single ';' to separate them. e.g. "chrMT_part1;chrMT_part2". Default = "chrMT".
 threads=1 # The number of threads to use. Default = "1".
 maker_opts="$LRSDAY_HOME/misc/maker_opts.customized.ctl" # The configuration file for MAKER. You can edit this file if you have native transciptome/EST data for the strain/species that you sequenced or if you want to adapt it to annotate other eukaryotic organisms. Otherwise, please keep it unchanged. Please note that if this file is in the same directory where this bash script is executed, the file name cannot be "maker_opts.ctl".
@@ -16,8 +16,10 @@ debug="no" # use "yes" if prefer to keep intermediate files, otherwise use "no".
 
 #######################################
 # process the pipeline
-echo "genome_assembly=$genome_assembly"
+genome_tag="$prefix"
+
 echo "genome_tag=$genome_tag"
+echo "genome_assembly=$genome_assembly"
 
 # convert the genome assembly file to all uppercases
 

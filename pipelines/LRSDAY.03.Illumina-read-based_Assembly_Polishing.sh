@@ -7,8 +7,8 @@ source ./../../env.sh
 ###########################################
 # set project-specific variables
 
-input_assembly="./../02.Long-read-based_Assembly_Polishing/SK1.assembly.long_read_polished.fa" # The file path of the input assembly before Illumina-based correction
-prefix="SK1" # The file name prefix for the output files.
+prefix="SK1" # The file name prefix for the processing sample. Default = "SK1" for the testing example.
+input_assembly="./../02.Long-read-based_Assembly_Polishing/$prefix.assembly.long_read_polished.fa" # The file path of the input assembly before Illumina-based correction
 trim_illumina_reads="yes" # Whether to trim the input Illumina reads. Use "yes" if prefer to perform trimming, otherwise use "no". Default = "yes". 
 rounds_of_successive_polishing=1 # The number of total rounds of Illumina-read-based assembly polishing. Default = "1" for the testing example.
 threads=1 # The number of threads to use. Default = "1".
@@ -117,13 +117,13 @@ do
 
     # GATK local realign
     # find realigner targets
-    java -Djava.io.tmpdir=./tmp -XX:ParallelGCThreads=$threads -jar $gatk_dir/GenomeAnalysisTK.jar \
+    java -Djava.io.tmpdir=./tmp -XX:ParallelGCThreads=$threads -jar $gatk3_dir/GenomeAnalysisTK.jar \
 	-R refseq.tmp.fa \
 	-T RealignerTargetCreator \
 	-I $prefix.round_${i}.dedup.bam \
 	-o $prefix.round_${i}.realn.intervals
     # run realigner
-    java -Djava.io.tmpdir=./tmp -XX:ParallelGCThreads=$threads -jar $gatk_dir/GenomeAnalysisTK.jar \
+    java -Djava.io.tmpdir=./tmp -XX:ParallelGCThreads=$threads -jar $gatk3_dir/GenomeAnalysisTK.jar \
 	-R refseq.tmp.fa \
 	-T IndelRealigner \
 	-I $prefix.round_${i}.dedup.bam \

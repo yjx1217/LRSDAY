@@ -7,8 +7,8 @@ PATH=$gnuplot_dir:$PATH
 
 #######################################
 # set project-specific variables
-genome="./../06.Mitochondrial_Genome_Assembly_Improvement/SK1.assembly.mt_improved.fa" # The file path of the input genome assembly.
-prefix="SK1" # The file name prefix for the output files.
+prefix="SK1" # The file name prefix for the processing sample. Default = "SK1" for the testing example.
+genome="./../06.Mitochondrial_Genome_Assembly_Improvement/$prefix.assembly.mt_improved.fa" # The file path of the input genome assembly.
 vcf="yes" # Whether to generate a vcf file generated to show SNP and INDEL differences between the assembled genome and the reference genome for their uniquely alignable regions. Use "yes" if prefer to have vcf file generated to show SNP and INDEL differences between the assembled genome and the reference genome. Default = "yes".
 dotplot="yes" # Whether to plot genome-wide dotplot based on the comparison with the reference genome below. Use "yes" if prefer to plot, otherwise use "no". Default = "yes".
 ref_genome_raw="./../00.Ref_Genome/S288C.ASM205763v1.fa" # The path of the raw reference genome, only needed when dotplot="yes" or vcf="yes".

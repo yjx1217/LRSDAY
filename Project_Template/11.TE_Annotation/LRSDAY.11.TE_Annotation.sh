@@ -6,8 +6,8 @@ source ./../../env.sh
 
 #######################################
 # set project-specific variables
-genome="./../07.Supervised_Final_Assembly/SK1.assembly.final.fa" # The file path of the input genome assembly.
-prefix="SK1" # The file name prefix for the output files.
+prefix="SK1" # The file name prefix for the processing sample. Default = "SK1" for the testing example.
+genome="./../07.Supervised_Final_Assembly/$prefix.assembly.final.fa" # The file path of the input genome assembly.
 threads=1 # The number of threads to use. Default = "1".
 debug="no" # Whether to keep intermediate files for debugging. Use "yes" if prefer to keep intermediate files, otherwise use "no". Default = "no".
 

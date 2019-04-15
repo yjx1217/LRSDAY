@@ -1,5 +1,5 @@
 #!/bin/bash
-# last update: 2019/03/07
+# last update: 2019/05/13
 
 set -e -o pipefail
 
@@ -19,7 +19,7 @@ if [ ! -z "$INSTALL_DEPS" ]; then
     xargs -a debiandeps sudo apt-get install -y
 fi
 
-SRA_VERSION="2.9.2" # released on 2018.09.26
+SRA_VERSION="2.9.6" # released on 2019.03.18
 SRA_DOWNLOAD_URL="https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/sratoolkit.${SRA_VERSION}-centos_linux64.tar.gz"
 
 PORECHOP_VERSION="0.2.4" # 
@@ -36,11 +36,11 @@ MINIMAP2_DOWNLOAD_URL="https://github.com/lh3/minimap2/releases/download/v${MINI
 CANU_VERSION="1.8" # released on 2018.10.23
 CANU_DOWNLOAD_URL="https://github.com/marbl/canu/releases/download/v${CANU_VERSION}/canu-${CANU_VERSION}.Linux-amd64.tar.xz"
 
-FLYE_VERSION="2.4.1" # released on 2019.03.07
+FLYE_VERSION="2.4.2" # released on 2019.04.07
 FLYE_DOWNLOAD_URL="https://github.com/fenderglass/Flye/archive/${FLYE_VERSION}.tar.gz"
 
-WTDBG2_VERSION="2.3" # 
-WTDBG2_GITHUB_COMMIT_VERSION="59a39a6" # committed on 2019.03.06
+WTDBG2_VERSION="2.4" # 
+WTDBG2_GITHUB_COMMIT_VERSION="f460eee" # committed on 2019.04.17
 WTDBG2_DOWNLOAD_URL="https://github.com/ruanjue/wtdbg2.git"
 
 SMARTDENOVO_VERSION="" # 
@@ -49,7 +49,13 @@ SMARTDENOVO_DOWNLOAD_URL="https://github.com/ruanjue/smartdenovo"
 
 RAGOUT_VERSION="2.1.1" # released on 2018.07.30
 RAGOUT_DOWNLOAD_URL="https://github.com/fenderglass/Ragout/archive/${RAGOUT_VERSION}.tar.gz"
-# GUPPY_VERSION="2.3.5" # released on 2019.02.26
+
+GUPPY_VERSION="2.3.5" # released on 2019.02.26
+GUPPY_DOWNLOAD_URL="https://mirror.oxfordnanoportal.com/software/analysis/ont-guppy-cpu_${GUPPY_VERSION}_linux64.tar.gz"
+
+NANOPLOT_VERSION="1.0.0" # released on 2017.11.04
+NANOPLOT_DOWNLOAD_URL="https://github.com/wdecoster/NanoPlot.git"
+
 # QUAST_VERSION="5.0.1" # one of its dependency needs "csh" to be pre-installed
 
 HDF_VERSION="1.10.1" # 
@@ -94,8 +100,8 @@ CIRCLATOR_DOWNLOAD_URL="https://github.com/sanger-pathogens/circlator/archive/v$
 TRIMMOMATIC_VERSION="0.38" # 
 TRIMMOMATIC_DOWNLOAD_URL="http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-${TRIMMOMATIC_VERSION}.zip"
 
-#GATK_VERSION="3.6-6" #
-#GATK_DOWNLOAD_URL="https://github.com/broadgsa/gatk/archive/${GATK_VERSION}.tar.gz"
+GATK3_VERSION="3.6-6" #
+GATK3_DOWNLOAD_URL="https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/GenomeAnalysisTK.jar"
 
 PICARD_VERSION="2.18.23" # released on 2019.02.25
 PICARD_DOWNLOAD_URL="https://github.com/broadinstitute/picard/releases/download/${PICARD_VERSION}/picard.jar"
@@ -240,14 +246,14 @@ download () {
   url=$1
   download_location=$2
   echo "Downloading $url to $download_location"
-  wget -nv --no-check-certificate $url -O $download_location
+  wget --no-check-certificate $url -O $download_location
 }
 
 download_and_extract() {
     url=$1
     download_location=$2
     echo "Downloading $url to $download_location"
-    wget -nv --no-check-certificate $url -O $download_location
+    wget --no-check-certificate $url -O $download_location
     if [[ $download_location =~ \.bz2$ ]]; then
         extract_command="tar -xjf"
     elif [[ $download_location =~ \.xz$ || $download_location =~ \.tar$ ]]; then
@@ -281,7 +287,7 @@ cpanm_dir=$build_dir/cpanm
 if [ ! -e "$build_dir/cpanm" ]; then
     mkdir -p  $build_dir/cpanm
     cd $cpanm_dir
-    wget -nv --no-check-certificate -O - https://cpanmin.us/ > cpanm
+    wget --no-check-certificate -O - https://cpanmin.us/ > cpanm
     chmod +x cpanm
     mkdir -p perlmods
 fi
@@ -318,7 +324,6 @@ if [ -z $(check_installed $porechop_dir) ]; then
     deactivate
     note_installed $porechop_dir
 fi
-
 
 # --------------- Filtlong ------------------
 filtlong_dir="$build_dir/Filtlong/bin"
@@ -433,7 +438,6 @@ if [ -z $(check_installed "sonLib") ]; then
     note_installed "$build_dir/sonLib"
 fi
 
-
 # ---------------- HAL -------------------
 hal_dir="$build_dir/hal/bin"
 if [ -z $(check_installed $hal_dir) ]; then
@@ -475,30 +479,45 @@ if [ -z $(check_installed $gnuplot_dir) ]; then
 fi
 PATH="$gnuplot_dir:${PATH}"
 
-# # --------------- Guppy --------------------
-# cd $build_dir
-# echo "Download Guppy-v${GUPPY_VERSION}"
-# download $GUPPY_DOWNLOAD_URL "ont-guppy-cpu_${GUPPY_VERSION}_linux64.tar.gz"
-# tar -xzf ont-guppy-cpu_${GUPPY_VERSION}_linux64.tar.gz
-# guppy_dir="$build_dir/ont-guppy-cpu/bin"
-# rm "ont-guppy-cpu_${GUPPY_VERSION}_linux64.tar.gz"
+# --------------- Guppy --------------------
+guppy_dir="$build_dir/ont-guppy-cpu/bin"
+if [ -z $(check_installed $guppy_dir) ]; then
+    cd $build_dir
+    echo "Download Guppy-v${GUPPY_VERSION}"
+    download_and_extract $GUPPY_DOWNLOAD_URL "ont-guppy-cpu_${GUPPY_VERSION}_linux64.tar.gz"
+    note_installed $guppy_dir
+fi
 
-# # ------------- QUAST --------------------
-# cd $build_dir
-# echo "Download QUAST-v${QUAST_VERSION}"
-# download $QUAST_DOWNLOAD_URL "QUAST-${QUAST_VERSION}.tar.gz"
-# tar -xzf QUAST-${QUAST_VERSION}.tar.gz
+# --------------- Nanoplot --------------------
+nanoplot_dir="$build_dir/py3_virtualenv_nanoplot/bin"
+if [ -z $(check_installed $nanoplot_dir) ]; then
+    cd $build_dir
+    virtualenv -p $(which python3) py3_virtualenv_nanoplot
+    source py3_virtualenv_nanoplot/bin/activate
+    py3_virtualenv_nanoplot/bin/pip install --upgrade pip
+    py3_virtualenv_nanoplot/bin/pip install --upgrade setuptools
+    py3_virtualenv_nanoplot/bin/pip install numpy  
+    py3_virtualenv_nanoplot/bin/pip install NanoPlot
+    deactivate
+    note_installed $nanoplot_dir
+fi
+
+# ------------- QUAST --------------------
 # quast_dir="$build_dir/quast-${QUAST_VERSION}"
-# cd $quast_dir
-# virtualenv -p $(which python3) py3_virtualenv_quast
-# source py3_virtualenv_quast/bin/activate
-# py3_virtualenv_quast/bin/pip install joblib
-# py3_virtualenv_quast/bin/pip install simplejson
-# py3_virtualenv_quast/bin/python3 -mpip install -U matplotlib
-# py3_virtualenv_quast/bin/python3 ./setup.py install
-# deactivate
-# cd ..
-# rm QUAST-${QUAST_VERSION}.tar.gz
+# if [ -z $(check_installed $quast_dir) ]; then
+#     cd $build_dir
+#     echo "Download QUAST-v${QUAST_VERSION}"
+#     download_and_extract $QUAST_DOWNLOAD_URL "QUAST-${QUAST_VERSION}.tar.gz"
+#     cd $quast_dir
+#     virtualenv -p $(which python3) py3_virtualenv_quast
+#     source py3_virtualenv_quast/bin/activate
+#     py3_virtualenv_quast/bin/pip install joblib
+#     py3_virtualenv_quast/bin/pip install simplejson
+#     py3_virtualenv_quast/bin/python3 -mpip install -U matplotlib
+#     py3_virtualenv_quast/bin/python3 ./setup.py install
+#     deactivate
+#     note_installed $quast_dir
+# fi
 
 # --------------- mummer ------------------
 mummer_dir="$build_dir/mummer-${MUMMER_VERSION}"
@@ -866,18 +885,17 @@ if [ -z $(check_installed $proteinortho_dir) ]; then
     note_installed $proteinortho_dir
 fi
 
-# --------------- GATK ------------------
-gatk_dir="$build_dir/GATK3"
-if [ -z $(check_installed $gatk_dir) ]; then
+# --------------- GATK3 ------------------
+gatk3_dir="$build_dir/GATK3"
+if [ -z $(check_installed $gatk3_dir) ]; then
     cd $build_dir
-    echo "Create GATK3 folder for users' manual installation"
+    echo "Create the GATK3 folder for installation"
     mkdir GATK3
     cd GATK3
-    wget -nv --no-check-certificate https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/GenomeAnalysisTK.jar
+    wget -nv --no-check-certificate $GATK3_DOWNLOAD_URL
     chmod 755 GenomeAnalysisTK.jar
-    note_installed $gatk_dir
+    note_installed $gatk3_dir
 fi
-
 
 # --------------- MAKER -----------------
 maker_dir="$build_dir/maker/bin"
@@ -1135,7 +1153,8 @@ echo "export canu_dir=${canu_dir}" >> env.sh
 echo "export flye_dir=${flye_dir}" >> env.sh
 echo "export wtdbg2_dir=${wtdbg2_dir}" >> env.sh
 echo "export smartdenovo_dir=${smartdenovo_dir}" >> env.sh
-# echo "export guppy_dir=${guppy_dir}" >> env.sh
+echo "export guppy_dir=${guppy_dir}" >> env.sh
+echo "export nanoplot_dir=${nanoplot_dir}" >> env.sh
 # echo "export quast_dir=${quast_dir}" >> env.sh
 echo "export ragout_dir=${ragout_dir}" >> env.sh
 echo "export hdf_dir=${hdf_dir}" >> env.sh
@@ -1175,7 +1194,7 @@ echo "export evm_dir=${evm_dir}" >> env.sh
 echo "export EVM_HOME=${evm_dir}" >> env.sh
 echo "export maker_dir=${maker_dir}" >> env.sh
 echo "export proteinortho_dir=${proteinortho_dir}" >> env.sh
-echo "export gatk_dir=${gatk_dir}" >> env.sh
+echo "export gatk3_dir=${gatk3_dir}" >> env.sh
 echo "export ucsc_dir=${ucsc_dir}" >> env.sh
 echo "export miniconda2_dir=${miniconda2_dir}" >> env.sh
 echo "export conda_pacbio_dir=${conda_pacbio_dir}" >> env.sh
