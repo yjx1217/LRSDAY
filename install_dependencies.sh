@@ -6,133 +6,216 @@ set -e -o pipefail
 LRSDAY_HOME=$(pwd)
 BUILD="build"
 
+if [ -z "$MAKE_JOBS" ]
+then
+    echo "Defaulting to 2 concurrent jobs when executing make. Override with MAKE_JOBS=<NUM>"
+    MAKE_JOBS=2
+fi
+
+if [ ! -z "$INSTALL_DEPS" ]; then
+    echo "Installing LRSDAY build dependencies for Debian/Ubuntu."
+    echo "sudo privileges are required and you will be prompted to enter your password"
+    sudo apt-get update
+    xargs -a debiandeps sudo apt-get install -y
+fi
+
 SRA_VERSION="2.9.2" # released on 2018.09.26
+SRA_DOWNLOAD_URL="https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/sratoolkit.${SRA_VERSION}-centos_linux64.tar.gz"
+
 PORECHOP_VERSION="0.2.4" # 
 PORECHOP_GITHUB_COMMIT_VERSION="109e437" # committed on 2018.10.19
+PORECHOP_DOWNLOAD_URL="https://github.com/rrwick/Porechop.git"
+
 FILTLONG_VERSION="0.2.0" #
 FILTLONG_GITHUB_COMMIT_VERSION="d1bb46d" # committed on 2018.05.11
+FILTLONG_DOWNLOAD_URL="https://github.com/rrwick/Filtlong.git"
+
 MINIMAP2_VERSION="2.16" # released on 2019.2.28
+MINIMAP2_DOWNLOAD_URL="https://github.com/lh3/minimap2/releases/download/v${MINIMAP2_VERSION}/minimap2-${MINIMAP2_VERSION}_x64-linux.tar.bz2"
+
 CANU_VERSION="1.8" # released on 2018.10.23
+CANU_DOWNLOAD_URL="https://github.com/marbl/canu/releases/download/v${CANU_VERSION}/canu-${CANU_VERSION}.Linux-amd64.tar.xz"
+
 FLYE_VERSION="2.4.1" # released on 2019.03.07
+FLYE_DOWNLOAD_URL="https://github.com/fenderglass/Flye/archive/${FLYE_VERSION}.tar.gz"
+
 WTDBG2_VERSION="2.3" # 
 WTDBG2_GITHUB_COMMIT_VERSION="59a39a6" # committed on 2019.03.06
+WTDBG2_DOWNLOAD_URL="https://github.com/ruanjue/wtdbg2.git"
+
 SMARTDENOVO_VERSION="" # 
 SMARTDENOVO_GITHUB_COMMIT_VERSION="5cc1356" # committed on 2018.02.19
+SMARTDENOVO_DOWNLOAD_URL="https://github.com/ruanjue/smartdenovo"
+
 RAGOUT_VERSION="2.1.1" # released on 2018.07.30
+RAGOUT_DOWNLOAD_URL="https://github.com/fenderglass/Ragout/archive/${RAGOUT_VERSION}.tar.gz"
 # GUPPY_VERSION="2.3.5" # released on 2019.02.26
 # QUAST_VERSION="5.0.1" # one of its dependency needs "csh" to be pre-installed
+
 HDF_VERSION="1.10.1" # 
+HDF_VERSION_prefix=${HDF_VERSION%.*}
+HDF_DOWNLOAD_URL="https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDF_VERSION_prefix}/hdf5-${HDF_VERSION}/src/hdf5-${HDF_VERSION}.tar.gz"
+
 SONLIB_VERSION="" # 
 SONLIB_GITHUB_COMMIT_VERSION="1afbd97" # committed on 2017.08.09
+SONLIB_DOWNLOAD_URL="https://github.com/benedictpaten/sonLib.git"
+
 HAL_VERSION="" # not available, so we use the github comit hash below for version control
 HAL_GITHUB_COMMIT_VERSION="a2ad656" # committed on 2017.09.09
+HAL_DOWNLOAD_URL="https://github.com/glennhickey/hal.git"
+
 MUMMER_VERSION="4.0.0beta2" # released on 2017.10.14
+MUMMER_DOWNLOAD_URL="https://github.com/gmarcais/mummer/releases/download/v${MUMMER_VERSION}/mummer-${MUMMER_VERSION}.tar.gz"
+
 GNUPLOT_VERSION="4.6.6" # released on 2015.02.18
+GNUPLOT_DOWNLOAD_URL="https://sourceforge.net/projects/gnuplot/files/gnuplot/${GNUPLOT_VERSION}/gnuplot-${GNUPLOT_VERSION}.tar.gz"
+
 BEDTOOLS_VERSION="2.27.1" # released on 2017.12.14
+BEDTOOLS_DOWNLOAD_URL="https://github.com/arq5x/bedtools2/releases/download/v${BEDTOOLS_VERSION}/bedtools-${BEDTOOLS_VERSION}.tar.gz"
+
 SPADES_VERSION="3.13.0" # released on 2018.10.16
+SPADES_DOWNLOAD_URL="http://cab.spbu.ru/files/release${SPADES_VERSION}/SPAdes-${SPADES_VERSION}-Linux.tar.gz"
+
 PRODIGAL_VERSION="2.6.3" # released on 2016.02.12
+PRODIGAL_DOWNLOAD_URL="https://github.com/hyattpd/Prodigal/archive/v${PRODIGAL_VERSION}.tar.gz"
+
 CAP_VERSION="" # see http://seq.cs.iastate.edu/cap3.html
+CAP_DOWNLOAD_URL="http://seq.cs.iastate.edu/CAP3/cap3.linux.x86_64.tar"
+
 BWA_VERSION="0.7.17" # released on 2017.10.23
+BWA_DOWNLOAD_URL="http://downloads.sourceforge.net/project/bio-bwa/bwa-${BWA_VERSION}.tar.bz2"
+
 SAMTOOLS_VERSION="1.9" # released on 2018.07.18
+SAMTOOLS_DOWNLOAD_URL="https://github.com/samtools/samtools/releases/download/${SAMTOOLS_VERSION}/samtools-${SAMTOOLS_VERSION}.tar.bz2"
+
 CIRCLATOR_VERSION="1.5.5" # released on 2018.01.31
+CIRCLATOR_DOWNLOAD_URL="https://github.com/sanger-pathogens/circlator/archive/v${CIRCLATOR_VERSION}.tar.gz"
+
 TRIMMOMATIC_VERSION="0.38" # 
-GATK_VERSION="3.6-6" #
+TRIMMOMATIC_DOWNLOAD_URL="http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-${TRIMMOMATIC_VERSION}.zip"
+
+#GATK_VERSION="3.6-6" #
+#GATK_DOWNLOAD_URL="https://github.com/broadgsa/gatk/archive/${GATK_VERSION}.tar.gz"
+
 PICARD_VERSION="2.18.23" # released on 2019.02.25
+PICARD_DOWNLOAD_URL="https://github.com/broadinstitute/picard/releases/download/${PICARD_VERSION}/picard.jar"
+
 PILON_VERSION="1.23" # released on 2018.11.27
+PILON_DOWNLOAD_URL="https://github.com/broadinstitute/pilon/releases/download/v${PILON_VERSION}/pilon-${PILON_VERSION}.jar"
+
 EXONERATE_VERSION="2.2.0" # 
+EXONERATE_DOWNLOAD_URL="http://ftp.ebi.ac.uk/pub/software/vertebrategenomics/exonerate/exonerate-${EXONERATE_VERSION}-x86_64.tar.gz"
+
 BLAST_VERSION="2.2.31" # 
 RMBLAST_VERSION="2.2.28" # 
+BLAST_DOWNLOAD_URL="ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/${BLAST_VERSION}/ncbi-blast-${BLAST_VERSION}+-x64-linux.tar.gz"
+RMBLAST_DOWNLOAD_URL="ftp://ftp.ncbi.nlm.nih.gov/blast/executables/rmblast/${RMBLAST_VERSION}/ncbi-rmblastn-${RMBLAST_VERSION}-x64-linux.tar.gz"
+
 SNAP_VERSION="" # 
 SNAP_GITHUB_COMMIT_VERSION="a89d68e" # committed on 2017.05.18
+SNAP_DOWNLOAD_URL="https://github.com/KorfLab/SNAP"
+
 RAPSEARCH_VERSION="2.24" #
+RAPSEARCH_DOWNLOAD_URL="https://sourceforge.net/projects/rapsearch2/files/RAPSearch${RAPSEARCH_VERSION}_64bits.tar.gz"
+
 TRNASCAN_VERSION="1.3.1" #
+TRNASCAN_DOWNLOAD_URL="http://eddylab.org/software/tRNAscan-SE/tRNAscan-SE.tar.gz"
+
 SNOSCAN_VERSION="0.9.1" #
+SNOSCAN_DOWNLOAD_URL="http://eddylab.org/software/snoscan/snoscan.tar.gz"
+
 REPEATMASKER_VERSION="open-4-0-7" #
+REPEATMASKER_DOWNLOAD_URL="http://repeatmasker.org/RepeatMasker-${REPEATMASKER_VERSION}.tar.gz"
+
 TRF_VERSION="409" #
+TRF_DOWNLOAD_URL="http://tandem.bu.edu/trf/downloads/trf${TRF_VERSION}.linux64"
+
 REANNOTATE_VERSION="17.03.2015-LongQueryName"
+REANNOTATE_DOWNLOAD_URL="https://github.com/yjx1217/REannotate_LongQueryName/archive/version_${REANNOTATE_VERSION}.tar.gz"
+
 CLUSTALW_VERSION="2.1" #
+CLUSTALW_DOWNLOAD_URL="http://www.clustal.org/download/${CLUSTALW_VERSION}/clustalw-${CLUSTALW_VERSION}.tar.gz"
+
 MUSCLE_VERSION="3.8.31" #
+MUSCLE_DOWNLOAD_URL="http://www.drive5.com/muscle/downloads${MUSCLE_VERSION}/muscle${MUSCLE_VERSION}_i86linux64.tar.gz"
+
 HMMER_VERSION="3.2.1" # released on 2018.06.13
+#HMMER_DOWNLOAD_URL="http://eddylab.org/software/hmmer3/${HMMER_VERSION}/hmmer-${HMMER_VERSION}-linux-intel-x86_64.tar.gz"
+HMMER_DOWNLOAD_URL="http://eddylab.org/software/hmmer/hmmer-${HMMER_VERSION}.tar.gz"
+
 BAMTOOLS_VERSION="2.4.2" # released on 2017.11.02
+BAMTOOLS_DOWNLOAD_URL="https://github.com/pezmaster31/bamtools/archive/v${BAMTOOLS_VERSION}.tar.gz"
+
 AUGUSTUS_VERSION="3.2.3" # 
 #AUGUSTUS_GITHUB_COMMIT_VERSION="79960c5"
+AUGUSTUS_DOWNLOAD_URL="http://bioinf.uni-greifswald.de/augustus/binaries/old/augustus-${AUGUSTUS_VERSION}.tar.gz"
+#AUGUSTUS_DOWNLOAD_URL="https://github.com/Gaius-Augustus/Augustus.git"
+
 EVM_VERSION="1.1.1" # released on 2015.07.03
+EVM_DOWNLOAD_URL="https://github.com/EVidenceModeler/EVidenceModeler/archive/v${EVM_VERSION}.tar.gz"
+
 PROTEINORTHO_VERSION="5.16b" # released on 2017.09.22
+PROTEINORTHO_DOWNLOAD_URL="https://www.bioinf.uni-leipzig.de/Software/proteinortho/proteinortho_v${PROTEINORTHO_VERSION}.tar.gz"
+
 MAKER_VERSION="3.00.0-beta" #
+MAKER_DOWNLOAD_URL="http://topaz.genetics.utah.edu/maker_downloads/static/maker-${MAKER_VERSION}.tgz"
+
 MINICONDA2_VERSION="4.5.11" #
+MINICONDA2_DOWNLOAD_URL="https://repo.continuum.io/miniconda/Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh"
 PB_ASSEMBLY_VERSION="0.0.2" #
 BAX2BAM_VERSION="0.0.9" #
+
 NANOPOLISH_VERSION="0.11.0" #
 NANOPOLISH_GITHUB_COMMIT_VERSION="8b5e605" # commited on 2019.02.22 
+NANOPOLISH_DOWNLOAD_URL="https://github.com/jts/nanopolish.git"
+
 PARALLEL_VERSION="20180722" # released on 2018.07.22
+PARALLEL_DOWNLOAD_URL="http://ftp.gnu.org/gnu/parallel/parallel-${PARALLEL_VERSION}.tar.bz2"
 # for MFannot
 EMBOSS_VERSION="6.5.7" # released on 2012.07.25
+EMBOSS_VERSION_prefix="${EMBOSS_VERSION:0:3}"
+EMBOSS_DOWNLOAD_URL="ftp://emboss.open-bio.org/pub/EMBOSS/old/${EMBOSS_VERSION_prefix}.0/EMBOSS-${EMBOSS_VERSION}.tar.gz"
+
 ERPIN_VERSION="5.5.4" # 
+ERPIN_DOWNLOAD_URL="http://rna.igmors.u-psud.fr/download/Erpin/erpin${ERPIN_VERSION}.serv.tar.gz"
+
 TBL2ASN_VERSION="" #
+TBL2ASN_DOWNLOAD_URL="ftp://ftp.ncbi.nih.gov/toolbox/ncbi_tools/converters/by_program/tbl2asn/linux64.tbl2asn.gz"
+
 PIROBJECT_VERSION="1.19" #
+PIROBJECT_DOWNLOAD_URL="https://github.com/prioux/PirObject/archive/v${PIROBJECT_VERSION}.tar.gz"
 PIRMODELS_GITHUB_COMMIT_VERSION="6b223ec" # committed on 2016.08.30
+PIRMODELS_DOWNLOAD_URL="https://github.com/BFL-lab/PirModels.git"
+
 FLIP_GITHUB_COMMIT_VERSION="00a57cb" # committed on 2016.04.07
+FLIP_DOWNLOAD_URL="https://github.com/BFL-lab/Flip.git"
+
 UMAC_GITHUB_COMMIT_VERSION="cae618e" # committed on 2016.08.30
+UMAC_DOWNLOAD_URL="https://github.com/BFL-lab/Umac.git"
+
 HMMSEARCHWC_GITHUB_COMMIT_VERSION="9e3b461" # committed on 2016.11.05
+HMMSEARCHWC_DOWNLOAD_URL="https://github.com/BFL-lab/HMMsearchWC.git"
+
 RNAFINDER_GITHUB_COMMIT_VERSION="579dc58" # committed on 2016.12.07
+RNAFINDER_DOWNLOAD_URL="https://github.com/BFL-lab/RNAfinder.git"
+
 MF2SQN_GITHUB_COMMIT_VERSION="6faf9f4" # committed on 2016.12.07
+MF2SQN_DOWNLOAD_URL="https://github.com/BFL-lab/Mf2sqn.git"
+
 GRAB_FASTA_GITHUB_COMMIT_VERSION="accd32d" # committed on 2017.02.14
+GRAB_FASTA_DOWNLOAD_URL="https://github.com/BFL-lab/grab-fasta.git"
+
+# for MFannot
 MFANNOT_DATA_GITHUB_COMMIT_VERSION="b039ac5" # committed on 2016.12.07
 MFANNOT_VERSION="1.35" #
 MFANNOT_GITHUB_COMMIT_VERSION="6472b97" # committed on 2018.10.31
+MFANNOT_DATA_DOWNLOAD_URL="https://github.com/BFL-lab/MFannot_data.git"
+MFANNOT_DOWNLOAD_URL="https://github.com/BFL-lab/MFannot.git"
 
 # downloading URLs for dependencies
-SRA_DOWNLOAD_URL="https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/sratoolkit.${SRA_VERSION}-centos_linux64.tar.gz"
-PORECHOP_DOWNLOAD_URL="https://github.com/rrwick/Porechop.git"
-FILTLONG_DOWNLOAD_URL="https://github.com/rrwick/Filtlong.git"
-MINIMAP2_DOWNLOAD_URL="https://github.com/lh3/minimap2/releases/download/v${MINIMAP2_VERSION}/minimap2-${MINIMAP2_VERSION}_x64-linux.tar.bz2"
-CANU_DOWNLOAD_URL="https://github.com/marbl/canu/releases/download/v${CANU_VERSION}/canu-${CANU_VERSION}.Linux-amd64.tar.xz"
-FLYE_DOWNLOAD_URL="https://github.com/fenderglass/Flye/archive/${FLYE_VERSION}.tar.gz"
-WTDBG2_DOWNLOAD_URL="https://github.com/ruanjue/wtdbg2.git"
-SMARTDENOVO_DOWNLOAD_URL="https://github.com/ruanjue/smartdenovo"
 # GUPPY_DOWNLOAD_URL="https://mirror.oxfordnanoportal.com/software/analysis/ont-guppy-cpu_${GUPPY_VERSION}_linux64.tar.gz"
 # QUAST_DOWNLOAD_URL="https://downloads.sourceforge.net/project/quast/quast-${QUAST_VERSION}.tar.gz"
-RAGOUT_DOWNLOAD_URL="https://github.com/fenderglass/Ragout/archive/${RAGOUT_VERSION}.tar.gz"
-HDF_VERSION_prefix=${HDF_VERSION%.*}
-HDF_DOWNLOAD_URL="https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDF_VERSION_prefix}/hdf5-${HDF_VERSION}/src/hdf5-${HDF_VERSION}.tar.gz"
-SONLIB_DOWNLOAD_URL="https://github.com/benedictpaten/sonLib.git"
-HAL_DOWNLOAD_URL="https://github.com/glennhickey/hal.git"
-MUMMER_DOWNLOAD_URL="https://github.com/gmarcais/mummer/releases/download/v${MUMMER_VERSION}/mummer-${MUMMER_VERSION}.tar.gz"
-GNUPLOT_DOWNLOAD_URL="https://sourceforge.net/projects/gnuplot/files/gnuplot/${GNUPLOT_VERSION}/gnuplot-${GNUPLOT_VERSION}.tar.gz"
-BEDTOOLS_DOWNLOAD_URL="https://github.com/arq5x/bedtools2/releases/download/v${BEDTOOLS_VERSION}/bedtools-${BEDTOOLS_VERSION}.tar.gz"
-SPADES_DOWNLOAD_URL="http://cab.spbu.ru/files/release${SPADES_VERSION}/SPAdes-${SPADES_VERSION}-Linux.tar.gz"
-PRODIGAL_DOWNLOAD_URL="https://github.com/hyattpd/Prodigal/archive/v${PRODIGAL_VERSION}.tar.gz"
-CAP_DOWNLOAD_URL="http://seq.cs.iastate.edu/CAP3/cap3.linux.x86_64.tar"
-CIRCLATOR_DOWNLOAD_URL="https://github.com/sanger-pathogens/circlator/archive/v${CIRCLATOR_VERSION}.tar.gz"
-TRIMMOMATIC_DOWNLOAD_URL="http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-${TRIMMOMATIC_VERSION}.zip"
-BWA_DOWNLOAD_URL="http://downloads.sourceforge.net/project/bio-bwa/bwa-${BWA_VERSION}.tar.bz2"
-SAMTOOLS_DOWNLOAD_URL="https://github.com/samtools/samtools/releases/download/${SAMTOOLS_VERSION}/samtools-${SAMTOOLS_VERSION}.tar.bz2"
-#GATK_DOWNLOAD_URL="https://github.com/broadgsa/gatk/archive/${GATK_VERSION}.tar.gz"
-MAKER_DOWNLOAD_URL="http://topaz.genetics.utah.edu/maker_downloads/static/maker-${MAKER_VERSION}.tgz"
-PICARD_DOWNLOAD_URL="https://github.com/broadinstitute/picard/releases/download/${PICARD_VERSION}/picard.jar"
-PILON_DOWNLOAD_URL="https://github.com/broadinstitute/pilon/releases/download/v${PILON_VERSION}/pilon-${PILON_VERSION}.jar"
-EXONERATE_DOWNLOAD_URL="http://ftp.ebi.ac.uk/pub/software/vertebrategenomics/exonerate/exonerate-${EXONERATE_VERSION}-x86_64.tar.gz"
-BLAST_DOWNLOAD_URL="ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/${BLAST_VERSION}/ncbi-blast-${BLAST_VERSION}+-x64-linux.tar.gz"
-RMBLAST_DOWNLOAD_URL="ftp://ftp.ncbi.nlm.nih.gov/blast/executables/rmblast/${RMBLAST_VERSION}/ncbi-rmblastn-${RMBLAST_VERSION}-x64-linux.tar.gz"
-SNAP_DOWNLOAD_URL="https://github.com/KorfLab/SNAP"
-RAPSEARCH_DOWNLOAD_URL="https://sourceforge.net/projects/rapsearch2/files/RAPSearch${RAPSEARCH_VERSION}_64bits.tar.gz"
-TRNASCAN_DOWNLOAD_URL="http://eddylab.org/software/tRNAscan-SE/tRNAscan-SE.tar.gz"
-SNOSCAN_DOWNLOAD_URL="http://eddylab.org/software/snoscan/snoscan.tar.gz"
-REPEATMASKER_DOWNLOAD_URL="http://repeatmasker.org/RepeatMasker-${REPEATMASKER_VERSION}.tar.gz"
-TRF_DOWNLOAD_URL="http://tandem.bu.edu/trf/downloads/trf${TRF_VERSION}.linux64"
-REANNOTATE_DOWNLOAD_URL="https://github.com/yjx1217/REannotate_LongQueryName/archive/version_${REANNOTATE_VERSION}.tar.gz"
-CLUSTALW_DOWNLOAD_URL="http://www.clustal.org/download/${CLUSTALW_VERSION}/clustalw-${CLUSTALW_VERSION}.tar.gz"
-MUSCLE_DOWNLOAD_URL="http://www.drive5.com/muscle/downloads${MUSCLE_VERSION}/muscle${MUSCLE_VERSION}_i86linux64.tar.gz"
-#HMMER_DOWNLOAD_URL="http://eddylab.org/software/hmmer3/${HMMER_VERSION}/hmmer-${HMMER_VERSION}-linux-intel-x86_64.tar.gz"
-HMMER_DOWNLOAD_URL="http://eddylab.org/software/hmmer/hmmer-${HMMER_VERSION}.tar.gz"
-BAMTOOLS_DOWNLOAD_URL="https://github.com/pezmaster31/bamtools/archive/v${BAMTOOLS_VERSION}.tar.gz"
-AUGUSTUS_DOWNLOAD_URL="http://bioinf.uni-greifswald.de/augustus/binaries/old/augustus-${AUGUSTUS_VERSION}.tar.gz"
-#AUGUSTUS_DOWNLOAD_URL="https://github.com/Gaius-Augustus/Augustus.git"
-EVM_DOWNLOAD_URL="https://github.com/EVidenceModeler/EVidenceModeler/archive/v${EVM_VERSION}.tar.gz"
-PROTEINORTHO_DOWNLOAD_URL="https://www.bioinf.uni-leipzig.de/Software/proteinortho/proteinortho_v${PROTEINORTHO_VERSION}.tar.gz"
-MINICONDA2_DOWNLOAD_URL="https://repo.continuum.io/miniconda/Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh"
-NANOPOLISH_DOWNLOAD_URL="https://github.com/jts/nanopolish.git"
-PARALLEL_DOWNLOAD_URL="http://ftp.gnu.org/gnu/parallel/parallel-${PARALLEL_VERSION}.tar.bz2"
+
 
 # UCSC Utilities
 BLAT_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/blat/blat"
@@ -141,40 +224,10 @@ PSLSORT_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/pslS
 PSLSCORE_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/pslScore"
 PSLCDNAFILTER_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/pslCDnaFilter"
 
-# for MFannot
-EMBOSS_VERSION_prefix="${EMBOSS_VERSION:0:3}"
-EMBOSS_DOWNLOAD_URL="ftp://emboss.open-bio.org/pub/EMBOSS/old/${EMBOSS_VERSION_prefix}.0/EMBOSS-${EMBOSS_VERSION}.tar.gz"
-ERPIN_DOWNLOAD_URL="http://rna.igmors.u-psud.fr/download/Erpin/erpin${ERPIN_VERSION}.serv.tar.gz"
-TBL2ASN_DOWNLOAD_URL="ftp://ftp.ncbi.nih.gov/toolbox/ncbi_tools/converters/by_program/tbl2asn/linux64.tbl2asn.gz"
-PIROBJECT_DOWNLOAD_URL="https://github.com/prioux/PirObject/archive/v${PIROBJECT_VERSION}.tar.gz"
-PIRMODELS_DOWNLOAD_URL="https://github.com/BFL-lab/PirModels.git"
-FLIP_DOWNLOAD_URL="https://github.com/BFL-lab/Flip.git"
-UMAC_DOWNLOAD_URL="https://github.com/BFL-lab/Umac.git"
-HMMSEARCHWC_DOWNLOAD_URL="https://github.com/BFL-lab/HMMsearchWC.git"
-RNAFINDER_DOWNLOAD_URL="https://github.com/BFL-lab/RNAfinder.git"
-MF2SQN_DOWNLOAD_URL="https://github.com/BFL-lab/Mf2sqn.git"
-GRAB_FASTA_DOWNLOAD_URL="https://github.com/BFL-lab/grab-fasta.git"
-MFANNOT_DATA_DOWNLOAD_URL="https://github.com/BFL-lab/MFannot_data.git"
-MFANNOT_DOWNLOAD_URL="https://github.com/BFL-lab/MFannot.git"
-
-
 # Create the $BUILD directory for dependency installation
-if [[ -d $BUILD ]]
-then
-    echo "The old \"$BUILD\" directory need to deleted for this installation to continue!"
-    while true; do
-	read -p $'Do you confirm to delete this directory? Please answer yes or no.\n' yn
-	case $yn in
-            [Yy]* ) echo "The answer \"yes\" is received. The old directory deleted and the new installation start now!"; rm -rf $BUILD; break;;
-            [Nn]* ) echo "The answer \"no\" is received. Quit the installation!"; exit;;
-            * ) echo "Please answer yes or no.";;
-	esac
-    done
-fi
-
 echo ""
-echo "Create the new $BUILD directory"
-mkdir $BUILD
+echo "Create $BUILD directory if it does not already exist"
+mkdir -p $BUILD
 cd $BUILD
 build_dir=$(pwd)
 
@@ -190,202 +243,236 @@ download () {
   wget -nv --no-check-certificate $url -O $download_location
 }
 
+download_and_extract() {
+    url=$1
+    download_location=$2
+    echo "Downloading $url to $download_location"
+    wget -nv --no-check-certificate $url -O $download_location
+    if [[ $download_location =~ \.bz2$ ]]; then
+        extract_command="tar -xjf"
+    elif [[ $download_location =~ \.xz$ || $download_location =~ \.tar$ ]]; then
+        extract_command="tar -xf"
+    else
+        extract_command="tar -zxf"
+    fi
+    $($extract_command $download_location)
+    rm $download_location
+
+}
+
+check_installed() {
+    if [ -e "$1/installed" ]; then
+        echo "installed"
+    else
+        echo ""
+    fi
+}
+
+note_installed() {
+    touch "$1/installed"
+}
+
 # ---------- set Perl & Python environment variables -------------
 PYTHONPATH="$build_dir"
 PERL5LIB="$build_dir:$PERL5LIB"
 PERL5LIB="$build_dir/cpanm/perlmods/lib/perl5:$PERL5LIB"
-
-mkdir -p  $build_dir/cpanm
 cpanm_dir=$build_dir/cpanm
-cd $cpanm_dir
-wget -nv --no-check-certificate -O - https://cpanmin.us/ > cpanm
-chmod +x cpanm
-mkdir perlmods
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed Test::More@1.302086
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed Text::Soundex@3.05
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed Env@1.04
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed File::Which@1.21
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed Term::ReadKey@2.37
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed Carp@1.38
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed Perl::Unsafe::Signals@0.03
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed Carp::Clan@6.06 # dependency for Bit::Vector@7.4
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed Bit::Vector@7.4
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed Inline@0.80
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed Inline::C@0.78
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed List::MoreUtils@0.419 # dependency for forks@0.36
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed Acme::Damn@0.08 # dependency for forks@0.36
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed Sys::SigAction@0.23 # dependency for forks@0.36
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed forks@0.36
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed forks::shared@0.36
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed Want@0.29 # dependency for IO::Prompt@0.997004
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed IO::All@0.86
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed IO::Prompt@0.997004
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed DBI@1.636
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed DBD::SQLite@1.54
-# $cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed DBD::Pg  # need $POSTGRES_HOME pre-defined
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed Proc::ProcessTable@0.53
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed threads@2.16
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed PerlIO::gzip@0.20
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed ExtUtils::CBuilder@0.280224 
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed LWP::Simple@6.26
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed LWP::UserAgent
-$cpanm_dir/cpanm -l $cpanm_dir/perlmods --skip-installed Bio::Perl@1.007001
 
+if [ ! -e "$build_dir/cpanm" ]; then
+    mkdir -p  $build_dir/cpanm
+    cd $cpanm_dir
+    wget -nv --no-check-certificate -O - https://cpanmin.us/ > cpanm
+    chmod +x cpanm
+    mkdir -p perlmods
+fi
+
+# Testing the packages when they are getting installed slows them down. Is this absolutely required?
+xargs -a "$LRSDAY_HOME/perldeps" $cpanm_dir/cpanm -l $cpanm_dir/perlmods --notest --skip-installed || (echo "Could not install some Perl modules. See logs for failures" && exit 1)
+if [ ! -z "$USE_POSTGRES" ]; then
+    # need $POSTGRES_HOME pre-defined
+    $cpanm_dir/cpanm -l $cpanm_dir/perlmods --notest --skip-installed DBD::Pg
+else
+    $cpanm_dir/cpanm -l $cpanm_dir/perlmods --notest --skip-installed DBD::SQLite@1.54
+fi
 
 # ------------- SRA Toolkit -------------------
-cd $build_dir
-echo "Download SRAtoolkit-v${SRA_VERSION}"
-download $SRA_DOWNLOAD_URL sratoolkit.${SRA_VERSION}-centos_linux64.tar.gz
-tar -zxf sratoolkit.${SRA_VERSION}-centos_linux64.tar.gz
 sra_dir="$build_dir/sratoolkit.${SRA_VERSION}-centos_linux64/bin"
-rm sratoolkit.${SRA_VERSION}-centos_linux64.tar.gz
+if [ -z $(check_installed $sra_dir) ]; then
+    cd $build_dir
+    echo "Download SRAtoolkit-v${SRA_VERSION}"
+    download_and_extract $SRA_DOWNLOAD_URL sratoolkit.${SRA_VERSION}-centos_linux64.tar.gz
+    note_installed $sra_dir
+fi
 
 # --------------- Porechop ------------------
-cd $build_dir
-echo "Download Porechop-v${PORECHOP_VERSION}"
-git clone $PORECHOP_DOWNLOAD_URL
-cd Porechop
-git checkout -f -q $PORECHOP_GITHUB_COMMIT_VERSION
-virtualenv -p $(which python3) py3_virtualenv_porechop
-source py3_virtualenv_porechop/bin/activate
-py3_virtualenv_porechop/bin/python3 ./setup.py install
-deactivate
 porechop_dir="$build_dir/Porechop/py3_virtualenv_porechop/bin"
+if [ -z $(check_installed $porechop_dir) ]; then
+    cd $build_dir
+    echo "Download Porechop-v${PORECHOP_VERSION}"
+    git clone $PORECHOP_DOWNLOAD_URL
+    cd Porechop
+    git checkout -f -q $PORECHOP_GITHUB_COMMIT_VERSION
+    virtualenv -p $(which python3) py3_virtualenv_porechop
+    source py3_virtualenv_porechop/bin/activate
+    py3_virtualenv_porechop/bin/python3 ./setup.py install
+    deactivate
+    note_installed $porechop_dir
+fi
+
 
 # --------------- Filtlong ------------------
-cd $build_dir
-echo "Download Filtlong-v${FILTLONG_VERSION}"
-git clone $FILTLONG_DOWNLOAD_URL
-cd Filtlong
-git checkout -f -q $FILTLONG_GITHUB_COMMIT_VERSION
-make -j
 filtlong_dir="$build_dir/Filtlong/bin"
+if [ -z $(check_installed $filtlong_dir) ]; then
+    cd $build_dir
+    echo "Download Filtlong-v${FILTLONG_VERSION}"
+    git clone $FILTLONG_DOWNLOAD_URL
+    cd Filtlong
+    git checkout -f -q $FILTLONG_GITHUB_COMMIT_VERSION
+    make -j $MAKE_JOBS
+    note_installed $filtlong_dir
+fi
 
 # --------------- minimap2 ------------------
-cd $build_dir
-echo "Download minimap2-v${MINIMAP2_VERSION}"
-download $MINIMAP2_DOWNLOAD_URL "minimap2-${MINIMAP2_VERSION}.tar.bz2"
-tar -xjf minimap2-${MINIMAP2_VERSION}.tar.bz2
 minimap2_dir="$build_dir/minimap2-${MINIMAP2_VERSION}_x64-linux"
-rm minimap2-${MINIMAP2_VERSION}.tar.bz2
+if [ -z $(check_installed $minimap2_dir) ]; then
+    cd $build_dir
+    echo "Download minimap2-v${MINIMAP2_VERSION}"
+    download_and_extract $MINIMAP2_DOWNLOAD_URL "minimap2-${MINIMAP2_VERSION}.tar.bz2"
+    note_installed $minimap2_dir
+fi
 
 # ------------- Canu -------------------
-cd $build_dir
-echo "Download Canu-v${CANU_VERSION}"
-download $CANU_DOWNLOAD_URL "canu-${CANU_VERSION}.tar.xz"
-tar -xf canu-${CANU_VERSION}.tar.xz
-canu_dir="$build_dir/canu-${CANU_VERSION}"
-cd $canu_dir
 canu_dir="$build_dir/canu-${CANU_VERSION}/Linux-amd64/bin"
-cd $canu_dir
-ln -s $minimap2_dir/minimap2 .
-cd $build_dir
-rm canu-${CANU_VERSION}.tar.xz
+if [ -z $(check_installed $canu_dir) ]; then
+    cd $build_dir
+    echo "Download Canu-v${CANU_VERSION}"
+    download_and_extract $CANU_DOWNLOAD_URL "canu-${CANU_VERSION}.tar.xz"
+    canu_dir="$build_dir/canu-${CANU_VERSION}"
+    cd $canu_dir
+    canu_dir="$build_dir/canu-${CANU_VERSION}/Linux-amd64/bin"
+    cd $canu_dir
+    ln -s $minimap2_dir/minimap2 .
+    note_installed $canu_dir
+fi
 
 # ------------- Flye -------------------
-cd $build_dir
-echo "Download Flye-v${FLYE_VERSION}"
-download $FLYE_DOWNLOAD_URL "Flye-${FLYE_VERSION}.tar.gz"
-tar -xzf Flye-${FLYE_VERSION}.tar.gz
-cd Flye-${FLYE_VERSION}
-python2 setup.py build
-cd ..
 flye_dir="$build_dir/Flye-${FLYE_VERSION}/bin"
-rm Flye-${FLYE_VERSION}.tar.gz
+if [ -z $(check_installed $flye_dir) ]; then
+    cd $build_dir
+    echo "Download Flye-v${FLYE_VERSION}"
+    download_and_extract $FLYE_DOWNLOAD_URL "Flye-${FLYE_VERSION}.tar.gz"
+    cd Flye-${FLYE_VERSION}
+    python2 setup.py build
+    note_installed $flye_dir
+fi
 
 # --------------- wtdbg2 ------------------
-cd $build_dir
-echo "Download wtdbg2-v${WTDBG2_VERSION}"
-git clone $WTDBG2_DOWNLOAD_URL
-cd wtdbg2
-git checkout -f -q $WTDBG2_GITHUB_COMMIT_VERSION
-C_INCLUDE_PATH="" 
-make
 wtdbg2_dir="$build_dir/wtdbg2"
+if [ -z $(check_installed $wtdbg2_dir) ]; then
+    cd $build_dir
+    echo "Download wtdbg2-v${WTDBG2_VERSION}"
+    git clone $WTDBG2_DOWNLOAD_URL
+    cd wtdbg2
+    git checkout -f -q $WTDBG2_GITHUB_COMMIT_VERSION
+    C_INCLUDE_PATH="" 
+    make -j $MAKE_JOBS
+    note_installed $wtdbg2_dir
+fi
 
 # --------------- smartdenovo ------------------
-cd $build_dir
-echo "Download smartdenovo-v${SMARTDENOVO_VERSION}"
-git clone $SMARTDENOVO_DOWNLOAD_URL
-cd smartdenovo
-git checkout -f -q $SMARTDENOVO_GITHUB_COMMIT_VERSION
-cp wtlay.h wtlay.h.bk
-cat wtlay.h.bk |sed s/inline//g > wtlay.h
-C_INCLUDE_PATH="" 
-make
-cp $LRSDAY_HOME/misc/smartdenovo_customized.pl .
-cd ..
 smartdenovo_dir="$build_dir/smartdenovo"
+if [ -z $(check_installed $smartdenovo_dir) ]; then
+    cd $build_dir
+    echo "Download smartdenovo-v${SMARTDENOVO_VERSION}"
+    git clone $SMARTDENOVO_DOWNLOAD_URL
+    cd smartdenovo
+    git checkout -f -q $SMARTDENOVO_GITHUB_COMMIT_VERSION
+    cp wtlay.h wtlay.h.bk
+    cat wtlay.h.bk |sed s/inline//g > wtlay.h
+    C_INCLUDE_PATH="" 
+    make -j $MAKE_JOBS
+    cp $LRSDAY_HOME/misc/smartdenovo_customized.pl .
+    note_installed $smartdenovo_dir
+fi
 
 # --------------- Ragout ------------------
-cd $build_dir
-echo "Download Ragout-v${RAGOUT_VERSION}"
-download $RAGOUT_DOWNLOAD_URL Ragout-${RAGOUT_VERSION}.tar.gz
-tar -zxf Ragout-${RAGOUT_VERSION}.tar.gz
-cd Ragout-${RAGOUT_VERSION}
-python2 setup.py build
-python2 ./scripts/install-sibelia.py
 ragout_dir="$build_dir/Ragout-${RAGOUT_VERSION}/bin"
-cd ..
-rm Ragout-${RAGOUT_VERSION}.tar.gz
+if [ -z $(check_installed $ragout_dir) ]; then
+    cd $build_dir
+    echo "Download Ragout-v${RAGOUT_VERSION}"
+    download_and_extract $RAGOUT_DOWNLOAD_URL Ragout-${RAGOUT_VERSION}.tar.gz
+    cd Ragout-${RAGOUT_VERSION}
+    python2 setup.py build
+    python2 ./scripts/install-sibelia.py
+    note_installed $ragout_dir
+fi
 
 # --------------- HDF ------------------
-cd $build_dir
-echo "Download HDF-v${HDF_VERSION}"
-download $HDF_DOWNLOAD_URL "hdf5-${HDF_VERSION}.tar.gz"
-tar -zxf hdf5-${HDF_VERSION}.tar.gz
-mkdir hdf5
-cd hdf5-${HDF_VERSION}
-./configure --enable-cxx  --prefix $build_dir/hdf5
-make
-make install
 hdf_dir="$build_dir/hdf5/bin"
-PATH="$hdf_dir:${PATH}"
 h5prefix="-prefix=$build_dir/hdf5"
-cd $build_dir
-rm hdf5-${HDF_VERSION}.tar.gz
+if [ -z $(check_installed $hdf_dir) ]; then
+    cd $build_dir
+    echo "Download HDF-v${HDF_VERSION}"
+    download_and_extract $HDF_DOWNLOAD_URL "hdf5-${HDF_VERSION}.tar.gz"
+    mkdir hdf5
+    cd hdf5-${HDF_VERSION}
+    ./configure --enable-cxx  --prefix $build_dir/hdf5
+    make -j $MAKE_JOBS
+    make install
+    note_installed $hdf_dir
+fi
+PATH="$hdf_dir:${PATH}"
 
 # --------------- sonLib ------------------
-cd $build_dir
-git clone $SONLIB_DOWNLOAD_URL
-cd sonLib
-git checkout -f -q $SONLIB_GITHUB_COMMIT_VERSION
-make
+if [ -z $(check_installed "sonLib") ]; then
+    cd $build_dir
+    git clone $SONLIB_DOWNLOAD_URL
+    cd sonLib
+    git checkout -f -q $SONLIB_GITHUB_COMMIT_VERSION
+    make -j $MAKE_JOBS
+    note_installed "$build_dir/sonLib"
+fi
+
 
 # ---------------- HAL -------------------
-cd $build_dir
-echo "Download HAL-v${HAL_VERSION}"
-git clone $HAL_DOWNLOAD_URL
-cd hal
-git checkout -f -q $HAL_GITHUB_COMMIT_VERSION
-make
 hal_dir="$build_dir/hal/bin"
+if [ -z $(check_installed $hal_dir) ]; then
+    cd $build_dir
+    echo "Download HAL-v${HAL_VERSION}"
+    git clone $HAL_DOWNLOAD_URL
+    cd hal
+    git checkout -f -q $HAL_GITHUB_COMMIT_VERSION
+    # Compiling with multiple workers results in build failures
+    # Possible race conditions / build order issues within the project?
+    make
+    note_installed $hal_dir
+fi
 
 # --------------- samtools -----------------
-cd $build_dir
-echo "Download samtools-v${SAMTOOLS_VERSION}"
-download $SAMTOOLS_DOWNLOAD_URL "samtools-${SAMTOOLS_VERSION}.tar.bz2"
-tar -xjf samtools-${SAMTOOLS_VERSION}.tar.bz2
 samtools_dir="$build_dir/samtools-${SAMTOOLS_VERSION}"
-cd $samtools_dir
-C_INCLUDE_PATH=""
-./configure --without-curses;
-make
-cd $build_dir
-rm samtools-${SAMTOOLS_VERSION}.tar.bz2
+if [ -z $(check_installed $samtools_dir) ]; then
+    cd $build_dir
+    echo "Download samtools-v${SAMTOOLS_VERSION}"
+    download_and_extract $SAMTOOLS_DOWNLOAD_URL "samtools-${SAMTOOLS_VERSION}.tar.bz2"
+    cd $samtools_dir
+    C_INCLUDE_PATH=""
+    ./configure --without-curses;
+    make -j $MAKE_JOBS
+    note_installed $samtools_dir
+fi
 
 # --------------- gnuplot ------------------
-cd $build_dir
-echo "Download gnuplot-v${GNUPLOT_VERSION}"
-download $GNUPLOT_DOWNLOAD_URL "gnuplot-${GNUPLOT_VERSION}.tar.gz"
-tar -zxf gnuplot-${GNUPLOT_VERSION}.tar.gz
-cd "$build_dir/gnuplot-${GNUPLOT_VERSION}"
-./configure --prefix="$build_dir/gnuplot-${GNUPLOT_VERSION}" --disable-wxwidgets
-make
-make install
 gnuplot_dir="$build_dir/gnuplot-${GNUPLOT_VERSION}/bin"
-cd $build_dir
-rm gnuplot-${GNUPLOT_VERSION}.tar.gz
+if [ -z $(check_installed $gnuplot_dir) ]; then
+    cd $build_dir
+    echo "Download gnuplot-v${GNUPLOT_VERSION}"
+    download_and_extract $GNUPLOT_DOWNLOAD_URL "gnuplot-${GNUPLOT_VERSION}.tar.gz"
+    cd "$build_dir/gnuplot-${GNUPLOT_VERSION}"
+    ./configure --prefix="$build_dir/gnuplot-${GNUPLOT_VERSION}" --disable-wxwidgets
+    make
+    make install
+    note_installed $gnuplot_dir
+fi
 PATH="$gnuplot_dir:${PATH}"
 
 # # --------------- Guppy --------------------
@@ -414,299 +501,333 @@ PATH="$gnuplot_dir:${PATH}"
 # rm QUAST-${QUAST_VERSION}.tar.gz
 
 # --------------- mummer ------------------
-cd $build_dir
-echo "Download mummer-v${MUMMER_VERSION}"
-download $MUMMER_DOWNLOAD_URL "mummer-${MUMMER_VERSION}.tar.gz"
-tar -zxf mummer-${MUMMER_VERSION}.tar.gz
 mummer_dir="$build_dir/mummer-${MUMMER_VERSION}"
-echo "$mummer_dir"
-cd $mummer_dir
-./configure
-make
+if [ -z $(check_installed $mummer_dir) ]; then
+    cd $build_dir
+    echo "Download mummer-v${MUMMER_VERSION}"
+    download_and_extract $MUMMER_DOWNLOAD_URL "mummer-${MUMMER_VERSION}.tar.gz"
+    echo "$mummer_dir"
+    cd $mummer_dir
+    ./configure
+    make -j $MAKE_JOBS
+    note_installed $mummer_dir
+fi
 PATH="$mummer_dir:${PATH}"
-cd $build_dir
-rm mummer-${MUMMER_VERSION}.tar.gz
 
 # --------------- bedtools ------------------
-cd $build_dir
-echo "Download bedtools-v${BEDTOOLS_VERSION}"
-download $BEDTOOLS_DOWNLOAD_URL "bedtools-${BEDTOOLS_VERSION}.tar.gz"
-tar -zxf bedtools-${BEDTOOLS_VERSION}.tar.gz
-cd "$build_dir/bedtools2"
-make
 bedtools_dir="$build_dir/bedtools2/bin"
-cd $build_dir
-rm bedtools-${BEDTOOLS_VERSION}.tar.gz
+if [ -z $(check_installed $bedtools_dir) ]; then
+    cd $build_dir
+    echo "Download bedtools-v${BEDTOOLS_VERSION}"
+    download_and_extract $BEDTOOLS_DOWNLOAD_URL "bedtools-${BEDTOOLS_VERSION}.tar.gz"
+    cd "$build_dir/bedtools2"
+    make -j $MAKE_JOBS
+    note_installed $bedtools_dir
+fi
 
 # --------------- SPAdes ------------------
-cd $build_dir
-echo "Download SPAdes-v${SPADES_VERSION}"
-download $SPADES_DOWNLOAD_URL "SPAdes-${SPADES_VERSION}-Linux.tar.gz"
-tar -zxf SPAdes-${SPADES_VERSION}-Linux.tar.gz
 spades_dir="$build_dir/SPAdes-${SPADES_VERSION}-Linux/bin"
-rm SPAdes-${SPADES_VERSION}-Linux.tar.gz
+if [ -z $(check_installed $spades_dir) ]; then
+    cd $build_dir
+    echo "Download SPAdes-v${SPADES_VERSION}"
+    # This sometimes times out, could this be throttling from the server?
+    # Allow administrator to manually upload a copy of the tarball for installation
+    if [ ! -e "SPAdes-${SPADES_VERSION}-Linux.tar.gz" ]; then
+        download_and_extract $SPADES_DOWNLOAD_URL "SPAdes-${SPADES_VERSION}-Linux.tar.gz"
+    else
+        tar -zxf "SPAdes-${SPADES_VERSION}-Linux.tar.gz"
+    fi
+    note_installed $spades_dir
+fi
 
 # --------------- Prodigal ------------------
-cd $build_dir
-echo "Download Prodigal-v${PRODIGAL_VERSION}"
-download $PRODIGAL_DOWNLOAD_URL "v${PRODIGAL_VERSION}.tar.gz"
-tar -zxf v${PRODIGAL_VERSION}.tar.gz
 prodigal_dir="$build_dir/Prodigal-${PRODIGAL_VERSION}"
-cd $prodigal_dir
-make
-cd $build_dir
-rm v${PRODIGAL_VERSION}.tar.gz
+if [ -z $(check_installed $prodigal_dir) ]; then
+    cd $build_dir
+    echo "Download Prodigal-v${PRODIGAL_VERSION}"
+    download_and_extract $PRODIGAL_DOWNLOAD_URL "v${PRODIGAL_VERSION}.tar.gz"
+    cd $prodigal_dir
+    make -j $MAKE_JOBS
+    note_installed $prodigal_dir
+fi
 
 # --------------- CAP3 ------------------
-cd $build_dir
-echo "Download CAP3-v${CAP3_VERSION}"
-download $CAP_DOWNLOAD_URL "cap3.linux.x86_64.tar"
-tar -xf cap3.linux.x86_64.tar
 cap_dir="$build_dir/CAP3"
-rm cap3.linux.x86_64.tar
+if [ -z $(check_installed $cap_dir) ]; then
+    cd $build_dir
+    echo "Download CAP3-v${CAP3_VERSION}"
+    download_and_extract $CAP_DOWNLOAD_URL "cap3.linux.x86_64.tar"
+    note_installed $cap_dir
+fi
 
 # ------------- BWA -------------------
-cd $build_dir
-echo "Download BWA-v${BWA_VERSION}"
-download $BWA_DOWNLOAD_URL "bwa-${BWA_VERSION}.tar.bz2"
-tar -xjf bwa-${BWA_VERSION}.tar.bz2
 bwa_dir="$build_dir/bwa-${BWA_VERSION}"
-cd $bwa_dir
-make
-cd $build_dir
-rm bwa-${BWA_VERSION}.tar.bz2
+if [ -z $(check_installed $bwa_dir) ]; then
+    cd $build_dir
+    echo "Download BWA-v${BWA_VERSION}"
+    download_and_extract $BWA_DOWNLOAD_URL "bwa-${BWA_VERSION}.tar.bz2"
+    cd $bwa_dir
+    make -j $MAKE_JOBS
+    note_installed $bwa_dir
+fi
 
 # --------------- Circlator ------------------
-cd $build_dir
-echo "Creating local virtual python3 environment and install Circlator-v${CIRCLATOR_VERSION}"
-virtualenv -p $(which python3) py3_virtualenv_circlator
-source py3_virtualenv_circlator/bin/activate
-py3_virtualenv_circlator/bin/pip3 install "circlator==${CIRCLATOR_VERSION}"
 circlator_dir="$build_dir/py3_virtualenv_circlator/bin"
-deactivate
+if [ -z $(check_installed $circlator_dir) ]; then
+    cd $build_dir
+    echo "Creating local virtual python3 environment and install Circlator-v${CIRCLATOR_VERSION}"
+    virtualenv -p $(which python3) py3_virtualenv_circlator
+    source py3_virtualenv_circlator/bin/activate
+    py3_virtualenv_circlator/bin/pip3 install "circlator==${CIRCLATOR_VERSION}"
+    deactivate
+    note_installed $circlator_dir
+fi
 
 # --------------- Trimmomatic -----------------
-cd $build_dir
-echo "Download Trimmomatic-v${TRIMMOMATIC_VERSION}"
-download $TRIMMOMATIC_DOWNLOAD_URL "Trimmomatic-${TRIMMOMATIC_VERSION}.zip"
-unzip Trimmomatic-${TRIMMOMATIC_VERSION}.zip
 trimmomatic_dir="$build_dir/Trimmomatic-${TRIMMOMATIC_VERSION}"
-cd $trimmomatic_dir
-chmod 755 trimmomatic-${TRIMMOMATIC_VERSION}.jar
-ln -s trimmomatic-${TRIMMOMATIC_VERSION}.jar trimmomatic.jar 
-cd $build_dir
-rm Trimmomatic-${TRIMMOMATIC_VERSION}.zip
+if [ -z $(check_installed $trimmomatic_dir) ]; then
+    cd $build_dir
+    echo "Download Trimmomatic-v${TRIMMOMATIC_VERSION}"
+    download $TRIMMOMATIC_DOWNLOAD_URL "Trimmomatic-${TRIMMOMATIC_VERSION}.zip"
+    unzip Trimmomatic-${TRIMMOMATIC_VERSION}.zip
+    rm Trimmomatic-${TRIMMOMATIC_VERSION}.zip
+
+    cd $trimmomatic_dir
+    chmod 755 trimmomatic-${TRIMMOMATIC_VERSION}.jar
+    ln -s trimmomatic-${TRIMMOMATIC_VERSION}.jar trimmomatic.jar 
+    note_installed $trimmomatic_dir
+fi
 
 # --------------- Picard -----------------
-cd $build_dir
-echo "Download Picard-v${PICARD_VERSION}"
-download $PICARD_DOWNLOAD_URL "picard.jar"
-mkdir Picard-v${PICARD_VERSION}
 picard_dir="$build_dir/Picard-v${PICARD_VERSION}"
-mv picard.jar $picard_dir
-cd $picard_dir
-chmod 755 picard.jar
+if [ -z $(check_installed $picard_dir) ]; then
+    cd $build_dir
+    echo "Download Picard-v${PICARD_VERSION}"
+    download $PICARD_DOWNLOAD_URL "picard.jar"
+    mkdir Picard-v${PICARD_VERSION}
+
+    mv picard.jar $picard_dir
+    cd $picard_dir
+    chmod 755 picard.jar
+    note_installed $picard_dir
+fi
 
 # --------------- Pilon -----------------
-cd $build_dir
-echo "Download Pilon-v${PILON_VERSION}"
-download $PILON_DOWNLOAD_URL "pilon-${PILON_VERSION}.jar"
-mkdir Pilon-v${PILON_VERSION}
 pilon_dir="$build_dir/Pilon-v${PILON_VERSION}"
-mv pilon-${PILON_VERSION}.jar $pilon_dir/pilon.jar
-cd $pilon_dir
-chmod 755 pilon.jar
+if [ -z $(check_installed $pilon_dir) ]; then
+    cd $build_dir
+    echo "Download Pilon-v${PILON_VERSION}"
+    download $PILON_DOWNLOAD_URL "pilon-${PILON_VERSION}.jar"
+    mkdir Pilon-v${PILON_VERSION}
+    mv pilon-${PILON_VERSION}.jar $pilon_dir/pilon.jar
+    cd $pilon_dir
+    chmod 755 pilon.jar
+    note_installed $pilon_dir
+fi
 
 # --------------- exonerate ------------------
-cd $build_dir
-echo "Download exonerate-v${EXONERATE_VERSION}"
-download $EXONERATE_DOWNLOAD_URL "exonerate-${EXONERATE_VERSION}-x86_64.tar.gz"
-tar -zxf exonerate-${EXONERATE_VERSION}-x86_64.tar.gz
 exonerate_dir="$build_dir/exonerate-${EXONERATE_VERSION}-x86_64/bin"
-rm exonerate-${EXONERATE_VERSION}-x86_64.tar.gz
+if [ -z $(check_installed $exonerate_dir) ]; then
+    cd $build_dir
+    echo "Download exonerate-v${EXONERATE_VERSION}"
+    download_and_extract $EXONERATE_DOWNLOAD_URL "exonerate-${EXONERATE_VERSION}-x86_64.tar.gz"
+    note_installed $exonerate_dir
+fi
 
 # --------------- ncbi-blast+ ------------------
-cd $build_dir
-echo "Download ncbi-blast-v${BLAST_VERSION}"
-download $BLAST_DOWNLOAD_URL "ncbi-blast-${BLAST_VERSION}+-x64-linux.tar.gz"
-tar -zxf ncbi-blast-${BLAST_VERSION}+-x64-linux.tar.gz
-rm ncbi-blast-${BLAST_VERSION}+-x64-linux.tar.gz
-cd "ncbi-blast-${BLAST_VERSION}+"
-mkdir matrices
-cd matrices
-wget -nv --no-check-certificate ftp://ftp.ncbi.nlm.nih.gov/blast/matrices/*
 blast_dir="$build_dir/ncbi-blast-${BLAST_VERSION}+/bin"
 blast_matrices_dir="$build_dir/ncbi-blast-${BLAST_VERSION}+/matrices"
+if [ -z $(check_installed $blast_dir) ]; then
+    cd $build_dir
+    echo "Download ncbi-blast-v${BLAST_VERSION}"
+    download_and_extract $BLAST_DOWNLOAD_URL "ncbi-blast-${BLAST_VERSION}+-x64-linux.tar.gz"
+    cd "ncbi-blast-${BLAST_VERSION}+"
+    mkdir matrices
+    cd matrices
+    wget -nv --no-check-certificate ftp://ftp.ncbi.nlm.nih.gov/blast/matrices/*
+    note_installed $blast_dir
+fi
 
 # --------------- ncbi-rmblast ------------------
-cd $build_dir
-echo "Download ncbi-rmblastn-v${BLAST_VERSION}"
-download $RMBLAST_DOWNLOAD_URL "ncbi-rmblastn-${RMBLAST_VERSION}-x64-linux.tar.gz"
-tar -zxf ncbi-rmblastn-${RMBLAST_VERSION}-x64-linux.tar.gz
 rmblast_dir="$build_dir/ncbi-rmblastn-${RMBLAST_VERSION}/bin"
-# copy rmblastn binary file to ncbi-blast+ directory for easy RepeatMasker configuration
-cp $rmblast_dir/rmblastn $blast_dir
-rm ncbi-rmblastn-${RMBLAST_VERSION}-x64-linux.tar.gz
+if [ -z $(check_installed $rmblast_dir) ]; then
+    cd $build_dir
+    echo "Download ncbi-rmblastn-v${BLAST_VERSION}"
+    download_and_extract $RMBLAST_DOWNLOAD_URL "ncbi-rmblastn-${RMBLAST_VERSION}-x64-linux.tar.gz"
+    # copy rmblastn binary file to ncbi-blast+ directory for easy RepeatMasker configuration
+    cp $rmblast_dir/rmblastn $blast_dir
+    note_installed $rmblast_dir
+fi
 
 # --------------- snap ------------------
-cd $build_dir
-echo "Download snap-v${SNAP_VERSION}"
-git clone $SNAP_DOWNLOAD_URL
 snap_dir="$build_dir/SNAP"
-cd $snap_dir
-git checkout -f -q $SNAP_GITHUB_COMMIT_VERSION
-ZOE="$snap_dir/Zoe"
-cp $LRSDAY_HOME/misc/snap.c .  # temporary fix for snap with gcc-8
-make
+if [ -z $(check_installed $snap_dir) ]; then
+    cd $build_dir
+    echo "Download snap-v${SNAP_VERSION}"
+    git clone $SNAP_DOWNLOAD_URL
+    cd $snap_dir
+    git checkout -f -q $SNAP_GITHUB_COMMIT_VERSION
+    ZOE="$snap_dir/Zoe"
+    cp $LRSDAY_HOME/misc/snap.c .  # temporary fix for snap with gcc-8
+    make -j $MAKE_JOBS
+    note_installed $snap_dir
+fi
 
 # --------------- RAPSearch2 ------------------
-cd $build_dir
-echo "Download RAPsearch-v${RAPSEARCH_VERSION}"
-download $RAPSEARCH_DOWNLOAD_URL "RAPSearch${RAPSEARCH_VERSION}_64bits.tar.gz"
-tar -zxf RAPSearch${RAPSEARCH_VERSION}_64bits.tar.gz
 rapsearch_dir="$build_dir/RAPSearch${RAPSEARCH_VERSION}_64bits/bin"
-rm RAPSearch${RAPSEARCH_VERSION}_64bits.tar.gz
+if [ -z $(check_installed $rapsearch_dir) ]; then
+    cd $build_dir
+    echo "Download RAPsearch-v${RAPSEARCH_VERSION}"
+    download_and_extract $RAPSEARCH_DOWNLOAD_URL "RAPSearch${RAPSEARCH_VERSION}_64bits.tar.gz"
+    note_installed $rapsearch_dir
+fi
 
 # --------------- tRNAscan-SE ------------------
-cd $build_dir
-echo "Download tRNAscan-SE-v${TRNASCAN_VERSION}"
-download $TRNASCAN_DOWNLOAD_URL "tRNAscan-SE-${TRNASCAN_VERSION}.tar.gz"
-tar -zxf tRNAscan-SE-${TRNASCAN_VERSION}.tar.gz
-trnascan_dir="$build_dir/tRNAscan-SE-${TRNASCAN_VERSION}"
-cd $trnascan_dir
-mkdir bin
-mkdir -p lib/tRNAscan-SE
-mkdir -p man
-cp $LRSDAY_HOME/misc/tRNAscan-SE.Makefile Makefile
-PERL5LIB=$trnascan_dir/bin:$PERL5LIB
-make BINDIR="$trnascan_dir/bin" LIBDIR="$trnascan_dir/lib/tRNAscan-SE" MANDIR="$trnascan_dir"
-make install BINDIR="$trnascan_dir/bin" LIBDIR="$trnascan_dir/lib/tRNAscan-SE" MANDIR="$trnascan_dir"
-trnascan_dir="$build_dir/tRNAscan-SE-${TRNASCAN_VERSION}/bin"
-cd $build_dir
-rm tRNAscan-SE-${TRNASCAN_VERSION}.tar.gz
+trnascan_root="$build_dir/tRNAscan-SE-${TRNASCAN_VERSION}"
+trnascan_dir="$trnascan_root/bin"
+PERL5LIB=$trnascan_dir:$PERL5LIB
+if [ -z $(check_installed $trnascan_dir) ]; then
+    cd $build_dir
+    echo "Download tRNAscan-SE-v${TRNASCAN_VERSION}"
+    download_and_extract $TRNASCAN_DOWNLOAD_URL "tRNAscan-SE-${TRNASCAN_VERSION}.tar.gz"
+    cd $trnascan_root
+    mkdir bin
+    mkdir -p lib/tRNAscan-SE
+    mkdir -p man
+    cp $LRSDAY_HOME/misc/tRNAscan-SE.Makefile Makefile
+    make -j $MAKE_JOBS BINDIR="$trnascan_root/bin" LIBDIR="$trnascan_root/lib/tRNAscan-SE" MANDIR="$trnascan_root"
+    make install BINDIR="$trnascan_root/bin" LIBDIR="$trnascan_root/lib/tRNAscan-SE" MANDIR="$trnascan_root"
+    note_installed $trnascan_dir
+fi
 
 # --------------- snoscan ------------------
-cd $build_dir
-echo "Download snoscan-v${SNOSCAN_VERSION}"
-download $SNOSCAN_DOWNLOAD_URL "snoscan-${SNOSCAN_VERSION}.tar.gz"
-tar -zxf snoscan-${SNOSCAN_VERSION}.tar.gz
 snoscan_dir="$build_dir/snoscan-${SNOSCAN_VERSION}"
-cd $snoscan_dir
-cd squid-1.5.11
-rm *.o
-make
-cd ..
-cp $LRSDAY_HOME/misc/snoscan.Makefile Makefile
-rm *.o
-make
-cd $build_dir
-rm snoscan-${SNOSCAN_VERSION}.tar.gz
+if [ -z $(check_installed $snoscan_dir) ]; then
+    cd $build_dir
+    echo "Download snoscan-v${SNOSCAN_VERSION}"
+    download_and_extract $SNOSCAN_DOWNLOAD_URL "snoscan-${SNOSCAN_VERSION}.tar.gz"
+    cd $snoscan_dir
+    cd squid-1.5.11
+    rm *.o
+    make -j $MAKE_JOBS
+    cd ..
+    cp $LRSDAY_HOME/misc/snoscan.Makefile Makefile
+    rm *.o
+    make -j $MAKE_JOBS
+    note_installed $snoscan_dir
+fi
 
 # --------------- RepeatMasker ------------------
-cd $build_dir
-echo "Download Repeatmasker-v${REPEATMASKER_VERSION}"
-download $REPEATMASKER_DOWNLOAD_URL "RepeatMasker-${REPEATMASKER_VERSION}.tar.gz"
-tar -zxf RepeatMasker-${REPEATMASKER_VERSION}.tar.gz
 repeatmasker_dir="$build_dir/RepeatMasker"
-cd $repeatmasker_dir
-echo "Download and setup RepBase library"
-REPBASE_VERSION="20170127"
-wget -nv --no-check-certificate https://github.com/yjx1217/RMRB/raw/master/RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
-tar xzf RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
-rm RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
-cd .. 
-rm RepeatMasker-${REPEATMASKER_VERSION}.tar.gz
+if [ -z $(check_installed $repeatmasker_dir) ]; then
+    cd $build_dir
+    echo "Download Repeatmasker-v${REPEATMASKER_VERSION}"
+    download_and_extract $REPEATMASKER_DOWNLOAD_URL "RepeatMasker-${REPEATMASKER_VERSION}.tar.gz"
+    cd $repeatmasker_dir
+    echo "Download and setup RepBase library"
+    REPBASE_VERSION="20170127"
+    wget -nv --no-check-certificate https://github.com/yjx1217/RMRB/raw/master/RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
+    tar xzf RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
+    rm RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
+    cd .. 
+    note_installed $repeatmasker_dir
+fi
 
 # --------------- TRF ------------------
-cd $repeatmasker_dir
-echo "Download TRF-v${TRF_VERSION}"
-download $TRF_DOWNLOAD_URL "trf${TRF_VERSION}.linux64"
-mv trf${TRF_VERSION}.linux64 trf
-chmod 755 trf
 trf_dir=$repeatmasker_dir
+if [ ! -e "$repeatmasker_dir/trf" ]; then
+    cd $repeatmasker_dir
+    echo "Download TRF-v${TRF_VERSION}"
+    download $TRF_DOWNLOAD_URL "trf${TRF_VERSION}.linux64"
+    mv trf${TRF_VERSION}.linux64 trf
+    chmod 755 trf
+fi
+
 
 # --------------- REannotate ------------------
-cd $build_dir
-echo "Download REannotate-v${REANNOTATE_VERSION}"
-download $REANNOTATE_DOWNLOAD_URL "version_${REANNOTATE_VERSION}.tar.gz"
-tar -zxf version_${REANNOTATE_VERSION}.tar.gz
 reannotate_dir="$build_dir/REannotate_LongQueryName-version_${REANNOTATE_VERSION}"
-cd $reannotate_dir
-chmod 755 REannotate_longname
-ln -s REannotate_longname REannotate
-cd $build_dir
-rm version_${REANNOTATE_VERSION}.tar.gz
+if [ -z $(check_installed $reannotate_dir) ]; then
+    cd $build_dir
+    echo "Download REannotate-v${REANNOTATE_VERSION}"
+    download_and_extract $REANNOTATE_DOWNLOAD_URL "version_${REANNOTATE_VERSION}.tar.gz"
+    cd $reannotate_dir
+    chmod 755 REannotate_longname
+    ln -s REannotate_longname REannotate
+    note_installed $reannotate_dir
+fi
 
 # --------------- ClustalW ------------------
-cd $build_dir
-echo "Download ClustalW-v${CLUSTALW_VERSION}"
-download $CLUSTALW_DOWNLOAD_URL "clustalw-${CLUSTALW_VERSION}.tar.gz"
-tar -zxf clustalw-${CLUSTALW_VERSION}.tar.gz
-cd clustalw-${CLUSTALW_VERSION}
-./configure --prefix="$build_dir/clustalw-${CLUSTALW_VERSION}"
-make
-make install
 clustalw_dir="$build_dir/clustalw-${CLUSTALW_VERSION}/bin"
-cd $build_dir
-rm clustalw-${CLUSTALW_VERSION}.tar.gz
+if [ -z $(check_installed $clustalw_dir) ]; then
+    cd $build_dir
+    echo "Download ClustalW-v${CLUSTALW_VERSION}"
+    download_and_extract $CLUSTALW_DOWNLOAD_URL "clustalw-${CLUSTALW_VERSION}.tar.gz"
+    cd clustalw-${CLUSTALW_VERSION}
+    ./configure --prefix="$build_dir/clustalw-${CLUSTALW_VERSION}"
+    make -j $MAKE_JOBS
+    make install
+    note_installed $clustalw_dir
+fi
 
 # --------------- MUSCLE ------------------
-cd $build_dir
-echo "Download MUSCLE-v${MUSCLE_VERSION}"
-download $MUSCLE_DOWNLOAD_URL "muscle-${MUSCLE_VERSION}_i86linux64.tar.gz"
-tar -zxf muscle-${MUSCLE_VERSION}_i86linux64.tar.gz
-mkdir muscle-${MUSCLE_VERSION}
-mv muscle${MUSCLE_VERSION}_i86linux64 ./muscle-${MUSCLE_VERSION}/muscle
 muscle_dir="$build_dir/muscle-${MUSCLE_VERSION}"
-rm muscle-${MUSCLE_VERSION}_i86linux64.tar.gz
+if [ -z $(check_installed $muscle_dir) ]; then
+    cd $build_dir
+    echo "Download MUSCLE-v${MUSCLE_VERSION}"
+    download_and_extract $MUSCLE_DOWNLOAD_URL "muscle-${MUSCLE_VERSION}_i86linux64.tar.gz"
+    mkdir muscle-${MUSCLE_VERSION}
+    mv muscle${MUSCLE_VERSION}_i86linux64 ./muscle-${MUSCLE_VERSION}/muscle
+    note_installed $muscle_dir
+fi
 
 # --------------- HMMER ------------------
-cd $build_dir
-echo "Download hmmer-v${HMMER_VERSION}"
-download $HMMER_DOWNLOAD_URL "hmmer-${HMMER_VERSION}-linux-intel-x86_64.tar.gz"
-tar -zxf hmmer-${HMMER_VERSION}-linux-intel-x86_64.tar.gz
-hmmer_dir="$build_dir/hmmer-${HMMER_VERSION}"
-cd $hmmer_dir
-./configure --prefix=$hmmer_dir
-make
-make install
-cd easel
-make install
-cd ..
-cd ..
+hmmer_root="$build_dir/hmmer-${HMMER_VERSION}"
 hmmer_dir="$build_dir/hmmer-${HMMER_VERSION}/bin"
-rm hmmer-${HMMER_VERSION}-linux-intel-x86_64.tar.gz
+if [ -z $(check_installed $hmmer_dir) ]; then
+    cd $build_dir
+    echo "Download hmmer-v${HMMER_VERSION}"
+    download_and_extract $HMMER_DOWNLOAD_URL "hmmer-${HMMER_VERSION}-linux-intel-x86_64.tar.gz"
+    cd $hmmer_root
+    ./configure --prefix=$hmmer_root
+    make -j $MAKE_JOBS
+    make install
+    cd easel
+    make install
+    note_installed $hmmer_dir
+fi
 
 # --------------- bamtools ------------------
-cd $build_dir
-echo "Download bamtools-v${BAMTOOLS_VERSION}"
-download $BAMTOOLS_DOWNLOAD_URL "v${BAMTOOLS_VERSION}.tar.gz"
-tar -zxf v${BAMTOOLS_VERSION}.tar.gz
-cd $build_dir/bamtools-${BAMTOOLS_VERSION}
-mkdir build
-cd build
-cmake -DCMAKE_INSTALL_PREFIX="$build_dir/bamtools-${BAMTOOLS_VERSION}" ..
-make
-make install
 bamtools_dir="$build_dir/bamtools-${BAMTOOLS_VERSION}/bin"
-cd $build_dir
-rm v${BAMTOOLS_VERSION}.tar.gz
+if [ -z $(check_installed $bamtools_dir) ]; then
+    cd $build_dir
+    echo "Download bamtools-v${BAMTOOLS_VERSION}"
+    download_and_extract $BAMTOOLS_DOWNLOAD_URL "v${BAMTOOLS_VERSION}.tar.gz"
+    cd $build_dir/bamtools-${BAMTOOLS_VERSION}
+    mkdir build
+    cd build
+    cmake -DCMAKE_INSTALL_PREFIX="$build_dir/bamtools-${BAMTOOLS_VERSION}" ..
+    make -j $MAKE_JOBS
+    make install
+    cd $build_dir/bamtools-${BAMTOOLS_VERSION}
+    ln -sf lib lib64
+    note_installed $bamtools_dir
+fi
 
 # --------------- Augustus ------------------
-cd $build_dir
-echo "Download Augustus-v${AUGUSTUS_VERSION}"
-download $AUGUSTUS_DOWNLOAD_URL "augustus-${AUGUSTUS_VERSION}.tar.gz"
-tar -zxf augustus-${AUGUSTUS_VERSION}.tar.gz
-cd $build_dir/augustus-${AUGUSTUS_VERSION}/auxprogs/bam2hints/
-cp $LRSDAY_HOME/misc/bam2hints.Makefile Makefile
-cd $build_dir/augustus-${AUGUSTUS_VERSION}/auxprogs/filterBam/src/
-cp $LRSDAY_HOME/misc/filterBam.Makefile Makefile
-cd $build_dir/augustus-${AUGUSTUS_VERSION}
-make BAMTOOLS="$build_dir/bamtools-${BAMTOOLS_VERSION}"
 augustus_dir="$build_dir/augustus-${AUGUSTUS_VERSION}/bin"
+if [ -z $(check_installed $augustus_dir) ]; then
+    cd $build_dir
+    echo "Download Augustus-v${AUGUSTUS_VERSION}"
+    download_and_extract $AUGUSTUS_DOWNLOAD_URL "augustus-${AUGUSTUS_VERSION}.tar.gz"
+    cd $build_dir/augustus-${AUGUSTUS_VERSION}/auxprogs/bam2hints/
+    cp $LRSDAY_HOME/misc/bam2hints.Makefile Makefile
+    cd $build_dir/augustus-${AUGUSTUS_VERSION}/auxprogs/filterBam/src/
+    cp $LRSDAY_HOME/misc/filterBam.Makefile Makefile
+    cd $build_dir/augustus-${AUGUSTUS_VERSION}
+    make -j $MAKE_JOBS BAMTOOLS="$build_dir/bamtools-${BAMTOOLS_VERSION}"
+    note_installed $augustus_dir
+fi
 export AUGUSTUS_CONFIG_PATH="$build_dir/augustus-${AUGUSTUS_VERSION}/config"
-cd $build_dir
-rm augustus-${AUGUSTUS_VERSION}.tar.gz
 
 # cd $build_dir
 # echo "Download Augustus-v${AUGUSTUS_VERSION}"
@@ -727,225 +848,276 @@ rm augustus-${AUGUSTUS_VERSION}.tar.gz
 
 
 # --------------- EVidenceModeler ------------------
-cd $build_dir
-echo "Download EvidenceModeler-v${EVM_VERSION}"
-download $EVM_DOWNLOAD_URL "v${EVM_VERSION}.tar.gz"
-tar -zxf v${EVM_VERSION}.tar.gz
 evm_dir="$build_dir/EVidenceModeler-${EVM_VERSION}"
-rm v${EVM_VERSION}.tar.gz
+if [ -z $(check_installed $evm_dir) ]; then
+    cd $build_dir
+    echo "Download EvidenceModeler-v${EVM_VERSION}"
+    download_and_extract $EVM_DOWNLOAD_URL "v${EVM_VERSION}.tar.gz"
+    note_installed $evm_dir
+fi
 
 # --------------- Proteinortho ------------------
-cd $build_dir
-echo "Download Proteinortho-v${PROTEINORTHO_VERSION}"
-download $PROTEINORTHO_DOWNLOAD_URL "proteinortho_v${PROTEINORTHO_VERSION}.tar.gz"
-tar -zxf proteinortho_v${PROTEINORTHO_VERSION}.tar.gz
 proteinortho_dir="$build_dir/proteinortho_v${PROTEINORTHO_VERSION}"
-cp $LRSDAY_HOME/misc/proteinortho5_better_robustness.pl $proteinortho_dir/proteinortho5.pl
-rm proteinortho_v${PROTEINORTHO_VERSION}.tar.gz
+if [ -z $(check_installed $proteinortho_dir) ]; then
+    cd $build_dir
+    echo "Download Proteinortho-v${PROTEINORTHO_VERSION}"
+    download_and_extract $PROTEINORTHO_DOWNLOAD_URL "proteinortho_v${PROTEINORTHO_VERSION}.tar.gz"
+    cp $LRSDAY_HOME/misc/proteinortho5_better_robustness.pl $proteinortho_dir/proteinortho5.pl
+    note_installed $proteinortho_dir
+fi
 
 # --------------- GATK ------------------
-cd $build_dir
-echo "Create GATK3 folder for users' manual installation"
-mkdir GATK3
-cd GATK3
-wget -nv --no-check-certificate https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/GenomeAnalysisTK.jar
-chmod 755 GenomeAnalysisTK.jar
 gatk_dir="$build_dir/GATK3"
+if [ -z $(check_installed $gatk_dir) ]; then
+    cd $build_dir
+    echo "Create GATK3 folder for users' manual installation"
+    mkdir GATK3
+    cd GATK3
+    wget -nv --no-check-certificate https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/GenomeAnalysisTK.jar
+    chmod 755 GenomeAnalysisTK.jar
+    note_installed $gatk_dir
+fi
+
 
 # --------------- MAKER -----------------
-cd $build_dir
-echo "Download MAKER"
-download $MAKER_DOWNLOAD_URL "maker-v${MAKER_VERSION}.tgz"
-tar -zxf maker-v${MAKER_VERSION}.tgz
-rm maker-v${MAKER_VERSION}.tgz
-cd $build_dir/maker/src/
-cp $LRSDAY_HOME/misc/maker_Build.PL .
-echo "no"|perl maker_Build.PL
-./Build install
 maker_dir="$build_dir/maker/bin"
+if [ -z $(check_installed $maker_dir) ]; then
+    cd $build_dir
+    echo "Download MAKER"
+    download_and_extract $MAKER_DOWNLOAD_URL "maker-v${MAKER_VERSION}.tgz"
+    cd $build_dir/maker/src/
+    cp $LRSDAY_HOME/misc/maker_Build.PL .
+    echo "no"|perl maker_Build.PL
+    ./Build install
+    note_installed $maker_dir
+fi
 
 # --------------- UCSC Utilities -----------------
-cd $build_dir
-mkdir UCSC_Utilities
 ucsc_dir="$build_dir/UCSC_Utilities"
-cd $ucsc_dir
-download $BLAT_DOWNLOAD_URL "blat"
-download $FASPLIT_DOWNLOAD_URL "faSplit"
-download $PSLSORT_DOWNLOAD_URL "pslSort"
-download $PSLSCORE_DOWNLOAD_URL "pslScore"
-download $PSLCDNAFILTER_DOWNLOAD_URL "pslCDnaFilter"
-chmod 755 $ucsc_dir/*
+if [ -z $(check_installed $ucsc_dir) ]; then
+    cd $build_dir
+    mkdir UCSC_Utilities
+    cd $ucsc_dir
+    download $BLAT_DOWNLOAD_URL "blat"
+    download $FASPLIT_DOWNLOAD_URL "faSplit"
+    download $PSLSORT_DOWNLOAD_URL "pslSort"
+    download $PSLSCORE_DOWNLOAD_URL "pslScore"
+    download $PSLCDNAFILTER_DOWNLOAD_URL "pslCDnaFilter"
+    chmod 755 $ucsc_dir/*
+    note_installed $ucsc_dir
+fi
 
 # ------------- Conda-PacBio --------------------
-cd $build_dir
-download $MINICONDA2_DOWNLOAD_URL "Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh"
-bash Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh -b -p $build_dir/miniconda2
-#export PATH="$build_dir/miniconda2/bin:$PATH"
 miniconda2_dir="$build_dir/miniconda2/bin"
-$miniconda2_dir/conda config --add channels defaults
-$miniconda2_dir/conda config --add channels bioconda
-$miniconda2_dir/conda config --add channels conda-forge
-$miniconda2_dir/conda create -y -p $build_dir/conda_pacbio_env
-source $miniconda2_dir/activate $build_dir/conda_pacbio_env
-$miniconda2_dir/conda install -y hdf5=${HDF_VERSION}
-$miniconda2_dir/conda install -y -c bioconda samtools=${SAMTOOLS_VERSION} openssl=1.0
-$miniconda2_dir/conda install -y -c bioconda pb-assembly=${PB_ASSEMBLY_VERSION}
-$miniconda2_dir/conda install -y -c bioconda bax2bam=${BAX2BAM_VERSION}
-source $miniconda2_dir/deactivate
-rm Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh 
 conda_pacbio_dir=$build_dir/conda_pacbio_env/bin
+if [ -z $(check_installed $miniconda2_dir) ]; then
+    cd $build_dir
+    download $MINICONDA2_DOWNLOAD_URL "Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh"
+    bash Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh -b -p $build_dir/miniconda2
+    #export PATH="$build_dir/miniconda2/bin:$PATH"
+    $miniconda2_dir/conda config --add channels defaults
+    $miniconda2_dir/conda config --add channels bioconda
+    $miniconda2_dir/conda config --add channels conda-forge
+    $miniconda2_dir/conda create -y -p $build_dir/conda_pacbio_env
+    source $miniconda2_dir/activate $build_dir/conda_pacbio_env
+    $miniconda2_dir/conda install -y hdf5=${HDF_VERSION}
+    $miniconda2_dir/conda install -y -c bioconda samtools=${SAMTOOLS_VERSION} openssl=1.0
+    $miniconda2_dir/conda install -y -c bioconda pb-assembly=${PB_ASSEMBLY_VERSION}
+    $miniconda2_dir/conda install -y -c bioconda bax2bam=${BAX2BAM_VERSION}
+    source $miniconda2_dir/deactivate
+    rm Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh 
+    note_installed $miniconda2_dir
+fi
 
 # ------------- NANOPOLISH --------------------
-cd $build_dir
-echo "Download nanopolish-v${NANOPOLISH_VERSION}"
-git clone --recursive $NANOPOLISH_DOWNLOAD_URL
 nanopolish_dir="$build_dir/nanopolish"
-cd $nanopolish_dir
-git checkout -f -q $NANOPOLISH_GITHUB_COMMIT_VERSION
-make
-virtualenv -p $(which python3) py3_virtualenv_nanopolish
-source py3_virtualenv_nanopolish/bin/activate
-py3_virtualenv_nanopolish/bin/pip install biopython
-py3_virtualenv_nanopolish/bin/pip install pysam
-deactivate
-rm *.tar.gz
-rm *.tar.bz2
+if [ -z $(check_installed $nanopolish_dir) ]; then
+    cd $build_dir
+    echo "Download nanopolish-v${NANOPOLISH_VERSION}"
+    git clone --recursive $NANOPOLISH_DOWNLOAD_URL
+    cd $nanopolish_dir
+    git checkout -f -q $NANOPOLISH_GITHUB_COMMIT_VERSION
+    make
+    virtualenv -p $(which python3) py3_virtualenv_nanopolish
+    source py3_virtualenv_nanopolish/bin/activate
+    py3_virtualenv_nanopolish/bin/pip install biopython
+    py3_virtualenv_nanopolish/bin/pip install pysam
+    deactivate
+    rm *.tar.gz
+    rm *.tar.bz2
+    note_installed $nanopolish_dir
+fi
 
 # --------------- parallel ------------------
-cd $build_dir
-echo "Download parallel"
-download $PARALLEL_DOWNLOAD_URL "parallel_v${PARALLEL_VERSION}.tar.bz2"
-tar -jxf parallel_v${PARALLEL_VERSION}.tar.bz2
-cd parallel-${PARALLEL_VERSION}
-./configure --prefix="$build_dir/parallel-${PARALLEL_VERSION}"
-make
-make install
 parallel_dir="$build_dir/parallel-${PARALLEL_VERSION}/bin"
-cd ..
-rm parallel_v${PARALLEL_VERSION}.tar.bz2
+if [ -z $(check_installed $parallel_dir) ]; then
+    cd $build_dir
+    echo "Download parallel"
+    download_and_extract $PARALLEL_DOWNLOAD_URL "parallel_v${PARALLEL_VERSION}.tar.bz2"
+    cd parallel-${PARALLEL_VERSION}
+    ./configure --prefix="$build_dir/parallel-${PARALLEL_VERSION}"
+    make -j $MAKE_JOBS
+    make install
+    parallel_dir="$build_dir/parallel-${PARALLEL_VERSION}/bin"
+    note_installed $parallel_dir
+fi
 
 # --------------- EMBOSS ------------------
-cd $build_dir
-echo "Download EMBOSS"
-download $EMBOSS_DOWNLOAD_URL "emboss_v${EMBOSS_VERSION}.tar.gz"
-tar -zxf emboss_v${EMBOSS_VERSION}.tar.gz
-cd EMBOSS-${EMBOSS_VERSION}
-./configure
-make
 emboss_dir="$build_dir/EMBOSS-${EMBOSS_VERSION}/emboss"
-cd ..
-rm emboss_v${EMBOSS_VERSION}.tar.gz
+if [ -z $(check_installed $emboss_dir) ]; then
+    cd $build_dir
+    echo "Download EMBOSS"
+    download_and_extract $EMBOSS_DOWNLOAD_URL "emboss_v${EMBOSS_VERSION}.tar.gz"
+    cd EMBOSS-${EMBOSS_VERSION}
+    ./configure --without-x
+    make -j $MAKE_JOBS
+    note_installed $emboss_dir
+fi
 
 # --------------- ERPIN ------------------
-cd $build_dir
-echo "Download ERPIN"
-download $ERPIN_DOWNLOAD_URL "erpin_v${ERPIN_VERSION}.tar.gz"
-tar -zxf erpin_v${ERPIN_VERSION}.tar.gz
-cd erpin${ERPIN_VERSION}.serv
-make
 erpin_dir="$build_dir/erpin${ERPIN_VERSION}.serv/bin"
-cd $build_dir
-rm erpin_v${ERPIN_VERSION}.tar.gz
+if [ -z $(check_installed $erpin_dir) ]; then
+    cd $build_dir
+    echo "Download ERPIN"
+    download_and_extract $ERPIN_DOWNLOAD_URL "erpin_v${ERPIN_VERSION}.tar.gz"
+    cd erpin${ERPIN_VERSION}.serv
+    make -j $MAKE_JOBS
+    note_installed $erpin_dir
+fi
 
 # --------------- tbl2asn ------------------
-cd $build_dir
-echo "Download tbl2asn"
-download $TBL2ASN_DOWNLOAD_URL "tbl2asn.gz"
-mkdir tbl2asn_dir
-gunzip tbl2asn.gz
-chmod 755 tbl2asn
-mv tbl2asn ./tbl2asn_dir/
 tbl2asn_dir="$build_dir/tbl2asn_dir"
-cd $build_dir
+if [ -z $(check_installed $tbl2asn_dir) ]; then
+    cd $build_dir
+    echo "Download tbl2asn"
+    download $TBL2ASN_DOWNLOAD_URL "tbl2asn.gz"
+    mkdir tbl2asn_dir
+    gunzip tbl2asn.gz
+    chmod 755 tbl2asn
+    mv tbl2asn ./tbl2asn_dir/
+    note_installed $tbl2asn_dir
+fi
 
 # --------------- PirObject ----------------
-cd $build_dir
-echo "Download PirObject"
-download $PIROBJECT_DOWNLOAD_URL "pirobject_v${PIROBJECT_VERSION}.tar.gz"
-tar -zxf pirobject_v${PIROBJECT_VERSION}.tar.gz
-cd PirObject-${PIROBJECT_VERSION}
 pirobject_dir="$build_dir/PirObject-${PIROBJECT_VERSION}"
-ln -s ./lib/PirObject.pm .
-cd $build_dir
-rm pirobject_v${PIROBJECT_VERSION}.tar.gz
+if [ -z $(check_installed $pirobject_dir) ]; then
+    cd $build_dir
+    echo "Download PirObject"
+    download_and_extract $PIROBJECT_DOWNLOAD_URL "pirobject_v${PIROBJECT_VERSION}.tar.gz"
+    cd PirObject-${PIROBJECT_VERSION}
+    ln -s ./lib/PirObject.pm .
+    note_installed $pirobject_dir
+fi
 
 # --------------- PirModels ------------------
-cd $build_dir
-echo "Download PirModels"
-git clone $PIRMODELS_DOWNLOAD_URL
-cd PirModels
-git checkout -f -q $PIRMODELS_GITHUB_COMMIT_VERSION
-cd ..
-cp -r PirModels $pirobject_dir
 pirmodels_dir="$pirobject_dir/PirModels"
+if [ -z $(check_installed $pirmodels_dir) ]; then
+    cd $build_dir
+    echo "Download PirModels"
+    git clone $PIRMODELS_DOWNLOAD_URL
+    cd PirModels
+    git checkout -f -q $PIRMODELS_GITHUB_COMMIT_VERSION
+    cd ..
+    cp -r PirModels $pirobject_dir
+    note_installed $pirmodels_dir
+fi
+
 
 # --------------- Flip ------------------
-cd $build_dir
-echo "Download Flip"
-git clone $FLIP_DOWNLOAD_URL
-cd Flip
-git checkout -f -q $FLIP_GITHUB_COMMIT_VERSION
-cd src
-make
-cp flip ./../
 flip_dir="$build_dir/Flip"
+if [ -z $(check_installed $flip_dir) ]; then
+    cd $build_dir
+    echo "Download Flip"
+    git clone $FLIP_DOWNLOAD_URL
+    cd Flip
+    git checkout -f -q $FLIP_GITHUB_COMMIT_VERSION
+    cd src
+    make -j $MAKE_JOBS
+    cp flip ./../
+    note_installed $flip_dir
+fi
 
 # --------------- Umac ------------------
-cd $build_dir
-echo "Download Umac"
-git clone $UMAC_DOWNLOAD_URL
-cd Umac
-git checkout -f -q $UMAC_GITHUB_COMMIT_VERSION
 umac_dir="$build_dir/Umac"
+if [ -z $(check_installed $umac_dir) ]; then
+    cd $build_dir
+    echo "Download Umac"
+    git clone $UMAC_DOWNLOAD_URL
+    cd Umac
+    git checkout -f -q $UMAC_GITHUB_COMMIT_VERSION
+    note_installed $umac_dir
+fi
+
 
 # --------------- HMMsearchWC ------------------
-cd $build_dir
-echo "Download HMMsearchWC"
-git clone $HMMSEARCHWC_DOWNLOAD_URL
-cd HMMsearchWC
-git checkout -f -q $HMMSEARCHWC_GITHUB_COMMIT_VERSION
 hmmsearchwc_dir="$build_dir/HMMsearchWC"
+if [ -z $(check_installed $hmmsearchwc_dir) ]; then
+    cd $build_dir
+    echo "Download HMMsearchWC"
+    git clone $HMMSEARCHWC_DOWNLOAD_URL
+    cd HMMsearchWC
+    git checkout -f -q $HMMSEARCHWC_GITHUB_COMMIT_VERSION
+    note_installed $hmmsearchwc_dir
+fi
+
 
 # --------------- RNAfinder ------------------
-cd $build_dir
-echo "Download RNAfinder"
-git clone $RNAFINDER_DOWNLOAD_URL
-cd RNAfinder
-git checkout -f -q $RNAFINDER_GITHUB_COMMIT_VERSION
 rnafinder_dir="$build_dir/RNAfinder"
+if [ -z $(check_installed $rnafinder_dir) ]; then
+    cd $build_dir
+    echo "Download RNAfinder"
+    git clone $RNAFINDER_DOWNLOAD_URL
+    cd RNAfinder
+    git checkout -f -q $RNAFINDER_GITHUB_COMMIT_VERSION
+    note_installed $rnafinder_dir
+fi
+
 
 # --------------- Mf2sqn ------------------
-cd $build_dir
-echo "Download Mf2sqn"
-git clone $MF2SQN_DOWNLOAD_URL
-cd Mf2sqn
-git checkout -f -q $MF2SQN_GITHUB_COMMIT_VERSION
 mf2sqn_dir="$build_dir/Mf2sqn"
-cp qualifs.pl $build_dir/cpanm/perlmods/lib/perl5
+if [ -z $(check_installed $mf2sqn_dir) ]; then
+    cd $build_dir
+    echo "Download Mf2sqn"
+    git clone $MF2SQN_DOWNLOAD_URL
+    cd Mf2sqn
+    git checkout -f -q $MF2SQN_GITHUB_COMMIT_VERSION
+    cp qualifs.pl $build_dir/cpanm/perlmods/lib/perl5
+    note_installed $mf2sqn_dir
+fi
 
 # --------------- grab-fasta ------------------
-cd $build_dir
-echo "Download grab-fasta"
-git clone $GRAB_FASTA_DOWNLOAD_URL
-cd grab-fasta
-git checkout -f -q $GRAB_FASTA_GITHUB_COMMIT_VERSION
 grab_fasta_dir="$build_dir/grab-fasta"
+if [ -z $(check_installed $grab_fasta_dir) ]; then
+    cd $build_dir
+    echo "Download grab-fasta"
+    git clone $GRAB_FASTA_DOWNLOAD_URL
+    cd grab-fasta
+    git checkout -f -q $GRAB_FASTA_GITHUB_COMMIT_VERSION
+    note_installed $grab_fasta_dir
+fi
 
 # --------------- MFannot_data ------------------
-cd $build_dir
-echo "Download MFannot_data"
-git clone $MFANNOT_DATA_DOWNLOAD_URL
-cd MFannot_data
-git checkout -f -q $MFANNOT_DATA_GITHUB_COMMIT_VERSION
 mfannot_data_dir="$build_dir/MFannot_data"
+if [ -z $(check_installed $mfannot_data_dir) ]; then
+    cd $build_dir
+    echo "Download MFannot_data"
+    git clone $MFANNOT_DATA_DOWNLOAD_URL
+    cd MFannot_data
+    git checkout -f -q $MFANNOT_DATA_GITHUB_COMMIT_VERSION
+    note_installed $mfannot_data_dir
+fi
+
 
 # --------------- MFannot ------------------
-cd $build_dir
-echo "Download MFannot"
-git clone $MFANNOT_DOWNLOAD_URL
-cd MFannot
-git checkout -f -q $MFANNOT_GITHUB_COMMIT_VERSION
 mfannot_dir="$build_dir/MFannot"
+if [ -z $(check_installed $mfannot_dir) ]; then
+    cd $build_dir
+    echo "Download MFannot"
+    git clone $MFANNOT_DOWNLOAD_URL
+    cd MFannot
+    git checkout -f -q $MFANNOT_GITHUB_COMMIT_VERSION
+    note_installed $mfannot_dir
+fi
 
 
 # Configure executable paths
