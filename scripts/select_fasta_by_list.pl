@@ -6,42 +6,72 @@ use Getopt::Long;
 ##############################################################
 #  script: select_fasta_by_list.pl
 #  author: Jia-Xing Yue (GitHub ID: yjx1217)
-#  last edited: 2018.01.11
+#  last edited: 2019.08.22
 #  description: select (-m normal) or reversely select (-m reverse) fasta sequences based on the sequence id list
-#  example: perl select_fasta_by_list.pl -i input.fa(.gz) -l keep.list -o keep.fa(.gz) -m normal 
+#  example: perl select_fasta_by_list.pl -i input.fa(.gz) -l keep.list -o keep.fa(.gz) -m normal -r by_fasta 
 ##############################################################
 
-my ($list, $input, $output, $mode);
-$mode = "normal"; # normal mode, output sequences found in the list. 
+my ($list, $input, $output, $selection_mode, $ranking_order);
+$selection_mode = "normal"; # normal mode, output sequences found in the list. 
+$ranking_order = "by_fasta";
 
 GetOptions('list|l:s' => \$list,
 	   'input|i:s' => \$input,
 	   'output|o:s' => \$output,
-	   'mode|m:s' => \$mode); # mode = normal or mode = reverse, if mode = reverse, will output sequences not found in the list;
+	   'selection_mode|m:s' => \$selection_mode, # mode = normal or mode = reverse, if mode = reverse, will output sequences not found in the list;
+	   'ranking_order|r:s' => \$ranking_order); 
 
-my $list_fh = read_file($list);
-my %list = parse_list_file($list_fh);
+print "Current option settings:\n";
+print "input: $input\n";
+print "output: $output\n";
+print "list: $list\n";
+print "selection_mode: $selection_mode\n";
+print "ranking_order: $ranking_order\n";
 
-my $input_fh = read_file($input);
-my @input = ();
-my %input = ();
-parse_fasta_file($input_fh, \%input, \@input);
-
-
-my $output_fh = write_file($output);
-    
-foreach my $id (@input) {
-    if (exists $list{$id}) {
-	if ($mode eq "normal") {
-	    print $output_fh ">$id\n$input{$id}\n";
-	}
-    } else {
-	if ($mode eq "reverse") {
-	    print $output_fh ">$id\n$input{$id}\n";
-	}
-    }
+if ($selection_mode !~ /(normal|reverse)/) {
+    die "Unrecognized selection_mode: $selection_mode. Please reset it to either \"normal\" (default) or \"reverse\" via the option -m";
+}
+if ($ranking_order !~ /(by_fasta|by_list)/) {
+    die "Unrecognized ranking_order: $ranking_order. Please reset it to either \"by_fasta\" (default) or \"by_list\" via the option -r";
 }
 
+my $list_fh = read_file($list);
+my %list = ();
+my @list = ();
+parse_list_file($list_fh, \%list, \@list);
+
+my $input_fh = read_file($input);
+my %input = ();
+my @input = ();
+parse_fasta_file($input_fh, \%input, \@input);
+
+my $output_fh = write_file($output);
+
+if ($ranking_order eq "by_list") {    
+    foreach my $id (@list) {
+	if (exists $input{$id}) {
+	    if ($selection_mode eq "normal") {
+		print $output_fh ">$id\n$input{$id}\n";
+	    }
+	} else {
+	    if ($selection_mode eq "reverse") {
+		print $output_fh ">$id\n$input{$id}\n";
+	    }
+	}
+    }
+} else {
+    foreach my $id (@input) {
+	if (exists $list{$id}) {
+	    if ($selection_mode eq "normal") {
+		print $output_fh ">$id\n$input{$id}\n";
+	    }
+	} else {
+	    if ($selection_mode eq "reverse") {
+		print $output_fh ">$id\n$input{$id}\n";
+	    }
+	}
+    }
+} 
 
 
 sub read_file {
@@ -67,17 +97,18 @@ sub write_file {
 }  
 
 
-
-
 sub parse_list_file {
-    my $fh = shift @_;
-    my %list = ();
+    my ($fh, $input_hashref, $input_arrayref) = @_;
     while (<$fh>) {
 	chomp;
 	$_ =~ s/\s+$//g;
-	$list{$_}++;
+	if (not exists $$input_hashref{$_}) {
+	    $$input_hashref{$_} = 1;
+	    push @$input_arrayref, $_;
+	} else {
+	    $$input_hashref{$_}++;
+	}
     }
-    return %list;
 }
 
 

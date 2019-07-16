@@ -22,6 +22,7 @@ Jia-Xing Yue & Gianni Liti. (2018) Long-read sequencing data analysis for yeasts
 Jia-Xing Yue, Jing Li, Louise Aigrain, Johan Hallin, Karl Persson, Karen Oliver, Anders Bergström, Paul Coupland, Jonas Warringer, Marco Cosentino Lagomarsino, Gilles Fischer, Richard Durbin, Gianni Liti. (2017) Contrasting evolutionary genome dynamics between domesticated and wild yeasts. *Nature Genetics*, 49:913-924.
 
 ## Release history
+* v1.6.0 Released on 2019/10/03
 * v1.5.0 Released on 2019/05/13
 * v1.4.0 Released on 2019/03/21
 * v1.3.1 Released on 2019/01/22

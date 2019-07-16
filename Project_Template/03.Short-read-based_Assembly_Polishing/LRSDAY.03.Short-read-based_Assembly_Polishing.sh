@@ -16,10 +16,10 @@ mode="PE" # Illumina sequencing mode, "PE" for paired-end sequencing and "SE" fo
 fixlist="snps,indels" # The types of errors for Illumina-read-based correction by Pilon; see Pilon's manual for more details. Default = "snps,indels".
 if [[ $mode == "PE" ]]
 then
-    reads_PE1="./../00.Illumina_Reads/SRR4074258_pass_1.fastq.gz" # Please replace the PE reads file name for your own project
-    reads_PE2="./../00.Illumina_Reads/SRR4074258_pass_2.fastq.gz" # Please replace the PE reads file name for your own project
+    reads_PE1="./../00.Short_Reads/SRR4074258_pass_1.fastq.gz" # Please replace the PE reads file name for your own project
+    reads_PE2="./../00.Short_Reads/SRR4074258_pass_2.fastq.gz" # Please replace the PE reads file name for your own project
 else
-    reads_SE="./../00.Illumina_Reads/sample_pass_1.fastq.gz" # Please replace the SE reads file name for your own project if you only have SE data
+    reads_SE="./../00.Short_Reads/sample_pass_1.fastq.gz" # Please replace the SE reads file name for your own project if you only have SE data
 fi
 debug="no" # Whether to keep intermediate files for debugging. Use "yes" if prefer to keep intermediate files, otherwise use "no". Default = "no".
 
@@ -168,7 +168,7 @@ do
     cp $prefix.assembly.pilon.round_${i}.fasta refseq.tmp.fa
 done
 
-ln -s $prefix.assembly.pilon.round_${rounds_of_successive_polishing}.fasta $prefix.assembly.illumina_read_polished.fa
+ln -s $prefix.assembly.pilon.round_${rounds_of_successive_polishing}.fasta $prefix.assembly.short_read_polished.fa
 rm refseq.tmp.fa
 rm -r tmp
 

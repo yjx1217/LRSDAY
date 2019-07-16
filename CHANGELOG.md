@@ -7,12 +7,27 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [1.6.0] - 2019-10-03
+### Added
+- Supports for canu-triobinning assembly mode for phased hybrid genome assembly.
+- Supports for new alternative long-read-assemblers: Ra and Shasta.
+- Supports for new alternative long-read-based polishers: Racon, Medaka, and MarginPolish.
+- Supports for new alternative reference-genome-based scaffolder: RaGOO.
+
+### Changed
+- Better robustness for the dependency installation script.
+- Better treatment for identifying mitochondrial contigs when they contain assembly gaps.
+- Minor adjustment for a few task-specific directory names.
+- Software version updates for a number of dependencies.
+### Fixed
+- A bug that will disrupt long-read-based assembly run when assembler="canu-flye", "canu-wtdbg2" or "canu-smartdenovo" because of deleting a non-existing file.
+
 ## [1.5.0] - 2019-05-13
 ### Added
 - Supports for native ONT nanopore basecalling, demultiplexing, and read profile plotting.
 - An lite-weight bash script for generating dotplot for any pairs of fasta files.
 ### Changed
-- Better robustness for the dependency installation script. 
+- Better robustness for the dependency installation script.
 - Reducing the requirements of setting output prefix by assuming the same prefix was used across different modules.
 - Setting adjustment for long-read filtering and downsampling.
 - Applying read filtering/downsampling for the testing example.

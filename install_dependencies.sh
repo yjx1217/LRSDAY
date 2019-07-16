@@ -1,5 +1,5 @@
 #!/bin/bash
-# last update: 2019/05/13
+# last update: 2019/10/03
 
 set -e -o pipefail
 
@@ -19,8 +19,12 @@ if [ ! -z "$INSTALL_DEPS" ]; then
     xargs -a debiandeps sudo apt-get install -y
 fi
 
+# for reads preparation and preprocessing
 SRA_VERSION="2.9.6" # released on 2019.03.18
 SRA_DOWNLOAD_URL="https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${SRA_VERSION}/sratoolkit.${SRA_VERSION}-centos_linux64.tar.gz"
+
+GUPPY_VERSION="3.2.4" # released on 2019.08.30
+GUPPY_DOWNLOAD_URL="https://mirror.oxfordnanoportal.com/software/analysis/ont-guppy-cpu_${GUPPY_VERSION}_linux64.tar.gz"
 
 PORECHOP_VERSION="0.2.4" # 
 PORECHOP_GITHUB_COMMIT_VERSION="109e437" # committed on 2018.10.19
@@ -30,13 +34,19 @@ FILTLONG_VERSION="0.2.0" #
 FILTLONG_GITHUB_COMMIT_VERSION="d1bb46d" # committed on 2018.05.11
 FILTLONG_DOWNLOAD_URL="https://github.com/rrwick/Filtlong.git"
 
-MINIMAP2_VERSION="2.16" # released on 2019.2.28
+NANOPLOT_VERSION="1.24.0" # released on 2017.11.04
+NUMPY_VERSION="1.16.3"
+SCIPY_VERSION="1.2.1"
+NANOPLOT_DOWNLOAD_URL="https://github.com/wdecoster/NanoPlot.git"
+
+# for genome assembly
+MINIMAP2_VERSION="2.17" # released on 2019.05.05
 MINIMAP2_DOWNLOAD_URL="https://github.com/lh3/minimap2/releases/download/v${MINIMAP2_VERSION}/minimap2-${MINIMAP2_VERSION}_x64-linux.tar.bz2"
 
 CANU_VERSION="1.8" # released on 2018.10.23
 CANU_DOWNLOAD_URL="https://github.com/marbl/canu/releases/download/v${CANU_VERSION}/canu-${CANU_VERSION}.Linux-amd64.tar.xz"
 
-FLYE_VERSION="2.4.2" # released on 2019.04.07
+FLYE_VERSION="2.5" # released on 2019.07.28
 FLYE_DOWNLOAD_URL="https://github.com/fenderglass/Flye/archive/${FLYE_VERSION}.tar.gz"
 
 WTDBG2_VERSION="2.4" # 
@@ -47,31 +57,67 @@ SMARTDENOVO_VERSION="" #
 SMARTDENOVO_GITHUB_COMMIT_VERSION="5cc1356" # committed on 2018.02.19
 SMARTDENOVO_DOWNLOAD_URL="https://github.com/ruanjue/smartdenovo"
 
-RAGOUT_VERSION="2.1.1" # released on 2018.07.30
+RA_VERSION="" # 
+RA_GITHUB_COMMIT_VERSION="07364a1" # committed on 2018.12.11
+RA_DOWNLOAD_URL="https://github.com/lbcb-sci/ra.git"
+
+SHASTA_VERSION="0.1.0" # 
+SHASTA_GITHUB_COMMIT_VERSION="dac5058" # committed on 2019.08.15
+SHASTA_DOWNLOAD_URL="https://github.com/chanzuckerberg/shasta/releases/download/${SHASTA_VERSION}/shasta-Linux-${SHASTA_VERSION}"
+
+# for assembly polishing
+
+MINICONDA2_VERSION="4.5.11" #
+MINICONDA2_DOWNLOAD_URL="https://repo.continuum.io/miniconda/Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh"
+PB_ASSEMBLY_VERSION="0.0.2" #
+BAX2BAM_VERSION="0.0.9" #
+PBMM2_VERSION="1.0.0" #
+
+NANOPOLISH_VERSION="0.11.1" #
+NANOPOLISH_GITHUB_COMMIT_VERSION="ee82bf5" # commited on 2019.03.27 
+NANOPOLISH_DOWNLOAD_URL="https://github.com/jts/nanopolish.git"
+
+PARALLEL_VERSION="20180722" # released on 2018.07.22
+PARALLEL_DOWNLOAD_URL="http://ftp.gnu.org/gnu/parallel/parallel-${PARALLEL_VERSION}.tar.bz2"
+
+RACON_VERSION="1.4.7" # released on 2019.09.18
+RACON_GITHUB_COMMIT_VERSION="7106b64" # commited on 2019.09.18 
+RACON_DOWNLOAD_URL="https://github.com/lbcb-sci/racon.git"
+
+MEDAKA_VERSION="0.8.1" # released on 2019.07.30
+MEDAKA_DOWNLOAD_URL="https://github.com/nanoporetech/medaka/archive/v${MEDAKA_VERSION}.tar.gz"
+
+MARGINPOLISH_VERSION="1.0.0" # released on 2019.07.30
+MARGINPOLISH_GITHUB_COMMIT_VERSION="7b1e687" # commited on 2019.08.02 
+MARGINPOLISH_DOWNLOAD_URL="https://github.com/UCSC-nanopore-cgl/marginPolish.git"
+
+HELEN_VERSION="0.0.1" # released on 2019.08.09
+HELEN_GITHUB_COMMIT_VERSION="b8af9a7" # commited on 2019.08.09 
+HELEN_DOWNLOAD_URL="https://github.com/kishwarshafin/helen.git"
+
+# for assembly scaffolding
+RAGOUT_VERSION="2.2" # released on 2019.04.09
 RAGOUT_DOWNLOAD_URL="https://github.com/fenderglass/Ragout/archive/${RAGOUT_VERSION}.tar.gz"
 
-GUPPY_VERSION="2.3.5" # released on 2019.02.26
-GUPPY_DOWNLOAD_URL="https://mirror.oxfordnanoportal.com/software/analysis/ont-guppy-cpu_${GUPPY_VERSION}_linux64.tar.gz"
-
-NANOPLOT_VERSION="1.0.0" # released on 2017.11.04
-NANOPLOT_DOWNLOAD_URL="https://github.com/wdecoster/NanoPlot.git"
+RAGOO_VERSION="1.1" # released on 2019.06.05
+RAGOO_DOWNLOAD_URL="https://github.com/malonge/RaGOO/archive/v${RAGOO_VERSION}.tar.gz"
 
 # QUAST_VERSION="5.0.1" # one of its dependency needs "csh" to be pre-installed
 
-HDF_VERSION="1.10.1" # 
-HDF_VERSION_prefix=${HDF_VERSION%.*}
-HDF_DOWNLOAD_URL="https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDF_VERSION_prefix}/hdf5-${HDF_VERSION}/src/hdf5-${HDF_VERSION}.tar.gz"
+# HDF_VERSION="1.10.1" # 
+# HDF_VERSION_prefix=${HDF_VERSION%.*}
+# HDF_DOWNLOAD_URL="https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDF_VERSION_prefix}/hdf5-${HDF_VERSION}/src/hdf5-${HDF_VERSION}.tar.gz"
 
-SONLIB_VERSION="" # 
-SONLIB_GITHUB_COMMIT_VERSION="1afbd97" # committed on 2017.08.09
-SONLIB_DOWNLOAD_URL="https://github.com/benedictpaten/sonLib.git"
+# SONLIB_VERSION="" # 
+# SONLIB_GITHUB_COMMIT_VERSION="1afbd97" # committed on 2017.08.09
+# SONLIB_DOWNLOAD_URL="https://github.com/benedictpaten/sonLib.git"
 
-HAL_VERSION="" # not available, so we use the github comit hash below for version control
-HAL_GITHUB_COMMIT_VERSION="a2ad656" # committed on 2017.09.09
-HAL_DOWNLOAD_URL="https://github.com/glennhickey/hal.git"
+# HAL_VERSION="" # not available, so we use the github comit hash below for version control
+# HAL_GITHUB_COMMIT_VERSION="a2ad656" # committed on 2017.09.09
+# HAL_DOWNLOAD_URL="https://github.com/glennhickey/hal.git"
 
-MUMMER_VERSION="4.0.0beta2" # released on 2017.10.14
-MUMMER_DOWNLOAD_URL="https://github.com/gmarcais/mummer/releases/download/v${MUMMER_VERSION}/mummer-${MUMMER_VERSION}.tar.gz"
+MUMMER4_VERSION="4.0.0beta2" # released on 2017.10.14
+MUMMER4_DOWNLOAD_URL="https://github.com/gmarcais/mummer/releases/download/v${MUMMER4_VERSION}/mummer-${MUMMER4_VERSION}.tar.gz"
 
 GNUPLOT_VERSION="4.6.6" # released on 2015.02.18
 GNUPLOT_DOWNLOAD_URL="https://sourceforge.net/projects/gnuplot/files/gnuplot/${GNUPLOT_VERSION}/gnuplot-${GNUPLOT_VERSION}.tar.gz"
@@ -131,7 +177,7 @@ SNOSCAN_VERSION="0.9.1" #
 SNOSCAN_DOWNLOAD_URL="http://eddylab.org/software/snoscan/snoscan.tar.gz"
 
 REPEATMASKER_VERSION="open-4-0-7" #
-REPEATMASKER_DOWNLOAD_URL="http://repeatmasker.org/RepeatMasker-${REPEATMASKER_VERSION}.tar.gz"
+REPEATMASKER_DOWNLOAD_URL="http://www.repeatmasker.org/RepeatMasker-${REPEATMASKER_VERSION}.tar.gz"
 
 TRF_VERSION="409" #
 TRF_DOWNLOAD_URL="http://tandem.bu.edu/trf/downloads/trf${TRF_VERSION}.linux64"
@@ -166,17 +212,6 @@ PROTEINORTHO_DOWNLOAD_URL="https://www.bioinf.uni-leipzig.de/Software/proteinort
 MAKER_VERSION="3.00.0-beta" #
 MAKER_DOWNLOAD_URL="http://topaz.genetics.utah.edu/maker_downloads/static/maker-${MAKER_VERSION}.tgz"
 
-MINICONDA2_VERSION="4.5.11" #
-MINICONDA2_DOWNLOAD_URL="https://repo.continuum.io/miniconda/Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh"
-PB_ASSEMBLY_VERSION="0.0.2" #
-BAX2BAM_VERSION="0.0.9" #
-
-NANOPOLISH_VERSION="0.11.0" #
-NANOPOLISH_GITHUB_COMMIT_VERSION="8b5e605" # commited on 2019.02.22 
-NANOPOLISH_DOWNLOAD_URL="https://github.com/jts/nanopolish.git"
-
-PARALLEL_VERSION="20180722" # released on 2018.07.22
-PARALLEL_DOWNLOAD_URL="http://ftp.gnu.org/gnu/parallel/parallel-${PARALLEL_VERSION}.tar.bz2"
 # for MFannot
 EMBOSS_VERSION="6.5.7" # released on 2012.07.25
 EMBOSS_VERSION_prefix="${EMBOSS_VERSION:0:3}"
@@ -219,7 +254,6 @@ MFANNOT_DATA_DOWNLOAD_URL="https://github.com/BFL-lab/MFannot_data.git"
 MFANNOT_DOWNLOAD_URL="https://github.com/BFL-lab/MFannot.git"
 
 # downloading URLs for dependencies
-# GUPPY_DOWNLOAD_URL="https://mirror.oxfordnanoportal.com/software/analysis/ont-guppy-cpu_${GUPPY_VERSION}_linux64.tar.gz"
 # QUAST_DOWNLOAD_URL="https://downloads.sourceforge.net/project/quast/quast-${QUAST_VERSION}.tar.gz"
 
 
@@ -345,6 +379,29 @@ if [ -z $(check_installed $minimap2_dir) ]; then
     download_and_extract $MINIMAP2_DOWNLOAD_URL "minimap2-${MINIMAP2_VERSION}.tar.bz2"
     note_installed $minimap2_dir
 fi
+PATH=$minimap2_dir:${PATH}
+
+# --------------- samtools -----------------
+samtools_dir="$build_dir/samtools-${SAMTOOLS_VERSION}"
+htslib_dir="$samtools_dir/htslib-${SAMTOOLS_VERSION}"
+tabix_dir="$samtools_dir/htslib-${SAMTOOLS_VERSION}"
+if [ -z $(check_installed $samtools_dir) ]; then
+    cd $build_dir
+    echo "Download samtools-v${SAMTOOLS_VERSION}"
+    download_and_extract $SAMTOOLS_DOWNLOAD_URL "samtools-${SAMTOOLS_VERSION}.tar.bz2"
+    cd $samtools_dir
+    C_INCLUDE_PATH=""
+    ./configure --without-curses;
+    make -j $MAKE_JOBS
+    cd htslib-${SAMTOOLS_VERSION}
+    #autoheader
+    #autoconf
+    ./configure
+    make -j $MAKE_JOBS
+    cd $build_dir
+    note_installed $samtools_dir
+fi
+PATH="$samtools_dir:$htslib_dir:$tabix_dir:${PATH}"
 
 # ------------- Canu -------------------
 canu_dir="$build_dir/canu-${CANU_VERSION}/Linux-amd64/bin"
@@ -400,70 +457,134 @@ if [ -z $(check_installed $smartdenovo_dir) ]; then
     note_installed $smartdenovo_dir
 fi
 
+# --------------- Ra ------------------
+ra_dir="$build_dir/ra/build/bin"
+if [ -z $(check_installed $ra_dir) ]; then
+    cd $build_dir
+    echo "Download Ra-v${RA_VERSION}"
+    git clone --recursive $RA_DOWNLOAD_URL
+    cd ra
+    git checkout -f -q $RA_GITHUB_COMMIT_VERSION
+    mkdir build
+    cd build
+    cmake -DCMAKE_BUILD_TYPE=Release .. 
+    make -j $MAKE_JOBS
+    note_installed $ra_dir
+fi
+
+# --------------- Shasta ------------------
+shasta_dir="$build_dir/shasta-${SHASTA_VERSION}"
+if [ -z $(check_installed $shasta_dir) ]; then
+    cd $build_dir
+    echo "Download Shasta-v${SHASTA_VERSION}"
+    mkdir shasta-${SHASTA_VERSION}
+    cd shasta-${SHASTA_VERSION}
+    wget $SHASTA_DOWNLOAD_URL
+    chmod ugo+x shasta-Linux-${SHASTA_VERSION}
+    ln -s shasta-Linux-${SHASTA_VERSION} shasta
+    note_installed $shasta_dir
+fi
+
+# ------------- Conda-PacBio --------------------
+miniconda2_dir="$build_dir/miniconda2/bin"
+conda_pacbio_dir=$build_dir/conda_pacbio_env/bin
+if [ -z $(check_installed $miniconda2_dir) ]; then
+    cd $build_dir
+    download $MINICONDA2_DOWNLOAD_URL "Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh"
+    bash Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh -b -p $build_dir/miniconda2
+    #export PATH="$build_dir/miniconda2/bin:$PATH"
+    $miniconda2_dir/conda config --add channels defaults
+    $miniconda2_dir/conda config --add channels bioconda
+    $miniconda2_dir/conda config --add channels conda-forge
+    $miniconda2_dir/conda create -y -p $build_dir/conda_pacbio_env
+    source $miniconda2_dir/activate $build_dir/conda_pacbio_env
+    $miniconda2_dir/conda install -y hdf5=${HDF_VERSION}
+    $miniconda2_dir/conda install -y -c bioconda samtools=${SAMTOOLS_VERSION} openssl=1.0
+    $miniconda2_dir/conda install -y -c bioconda pb-assembly=${PB_ASSEMBLY_VERSION}
+    $miniconda2_dir/conda install -y -c bioconda bax2bam=${BAX2BAM_VERSION}
+    $miniconda2_dir/conda install -y -c bioconda pbmm2=${PBMM2_VERSION}
+    source $miniconda2_dir/deactivate
+    rm Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh 
+    note_installed $miniconda2_dir
+fi
+
 # --------------- Ragout ------------------
-ragout_dir="$build_dir/Ragout-${RAGOUT_VERSION}/bin"
+
+ragout_dir="$build_dir/conda_ragout_env/Ragout-2.2/bin"
 if [ -z $(check_installed $ragout_dir) ]; then
     cd $build_dir
+    $miniconda2_dir/conda create -y -p $build_dir/conda_ragout_env python=2
+    source $miniconda2_dir/activate $build_dir/conda_ragout_env
+    pip install networkx==2.2
+    echo "Download Ragout-v${RAGOUT_VERSION}"
+    cd $build_dir/conda_ragout_env
     echo "Download Ragout-v${RAGOUT_VERSION}"
     download_and_extract $RAGOUT_DOWNLOAD_URL Ragout-${RAGOUT_VERSION}.tar.gz
     cd Ragout-${RAGOUT_VERSION}
     python2 setup.py build
     python2 ./scripts/install-sibelia.py
+    #conda install -c bioconda ragout=2.2 
+    source $miniconda2_dir/deactivate
     note_installed $ragout_dir
 fi
 
-# --------------- HDF ------------------
-hdf_dir="$build_dir/hdf5/bin"
-h5prefix="-prefix=$build_dir/hdf5"
-if [ -z $(check_installed $hdf_dir) ]; then
+# --------------- RaGOO ------------------
+ragoo_dir="$build_dir/py3_virtualenv_ragoo/bin"
+if [ -z $(check_installed $ragoo_dir) ]; then
     cd $build_dir
-    echo "Download HDF-v${HDF_VERSION}"
-    download_and_extract $HDF_DOWNLOAD_URL "hdf5-${HDF_VERSION}.tar.gz"
-    mkdir hdf5
-    cd hdf5-${HDF_VERSION}
-    ./configure --enable-cxx  --prefix $build_dir/hdf5
-    make -j $MAKE_JOBS
-    make install
-    note_installed $hdf_dir
-fi
-PATH="$hdf_dir:${PATH}"
-
-# --------------- sonLib ------------------
-if [ -z $(check_installed "sonLib") ]; then
-    cd $build_dir
-    git clone $SONLIB_DOWNLOAD_URL
-    cd sonLib
-    git checkout -f -q $SONLIB_GITHUB_COMMIT_VERSION
-    make -j $MAKE_JOBS
-    note_installed "$build_dir/sonLib"
+    virtualenv -p $(which python3) py3_virtualenv_ragoo
+    source py3_virtualenv_ragoo/bin/activate
+    echo "Download RaGOO-v${RAGOO_VERSION}"
+    cd py3_virtualenv_ragoo
+    download_and_extract $RAGOO_DOWNLOAD_URL RaGOO-${RAGOO_VERSION}.tar.gz
+    # bugbug
+    cd RaGOO-${RAGOO_VERSION}
+    #git checkout -f -q $RAGOO_GITHUB_COMMIT_VERSION
+    pip install numpy==${NUMPY_VERSION}
+    python3 setup.py install 
+    deactivate
+    note_installed $ragoo_dir
 fi
 
-# ---------------- HAL -------------------
-hal_dir="$build_dir/hal/bin"
-if [ -z $(check_installed $hal_dir) ]; then
-    cd $build_dir
-    echo "Download HAL-v${HAL_VERSION}"
-    git clone $HAL_DOWNLOAD_URL
-    cd hal
-    git checkout -f -q $HAL_GITHUB_COMMIT_VERSION
-    # Compiling with multiple workers results in build failures
-    # Possible race conditions / build order issues within the project?
-    make
-    note_installed $hal_dir
-fi
+# # --------------- HDF ------------------
+# hdf_dir="$build_dir/hdf5/bin"
+# h5prefix="-prefix=$build_dir/hdf5"
+# if [ -z $(check_installed $hdf_dir) ]; then
+#     cd $build_dir
+#     echo "Download HDF-v${HDF_VERSION}"
+#     download_and_extract $HDF_DOWNLOAD_URL "hdf5-${HDF_VERSION}.tar.gz"
+#     mkdir hdf5
+#     cd hdf5-${HDF_VERSION}
+#     ./configure --enable-cxx  --prefix $build_dir/hdf5
+#     make -j $MAKE_JOBS
+#     make install
+#     note_installed $hdf_dir
+# fi
+# PATH="$hdf_dir:${PATH}"
 
-# --------------- samtools -----------------
-samtools_dir="$build_dir/samtools-${SAMTOOLS_VERSION}"
-if [ -z $(check_installed $samtools_dir) ]; then
-    cd $build_dir
-    echo "Download samtools-v${SAMTOOLS_VERSION}"
-    download_and_extract $SAMTOOLS_DOWNLOAD_URL "samtools-${SAMTOOLS_VERSION}.tar.bz2"
-    cd $samtools_dir
-    C_INCLUDE_PATH=""
-    ./configure --without-curses;
-    make -j $MAKE_JOBS
-    note_installed $samtools_dir
-fi
+# # --------------- sonLib ------------------
+# if [ -z $(check_installed "sonLib") ]; then
+#     cd $build_dir
+#     git clone $SONLIB_DOWNLOAD_URL
+#     cd sonLib
+#     git checkout -f -q $SONLIB_GITHUB_COMMIT_VERSION
+#     make -j $MAKE_JOBS
+#     note_installed "$build_dir/sonLib"
+# fi
+
+# # ---------------- HAL -------------------
+# hal_dir="$build_dir/hal/bin"
+# if [ -z $(check_installed $hal_dir) ]; then
+#     cd $build_dir
+#     echo "Download HAL-v${HAL_VERSION}"
+#     git clone $HAL_DOWNLOAD_URL
+#     cd hal
+#     git checkout -f -q $HAL_GITHUB_COMMIT_VERSION
+#     # Compiling with multiple workers results in build failures
+#     # Possible race conditions / build order issues within the project?
+#     make
+#     note_installed $hal_dir
+# fi
 
 # --------------- gnuplot ------------------
 gnuplot_dir="$build_dir/gnuplot-${GNUPLOT_VERSION}/bin"
@@ -473,7 +594,7 @@ if [ -z $(check_installed $gnuplot_dir) ]; then
     download_and_extract $GNUPLOT_DOWNLOAD_URL "gnuplot-${GNUPLOT_VERSION}.tar.gz"
     cd "$build_dir/gnuplot-${GNUPLOT_VERSION}"
     ./configure --prefix="$build_dir/gnuplot-${GNUPLOT_VERSION}" --disable-wxwidgets
-    make
+    make -j $MAKE_JOBS
     make install
     note_installed $gnuplot_dir
 fi
@@ -496,10 +617,114 @@ if [ -z $(check_installed $nanoplot_dir) ]; then
     source py3_virtualenv_nanoplot/bin/activate
     py3_virtualenv_nanoplot/bin/pip install --upgrade pip
     py3_virtualenv_nanoplot/bin/pip install --upgrade setuptools
-    py3_virtualenv_nanoplot/bin/pip install numpy  
-    py3_virtualenv_nanoplot/bin/pip install NanoPlot
+    py3_virtualenv_nanoplot/bin/pip install numpy==${NUMPY_VERSION}
+    py3_virtualenv_nanoplot/bin/pip install scipy==${SCIPY_VERSION}
+    py3_virtualenv_nanoplot/bin/pip install NanoPlot==${NANOPLOT_VERSION}
     deactivate
     note_installed $nanoplot_dir
+fi
+
+# ------------- NANOPOLISH --------------------
+nanopolish_dir="$build_dir/nanopolish"
+nanopolish_virtualenv_dir="$build_dir/nanopolish/py3_virtualenv_nanopolish/bin"
+if [ -z $(check_installed $nanopolish_dir) ]; then
+    cd $build_dir
+    echo "Download nanopolish-v${NANOPOLISH_VERSION}"
+    git clone --recursive $NANOPOLISH_DOWNLOAD_URL
+    cd $nanopolish_dir
+    git checkout -f -q $NANOPOLISH_GITHUB_COMMIT_VERSION
+    make
+    virtualenv -p $(which python3) py3_virtualenv_nanopolish
+    source py3_virtualenv_nanopolish/bin/activate
+    py3_virtualenv_nanopolish/bin/pip install biopython
+    py3_virtualenv_nanopolish/bin/pip install pysam
+    deactivate
+    rm *.tar.gz
+    rm *.tar.bz2
+    note_installed $nanopolish_dir
+fi
+
+# --------------- parallel ------------------
+parallel_dir="$build_dir/parallel-${PARALLEL_VERSION}/bin"
+if [ -z $(check_installed $parallel_dir) ]; then
+    cd $build_dir
+    echo "Download parallel"
+    download_and_extract $PARALLEL_DOWNLOAD_URL "parallel_v${PARALLEL_VERSION}.tar.bz2"
+    cd parallel-${PARALLEL_VERSION}
+    ./configure --prefix="$build_dir/parallel-${PARALLEL_VERSION}"
+    make -j $MAKE_JOBS
+    make install
+    parallel_dir="$build_dir/parallel-${PARALLEL_VERSION}/bin"
+    note_installed $parallel_dir
+fi
+
+# --------------- Racon -----------------
+racon_dir="$build_dir/racon/build/bin"
+if [ -z $(check_installed $racon_dir) ]; then
+    cd $build_dir
+    echo "Download racon-v${RACON_VERSION}"
+    git clone --recursive $RACON_DOWNLOAD_URL
+    cd racon
+    git checkout -f -q $RACON_GITHUB_COMMIT_VERSION
+    mkdir build
+    cd build
+    cmake -DCMAKE_BUILD_TYPE=Release ..
+    make -j $MAKE_JOBS
+    note_installed $racon_dir
+fi
+
+# --------------- Medaka -----------------
+conda_medaka_dir="$build_dir/conda_medaka_env"
+if [ -z $(check_installed $conda_medaka_dir) ]; then
+    cd $build_dir
+    $miniconda2_dir/conda create -y -p $build_dir/conda_medaka_env
+    source $miniconda2_dir/activate $build_dir/conda_medaka_env
+    $miniconda2_dir/conda install -y -c bioconda medaka=${MEDAKA_VERSION}
+    source $miniconda2_dir/deactivate
+    conda_medaka_dir="$build_dir/conda_medaka_env/bin"
+    note_installed $conda_medaka_dir
+fi
+
+# --------------- MarginPolish -----------------
+marginpolish_dir="$build_dir/marginPolish/build"
+if [ -z $(check_installed $marginpolish_dir) ]; then
+    cd $build_dir
+    echo "Download MarginPolish-v${MARGINPOLISH_VERSION}"
+    git clone --recursive $MARGINPOLISH_DOWNLOAD_URL
+    cd marginPolish
+    git checkout -f -q $MARGINPOLISH_GITHUB_COMMIT_VERSION
+    git submodule update --init
+    mkdir build
+    cd build
+    cmake ..
+    make -j $MAKE_JOBS
+    note_installed $marginpolish_dir
+fi
+
+# --------------- HELEN -----------------
+helen_dir="$build_dir/helen/build"
+helen_virtualenv_dir="$build_dir/helen/py3_virtualenv_helen/bin"
+if [ -z $(check_installed $helen_dir) ]; then
+    cd $build_dir
+    echo "Download racon-v${HELEN_VERSION}"
+    git clone $HELEN_DOWNLOAD_URL
+    cd helen
+    git checkout -f -q $HELEN_GITHUB_COMMIT_VERSION
+    mkdir build
+    # virtualenv -p $(which python3) py3_virtualenv_helen
+    # source py3_virtualenv_helen/bin/activate
+    # py3_virtualenv_helen/bin/pip install pybind11
+    # py3_virtualenv_helen/bin/pip install h5py
+    # py3_virtualenv_helen/bin/pip install tqdm
+    # py3_virtualenv_helen/bin/pip install numpy==${NUMPY_VERSION}
+    # #py3_virtualenv_helen/bin/pip install torchnet
+    # py3_virtualenv_helen/bin/pip install pyyaml
+    # cd $helen_dir
+    # cmake .. -Wno-deprecated
+    # make -j $MAKE_JOBS
+    # cd ..
+    # deactivate
+    note_installed $helen_dir
 fi
 
 # ------------- QUAST --------------------
@@ -519,19 +744,19 @@ fi
 #     note_installed $quast_dir
 # fi
 
-# --------------- mummer ------------------
-mummer_dir="$build_dir/mummer-${MUMMER_VERSION}"
-if [ -z $(check_installed $mummer_dir) ]; then
+# --------------- mummer4 ------------------
+mummer4_dir="$build_dir/mummer-${MUMMER4_VERSION}"
+if [ -z $(check_installed $mummer4_dir) ]; then
     cd $build_dir
-    echo "Download mummer-v${MUMMER_VERSION}"
-    download_and_extract $MUMMER_DOWNLOAD_URL "mummer-${MUMMER_VERSION}.tar.gz"
-    echo "$mummer_dir"
-    cd $mummer_dir
+    echo "Download mummer-v${MUMMER4_VERSION}"
+    download_and_extract $MUMMER4_DOWNLOAD_URL "mummer-${MUMMER4_VERSION}.tar.gz"
+    echo "$mummer4_dir"
+    cd $mummer4_dir
     ./configure
     make -j $MAKE_JOBS
-    note_installed $mummer_dir
+    note_installed $mummer4_dir
 fi
-PATH="$mummer_dir:${PATH}"
+PATH="$mummer4_dir:${PATH}"
 
 # --------------- bedtools ------------------
 bedtools_dir="$build_dir/bedtools2/bin"
@@ -925,61 +1150,6 @@ if [ -z $(check_installed $ucsc_dir) ]; then
     note_installed $ucsc_dir
 fi
 
-# ------------- Conda-PacBio --------------------
-miniconda2_dir="$build_dir/miniconda2/bin"
-conda_pacbio_dir=$build_dir/conda_pacbio_env/bin
-if [ -z $(check_installed $miniconda2_dir) ]; then
-    cd $build_dir
-    download $MINICONDA2_DOWNLOAD_URL "Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh"
-    bash Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh -b -p $build_dir/miniconda2
-    #export PATH="$build_dir/miniconda2/bin:$PATH"
-    $miniconda2_dir/conda config --add channels defaults
-    $miniconda2_dir/conda config --add channels bioconda
-    $miniconda2_dir/conda config --add channels conda-forge
-    $miniconda2_dir/conda create -y -p $build_dir/conda_pacbio_env
-    source $miniconda2_dir/activate $build_dir/conda_pacbio_env
-    $miniconda2_dir/conda install -y hdf5=${HDF_VERSION}
-    $miniconda2_dir/conda install -y -c bioconda samtools=${SAMTOOLS_VERSION} openssl=1.0
-    $miniconda2_dir/conda install -y -c bioconda pb-assembly=${PB_ASSEMBLY_VERSION}
-    $miniconda2_dir/conda install -y -c bioconda bax2bam=${BAX2BAM_VERSION}
-    source $miniconda2_dir/deactivate
-    rm Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh 
-    note_installed $miniconda2_dir
-fi
-
-# ------------- NANOPOLISH --------------------
-nanopolish_dir="$build_dir/nanopolish"
-if [ -z $(check_installed $nanopolish_dir) ]; then
-    cd $build_dir
-    echo "Download nanopolish-v${NANOPOLISH_VERSION}"
-    git clone --recursive $NANOPOLISH_DOWNLOAD_URL
-    cd $nanopolish_dir
-    git checkout -f -q $NANOPOLISH_GITHUB_COMMIT_VERSION
-    make
-    virtualenv -p $(which python3) py3_virtualenv_nanopolish
-    source py3_virtualenv_nanopolish/bin/activate
-    py3_virtualenv_nanopolish/bin/pip install biopython
-    py3_virtualenv_nanopolish/bin/pip install pysam
-    deactivate
-    rm *.tar.gz
-    rm *.tar.bz2
-    note_installed $nanopolish_dir
-fi
-
-# --------------- parallel ------------------
-parallel_dir="$build_dir/parallel-${PARALLEL_VERSION}/bin"
-if [ -z $(check_installed $parallel_dir) ]; then
-    cd $build_dir
-    echo "Download parallel"
-    download_and_extract $PARALLEL_DOWNLOAD_URL "parallel_v${PARALLEL_VERSION}.tar.bz2"
-    cd parallel-${PARALLEL_VERSION}
-    ./configure --prefix="$build_dir/parallel-${PARALLEL_VERSION}"
-    make -j $MAKE_JOBS
-    make install
-    parallel_dir="$build_dir/parallel-${PARALLEL_VERSION}/bin"
-    note_installed $parallel_dir
-fi
-
 # --------------- EMBOSS ------------------
 emboss_dir="$build_dir/EMBOSS-${EMBOSS_VERSION}/emboss"
 if [ -z $(check_installed $emboss_dir) ]; then
@@ -1142,6 +1312,7 @@ fi
 cd $LRSDAY_HOME
 echo "Configuring executable paths ..."
 echo "export LRSDAY_HOME=${LRSDAY_HOME}" > env.sh
+echo "export build_dir=${build_dir}" >> env.sh
 echo "export PYTHONPATH=${PYTHONPATH}" >> env.sh
 echo "export PERL5LIB=${PERL5LIB}" >> env.sh 
 echo "export cpanm_dir=${cpanm_dir}" >> env.sh
@@ -1153,14 +1324,27 @@ echo "export canu_dir=${canu_dir}" >> env.sh
 echo "export flye_dir=${flye_dir}" >> env.sh
 echo "export wtdbg2_dir=${wtdbg2_dir}" >> env.sh
 echo "export smartdenovo_dir=${smartdenovo_dir}" >> env.sh
+echo "export ra_dir=${ra_dir}" >> env.sh
+echo "export shasta_dir=${shasta_dir}" >> env.sh
+echo "export miniconda2_dir=${miniconda2_dir}" >> env.sh
+echo "export conda_pacbio_dir=${conda_pacbio_dir}" >> env.sh
 echo "export guppy_dir=${guppy_dir}" >> env.sh
 echo "export nanoplot_dir=${nanoplot_dir}" >> env.sh
+echo "export nanopolish_dir=${nanopolish_dir}" >> env.sh
+echo "export nanopolish_virtualenv_dir=${nanopolish_virtualenv_dir}" >> env.sh
+echo "export parallel_dir=${parallel_dir}" >> env.sh
+echo "export conda_medaka_dir=${conda_medaka_dir}" >> env.sh
+echo "export racon_dir=${racon_dir}" >> env.sh
+echo "export marginpolish_dir=${marginpolish_dir}" >> env.sh
+echo "export helen_dir=${helen_dir}" >> env.sh
+echo "export helen_virtualenv_dir=${helen_virtualenv_dir}" >> env.sh
 # echo "export quast_dir=${quast_dir}" >> env.sh
 echo "export ragout_dir=${ragout_dir}" >> env.sh
-echo "export hdf_dir=${hdf_dir}" >> env.sh
-echo "export h5prefix=${h5prefix}" >> env.sh
-echo "export hal_dir=${hal_dir}" >> env.sh
-echo "export mummer_dir=${mummer_dir}" >> env.sh
+echo "export ragoo_dir=${ragoo_dir}" >> env.sh
+# echo "export hdf_dir=${hdf_dir}" >> env.sh
+# echo "export h5prefix=${h5prefix}" >> env.sh
+# echo "export hal_dir=${hal_dir}" >> env.sh
+echo "export mummer4_dir=${mummer4_dir}" >> env.sh
 echo "export gnuplot_dir=${gnuplot_dir}" >> env.sh
 echo "export bedtools_dir=${bedtools_dir}" >> env.sh
 echo "export spades_dir=${spades_dir}" >> env.sh
@@ -1196,10 +1380,6 @@ echo "export maker_dir=${maker_dir}" >> env.sh
 echo "export proteinortho_dir=${proteinortho_dir}" >> env.sh
 echo "export gatk3_dir=${gatk3_dir}" >> env.sh
 echo "export ucsc_dir=${ucsc_dir}" >> env.sh
-echo "export miniconda2_dir=${miniconda2_dir}" >> env.sh
-echo "export conda_pacbio_dir=${conda_pacbio_dir}" >> env.sh
-echo "export nanopolish_dir=${nanopolish_dir}" >> env.sh
-echo "export parallel_dir=${parallel_dir}" >> env.sh
 
 ######### for Mfannot  ###########
 echo "export emboss_dir=${emboss_dir}" >> env.sh

@@ -78,7 +78,7 @@ sub parse_fasta_file {
             next;
         } elsif (/^\s*\#/) {
             next;
-        } elsif (/^>(.*)/) {
+        } elsif (/^>(\S+)/) {
             $seq_name = $1;
             $seq{$seq_name} = "";
         } else {
