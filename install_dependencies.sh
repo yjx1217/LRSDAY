@@ -1,5 +1,5 @@
 #!/bin/bash
-# last update: 2019/10/03
+# last update: 2020/05/07
 
 set -e -o pipefail
 
@@ -67,7 +67,7 @@ SHASTA_DOWNLOAD_URL="https://github.com/chanzuckerberg/shasta/releases/download/
 
 # for assembly polishing
 
-MINICONDA2_VERSION="4.5.11" #
+MINICONDA2_VERSION="4.5.11" # 
 MINICONDA2_DOWNLOAD_URL="https://repo.continuum.io/miniconda/Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh"
 PB_ASSEMBLY_VERSION="0.0.2" #
 BAX2BAM_VERSION="0.0.9" #
@@ -82,7 +82,8 @@ PARALLEL_DOWNLOAD_URL="http://ftp.gnu.org/gnu/parallel/parallel-${PARALLEL_VERSI
 
 RACON_VERSION="1.4.7" # released on 2019.09.18
 RACON_GITHUB_COMMIT_VERSION="7106b64" # commited on 2019.09.18 
-RACON_DOWNLOAD_URL="https://github.com/lbcb-sci/racon.git"
+#RACON_DOWNLOAD_URL="https://github.com/lbcb-sci/racon.git"
+RACON_DOWNLOAD_URL="https://github.com/lbcb-sci/racon/releases/download/${RACON_VERSION}/racon-v${RACON_VERSION}.tar.gz"
 
 MEDAKA_VERSION="0.8.1" # released on 2019.07.30
 MEDAKA_DOWNLOAD_URL="https://github.com/nanoporetech/medaka/archive/v${MEDAKA_VERSION}.tar.gz"
@@ -496,10 +497,10 @@ if [ -z $(check_installed $miniconda2_dir) ]; then
     $miniconda2_dir/conda config --add channels defaults
     $miniconda2_dir/conda config --add channels bioconda
     $miniconda2_dir/conda config --add channels conda-forge
-    $miniconda2_dir/conda create -y -p $build_dir/conda_pacbio_env
+    $miniconda2_dir/conda create -y -p $build_dir/conda_pacbio_env python=2.7
     source $miniconda2_dir/activate $build_dir/conda_pacbio_env
     $miniconda2_dir/conda install -y hdf5=${HDF_VERSION}
-    $miniconda2_dir/conda install -y -c bioconda samtools=${SAMTOOLS_VERSION} openssl=1.0
+    $miniconda2_dir/conda install -y -c bioconda samtools=${SAMTOOLS_VERSION} openssl=1.0 
     $miniconda2_dir/conda install -y -c bioconda pb-assembly=${PB_ASSEMBLY_VERSION}
     $miniconda2_dir/conda install -y -c bioconda bax2bam=${BAX2BAM_VERSION}
     $miniconda2_dir/conda install -y -c bioconda pbmm2=${PBMM2_VERSION}
@@ -513,7 +514,7 @@ fi
 ragout_dir="$build_dir/conda_ragout_env/Ragout-2.2/bin"
 if [ -z $(check_installed $ragout_dir) ]; then
     cd $build_dir
-    $miniconda2_dir/conda create -y -p $build_dir/conda_ragout_env python=2
+    $miniconda2_dir/conda create -y -p $build_dir/conda_ragout_env python=2.7
     source $miniconda2_dir/activate $build_dir/conda_ragout_env
     pip install networkx==2.2
     echo "Download Ragout-v${RAGOUT_VERSION}"
@@ -659,13 +660,12 @@ if [ -z $(check_installed $parallel_dir) ]; then
 fi
 
 # --------------- Racon -----------------
-racon_dir="$build_dir/racon/build/bin"
+racon_dir="$build_dir/racon-v${RACON_VERSION}/build/bin"
 if [ -z $(check_installed $racon_dir) ]; then
     cd $build_dir
     echo "Download racon-v${RACON_VERSION}"
-    git clone --recursive $RACON_DOWNLOAD_URL
-    cd racon
-    git checkout -f -q $RACON_GITHUB_COMMIT_VERSION
+    download_and_extract $RACON_DOWNLOAD_URL "racon-v${RACON_VERSION}.tar.gz"
+    cd racon-v${RACON_VERSION}
     mkdir build
     cd build
     cmake -DCMAKE_BUILD_TYPE=Release ..
@@ -677,12 +677,12 @@ fi
 conda_medaka_dir="$build_dir/conda_medaka_env"
 if [ -z $(check_installed $conda_medaka_dir) ]; then
     cd $build_dir
-    $miniconda2_dir/conda create -y -p $build_dir/conda_medaka_env
+    $miniconda2_dir/conda create -y -p $build_dir/conda_medaka_env python=3.6
     source $miniconda2_dir/activate $build_dir/conda_medaka_env
     $miniconda2_dir/conda install -y -c bioconda medaka=${MEDAKA_VERSION}
     source $miniconda2_dir/deactivate
-    conda_medaka_dir="$build_dir/conda_medaka_env/bin"
     note_installed $conda_medaka_dir
+    conda_medaka_dir="$build_dir/conda_medaka_env/bin"
 fi
 
 # --------------- MarginPolish -----------------
