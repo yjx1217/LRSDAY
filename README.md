@@ -43,7 +43,7 @@ This protocol is designed for a desktop or computing server running an x86-64-bi
 ### Software or library requirements
 * bash (https://www.gnu.org/software/bash/)
 * bzip2 and libbz2-dev (http://www.bzip.org/)
-* cmake (https://cmake.org/)
+* cmake v3.2 or newer (https://cmake.org/)
 * gcc and g++ v4.9.1 or newer (https://gcc.gnu.org/)
 * ghostscript (https://www.ghostscript.com)
 * git (https://git-scm.com/)

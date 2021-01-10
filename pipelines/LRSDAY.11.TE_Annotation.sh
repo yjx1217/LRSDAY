@@ -39,34 +39,55 @@ done
 
 TY2_query="$LRSDAY_HOME/data/TY2_specific_region.fa"
 
+
 db="$prefix.TY_REannotate.complete.TY1TY2.raw.fa"
 db_tag="complete_TY1TY2_db"
-$blast_dir/makeblastdb  -in $db  -dbtype nucl -title $db_tag -hash_index -out $db_tag
-$blast_dir/blastn -task blastn -query $TY2_query -num_threads $threads -db $db_tag -outfmt 7 >$prefix.$db_tag.blastn.fmt7.out
-perl $LRSDAY_HOME/scripts/filter_blast_result.pl -i $prefix.$db_tag.blastn.fmt7.out -pct_identity_cutoff 95 -aln_length_cutoff 500 -o $prefix.$db_tag.blastn.fmt7.I95L500.out
-cat $prefix.$db_tag.blastn.fmt7.I95L500.out |egrep -v "^#" |cut -f 2  > $prefix.TY_REannotate.complete.TY2.list
-comm -23 <(sort $prefix.TY_REannotate.complete.TY1TY2.raw.list) <(sort $prefix.TY_REannotate.complete.TY2.list) > $prefix.TY_REannotate.complete.TY1.list
-cat $prefix.TY_REannotate.complete.TY1.list | sed "s/TY2/TY1/g" >$prefix.TY_REannotate.complete.TY1.final.list
-cat $prefix.TY_REannotate.complete.TY2.list | sed "s/TY1/TY2/g" >$prefix.TY_REannotate.complete.TY2.final.list
+if [ ! -s "$db" ]
+then
+    echo "$db is empty, skip .."
+    touch $prefix.TY_REannotate.complete.TY1.final.list
+    touch $prefix.TY_REannotate.complete.TY2.final.list
+else
+    $blast_dir/makeblastdb  -in $db  -dbtype nucl -title $db_tag -hash_index -out $db_tag
+    $blast_dir/blastn -task blastn -query $TY2_query -num_threads $threads -db $db_tag -outfmt 7 >$prefix.$db_tag.blastn.fmt7.out
+    perl $LRSDAY_HOME/scripts/filter_blast_result.pl -i $prefix.$db_tag.blastn.fmt7.out -pct_identity_cutoff 95 -aln_length_cutoff 500 -o $prefix.$db_tag.blastn.fmt7.I95L500.out
+    cat $prefix.$db_tag.blastn.fmt7.I95L500.out |egrep -v "^#" |cut -f 2  > $prefix.TY_REannotate.complete.TY2.list
+    comm -23 <(sort $prefix.TY_REannotate.complete.TY1TY2.raw.list) <(sort $prefix.TY_REannotate.complete.TY2.list) > $prefix.TY_REannotate.complete.TY1.list
+    cat $prefix.TY_REannotate.complete.TY1.list | sed "s/TY2/TY1/g" >$prefix.TY_REannotate.complete.TY1.final.list
+    cat $prefix.TY_REannotate.complete.TY2.list | sed "s/TY1/TY2/g" >$prefix.TY_REannotate.complete.TY2.final.list
+fi
 
 db="$prefix.TY_REannotate.truncated.TY1TY2.raw.fa"
 db_tag="truncated_TY1TY2_db"
-$blast_dir/makeblastdb  -in $db  -dbtype nucl -title $db_tag -hash_index -out $db_tag
-$blast_dir/blastn -task blastn -query $TY2_query -num_threads $threads -db $db_tag -outfmt 7 >$prefix.$db_tag.blastn.fmt7.out
-perl $LRSDAY_HOME/scripts/filter_blast_result.pl -i $prefix.$db_tag.blastn.fmt7.out -pct_identity_cutoff 95 -aln_length_cutoff 100 -o $prefix.$db_tag.blastn.fmt7.I95L100.out
-cat $prefix.$db_tag.blastn.fmt7.I95L100.out |egrep -v "^#" |cut -f 2 > $prefix.TY_REannotate.truncated.TY2.list
-comm -23 <(sort $prefix.TY_REannotate.truncated.TY1TY2.raw.list) <(sort $prefix.TY_REannotate.truncated.TY2.list) > $prefix.TY_REannotate.truncated.TY1.list
-cat $prefix.TY_REannotate.truncated.TY1.list |sed "s/TY2/TY1/g" >$prefix.TY_REannotate.truncated.TY1.final.list
-cat $prefix.TY_REannotate.truncated.TY2.list |sed "s/TY1/TY2/g" >$prefix.TY_REannotate.truncated.TY2.final.list
+if [ ! -s "$db" ]
+then
+    echo "$db is empty, skip .."
+    touch $prefix.TY_REannotate.truncated.TY1.final.list
+    touch $prefix.TY_REannotate.truncated.TY2.final.list
+else
+    $blast_dir/makeblastdb  -in $db  -dbtype nucl -title $db_tag -hash_index -out $db_tag
+    $blast_dir/blastn -task blastn -query $TY2_query -num_threads $threads -db $db_tag -outfmt 7 >$prefix.$db_tag.blastn.fmt7.out
+    perl $LRSDAY_HOME/scripts/filter_blast_result.pl -i $prefix.$db_tag.blastn.fmt7.out -pct_identity_cutoff 95 -aln_length_cutoff 100 -o $prefix.$db_tag.blastn.fmt7.I95L100.out
+    cat $prefix.$db_tag.blastn.fmt7.I95L100.out |egrep -v "^#" |cut -f 2 > $prefix.TY_REannotate.truncated.TY2.list
+    comm -23 <(sort $prefix.TY_REannotate.truncated.TY1TY2.raw.list) <(sort $prefix.TY_REannotate.truncated.TY2.list) > $prefix.TY_REannotate.truncated.TY1.list
+    cat $prefix.TY_REannotate.truncated.TY1.list |sed "s/TY2/TY1/g" >$prefix.TY_REannotate.truncated.TY1.final.list
+    cat $prefix.TY_REannotate.truncated.TY2.list |sed "s/TY1/TY2/g" >$prefix.TY_REannotate.truncated.TY2.final.list
+fi
 
 db="$LRSDAY_HOME/data/TY_lib.Yue_et_al_2017_NG.LTRonly.fa"
 db_tag="soloLTR_db";
-LTR_query="$prefix.TY_REannotate.soloLTR.raw.fa"
-$blast_dir/makeblastdb  -in $db  -dbtype nucl -title $db_tag -hash_index -out $db_tag
-$blast_dir/blastn  -task blastn -query $LTR_query -num_threads $threads -db $db_tag -outfmt 7 >$prefix.$db_tag.soloLTR.blastn.fmt7.out
-perl $LRSDAY_HOME/scripts/trim_soloLTR_by_blast.pl -q $LTR_query -b  $prefix.$db_tag.soloLTR.blastn.fmt7.out -p $prefix  -i 70 -l 100
-$bedtools_dir/bedtools sort  -i  $prefix.TY_REannotate.soloLTR.refined.gff > $prefix.TY_REannotate.soloLTR.refined.sorted.gff
-perl $LRSDAY_HOME/scripts/rm_overlap_features_from_gff_simple.pl  -r ./../genome.fa  -i $prefix.TY_REannotate.soloLTR.refined.sorted.gff -o $prefix.TY_soloLTR.refined.nr.gff 
+if [ ! -s "$db" ]
+then
+    echo "$db is empty, skip .."
+    touch $prefix.TY_soloLTR.refined.nr.gff
+else
+    LTR_query="$prefix.TY_REannotate.soloLTR.raw.fa"
+    $blast_dir/makeblastdb  -in $db  -dbtype nucl -title $db_tag -hash_index -out $db_tag
+    $blast_dir/blastn  -task blastn -query $LTR_query -num_threads $threads -db $db_tag -outfmt 7 >$prefix.$db_tag.soloLTR.blastn.fmt7.out
+    perl $LRSDAY_HOME/scripts/trim_soloLTR_by_blast.pl -q $LTR_query -b  $prefix.$db_tag.soloLTR.blastn.fmt7.out -p $prefix  -i 70 -l 100
+    $bedtools_dir/bedtools sort  -i  $prefix.TY_REannotate.soloLTR.refined.gff > $prefix.TY_REannotate.soloLTR.refined.sorted.gff
+    perl $LRSDAY_HOME/scripts/rm_overlap_features_from_gff_simple.pl  -r ./../genome.fa  -i $prefix.TY_REannotate.soloLTR.refined.sorted.gff -o $prefix.TY_soloLTR.refined.nr.gff 
+fi
 
 for i in {1..5}
 do

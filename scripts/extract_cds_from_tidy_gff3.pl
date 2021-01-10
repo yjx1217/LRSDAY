@@ -6,7 +6,7 @@ use Getopt::Long;
 ##############################################################
 #  script: extract_cds_from_tidy_gff3.pl
 #  author: Jia-Xing Yue (GitHub ID: yjx1217)
-#  last edited: 2017.06.17
+#  last edited: 2020.01.07
 #  description: extract CDS sequences from GFF3 file
 #  example: perl extract_cds_from_tidy_gff3.pl -r genome.fa.gz -g genome.gff3 -o genome.cds.fa
 ##############################################################
@@ -48,7 +48,8 @@ foreach my $chr (@refseq) {
 		if ($mRNA_strand eq '+') {
 		    $mRNA_seq = $mRNA_seq . $cds_seq;
 		} else {
-		    $mRNA_seq = $cds_seq . $mRNA_seq;
+		    $mRNA_seq = $mRNA_seq . $cds_seq;
+		    # $mRNA_seq = $cds_seq . $mRNA_seq;
 		}
 	    }
 	    
