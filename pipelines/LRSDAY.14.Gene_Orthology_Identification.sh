@@ -7,7 +7,7 @@ source ./../../env.sh
 #######################################
 # set project-specific variables
 prefix="SK1" # The file name prefix for the processing sample. Default = "SK1" for the testing example.
-threads=1 # The number of threads to use. Default = "1".
+threads=10 # The number of threads to use. Default = "1".
 
 input_nuclear_gene_gff="./../09.Nuclear_Gene_Annotation/$prefix.nuclear_genome.EVM.gff3" # The file path of the input nuclear gene gff3 file generated in the task 09.Nuclear_Gene_Annotation. Set this variable as well as the following two variables to "" if you want to skip this step for the nuclear gene annotation. 
 query_nuclear_gene_PoFF_faa="./../09.Nuclear_Gene_Annotation/$prefix.nuclear_genome.EVM.PoFF.faa" # The file path of the PoFF.faa file generated in the task 09.Nuclear_Gene_Annotation.
@@ -50,16 +50,16 @@ then
     cp $query_nuclear_gene_PoFF_gff query.nuclear_gene.PoFF.gff
     output_nuclear_gene_gff="$prefix.nuclear_gene.orthology_map.gff3"
     proteinortho_nuclear_gene_input="query.nuclear_gene.PoFF.faa ref.PoFF.faa"
-    perl $proteinortho_dir/proteinortho5.pl -cpus=$threads -blastpath=$blast_dir -singles -synteny -project="$prefix.nuclear_gene" $proteinortho_nuclear_gene_input  
-    perl $LRSDAY_HOME/scripts/update_gff3_by_proteinortho.pl -i $input_nuclear_gene_gff -x $prefix.nuclear_gene.poff -r ref.PoFF.faa -q query.nuclear_gene.PoFF.faa -o $prefix.nuclear_gene.updated.gff3
+    perl $proteinortho_dir/proteinortho6.pl -cpus=$threads -p=blastp -singles -synteny -project="${prefix}_nuclear_gene" $proteinortho_nuclear_gene_input  
+    perl $LRSDAY_HOME/scripts/update_gff3_by_proteinortho.pl -i $input_nuclear_gene_gff -x ${prefix}_nuclear_gene.poff.tsv -r ref.PoFF.faa -q query.nuclear_gene.PoFF.faa -o $prefix.nuclear_gene.updated.gff3
 
-    if [[ $debug == "no" ]]
-    then
-	rm $prefix.nuclear_gene.ffadj-graph
-	rm $prefix.nuclear_gene.blast-graph
-	rm $prefix.nuclear_gene.proteinortho-graph
-	rm $prefix.nuclear_gene.poff-graph
-    fi
+    #if [[ $debug == "no" ]]
+    #then
+    #rm ${prefix}_nuclear_gene.ffadj-graph
+    #rm ${prefix}_nuclear_gene.blast-graph
+    #rm ${prefix}_nuclear_gene.proteinortho-graph
+    #rm ${prefix}_nuclear_gene.poff-graph
+    #fi
 fi
 
 # process mitochondrial gene annotation
@@ -72,16 +72,16 @@ then
     cp $query_mitochondrial_gene_PoFF_gff query.mitochondrial_gene.PoFF.gff
     output_mitochondrial_gene_gff="$prefix.mitochondrial_gene.orthology_map.gff3"
     proteinortho_mitochondrial_gene_input="query.mitochondrial_gene.PoFF.faa ref.PoFF.faa"
-    perl $proteinortho_dir/proteinortho5.pl -cpus=$threads -blastpath=$blast_dir -singles -synteny -project="$prefix.mitochondrial_gene"  $proteinortho_mitochondrial_gene_input  
-    perl $LRSDAY_HOME/scripts/update_gff3_by_proteinortho.pl -i $input_mitochondrial_gene_gff -x $prefix.mitochondrial_gene.poff -r ref.PoFF.faa -q query.mitochondrial_gene.PoFF.faa -o $prefix.mitochondrial_gene.updated.gff3
+    perl $proteinortho_dir/proteinortho6.pl -cpus=$threads -p=blastp -singles -synteny -project="${prefix}_mitochondrial_gene"  $proteinortho_mitochondrial_gene_input  
+    perl $LRSDAY_HOME/scripts/update_gff3_by_proteinortho.pl -i $input_mitochondrial_gene_gff -x ${prefix}_mitochondrial_gene.poff.tsv -r ref.PoFF.faa -q query.mitochondrial_gene.PoFF.faa -o $prefix.mitochondrial_gene.updated.gff3
 
-    if [[ $debug == "no" ]]
-    then
-	rm $prefix.mitochondrial_gene.ffadj-graph
-	rm $prefix.mitochondrial_gene.blast-graph
-	rm $prefix.mitochondrial_gene.proteinortho-graph
-	rm $prefix.mitochondrial_gene.poff-graph
-    fi
+    #if [[ $debug == "no" ]]
+    #then
+    #rm ${prefix}_mitochondrial_gene.ffadj-graph
+    #rm ${prefix}_mitochondrial_gene.blast-graph
+    #rm ${prefix}_mitochondrial_gene.proteinortho-graph
+    #rm ${prefix}_mitochondrial_gene.poff-graph
+    #fi
 fi
 
 
