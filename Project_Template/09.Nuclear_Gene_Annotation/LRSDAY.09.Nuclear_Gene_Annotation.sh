@@ -6,10 +6,11 @@ source ./../../env.sh
 
 #######################################
 # set project-specific variables
-prefix="SK1" # The file name prefix for the processing sample. Default = "SK1" for the testing example.
-genome_assembly="./../07.Supervised_Final_Assembly/$prefix.assembly.final.fa" # The file path of the input genome assembly.
+prefix="CPG_1a" # The file name prefix (only allowing strings of alphabetical letters, numbers, and underscores) for the processing sample. Default = "CPG_1a" for the testing example.          
+
+genome_assembly="./../07.Supervised_Final_Assembly/$prefix.assembly.final.fa" # The file path of the final input genome assembly.
 chrMT_tag="chrMT" # The sequence name for the mitochondrial genome in the final assembly. If there are multiple sequences, use a single ';' to separate them. e.g. "chrMT_part1;chrMT_part2". Default = "chrMT".
-threads=1 # The number of threads to use. Default = "1".
+threads=8 # The number of threads to use. Default = "8".
 maker_opts="$LRSDAY_HOME/misc/maker_opts.customized.ctl" # The configuration file for MAKER. You can edit this file if you have native transciptome/EST data for the strain/species that you sequenced or if you want to adapt it to annotate other eukaryotic organisms. Otherwise, please keep it unchanged. Please note that if this file is in the same directory where this bash script is executed, the file name cannot be "maker_opts.ctl".
 EVM_weights="$LRSDAY_HOME/misc/EVM_weights.customized.txt" # The configuration file for EVM. A list of numeric weight values to be applied to each type of evidence.
 debug="no" # use "yes" if prefer to keep intermediate files, otherwise use "no".
@@ -24,17 +25,16 @@ echo "genome_assembly=$genome_assembly"
 # convert the genome assembly file to all uppercases
 
 echo $chrMT_tag | sed -e "s/;/\n/g" > $genome_tag.assembly.chrMT.list
-$LRSDAY_HOME/scripts/select_fasta_by_list.pl -i $genome_assembly -l $genome_tag.assembly.chrMT.list -m reverse -o $genome_tag.assembly.nuclear_genome.fa
-#$LRSDAY_HOME/scripts/select_fasta_by_list.pl -i $genome_assembly -l $genome_tag.assembly.chrMT.list -m normal -o $genome_tag.assembly.mitochondrial_genome.fa
-
-perl $LRSDAY_HOME/scripts/switch_letter_cases_in_fasta.pl -i $genome_tag.assembly.nuclear_genome.fa -o genome.uppercase.fa -c upper
+perl $LRSDAY_HOME/scripts/select_fasta_by_list.pl -i $genome_assembly -l $genome_tag.assembly.chrMT.list -m reverse -o $genome_tag.assembly.nuclear_genome.fa
+# perl $LRSDAY_HOME/scripts/select_fasta_by_list.pl -i $genome_assembly -l $genome_tag.assembly.chrMT.list -m normal -o $genome_tag.assembly.mitochondrial_genome.fa
+perl $LRSDAY_HOME/scripts/tidy_fasta.pl -i $genome_tag.assembly.nuclear_genome.fa -o $genome_tag.assembly.nuclear_genome.tidy.fa
 
 cp $maker_opts maker_opts.ctl
 cp $LRSDAY_HOME/misc/maker_exe.ctl .
 cp $LRSDAY_HOME/misc/maker_bopts.ctl .
 cp $LRSDAY_HOME/misc/maker_evm.ctl .
 
-$maker_dir/maker -fix_nucleotides -genome genome.uppercase.fa -cpus $threads -base $genome_tag
+$maker_dir/maker -fix_nucleotides -genome $genome_tag.assembly.nuclear_genome.tidy.fa -cpus $threads -base $genome_tag
 
 # $maker_dir/fasta_merge -d $genome_tag.maker.output/${genome_tag}_master_datastore_index.log -o $genome_tag.nuclear_genome.maker.fasta
 $maker_dir/gff3_merge -d $genome_tag.maker.output/${genome_tag}_master_datastore_index.log -n -g -o $genome_tag.nuclear_genome.maker.raw.gff3
@@ -64,7 +64,7 @@ cat $genome_tag.nuclear_genome.maker.raw.protein_coding_gene.gff3 $genome_tag.nu
 mkdir $genome_tag.nuclear_genome.EVM.output
 cd $genome_tag.nuclear_genome.EVM.output
 $EVM_HOME/EvmUtils/partition_EVM_inputs.pl \
-    --genome ./../genome.uppercase.fa \
+    --genome ./../$genome_tag.assembly.nuclear_genome.tidy.fa \
     --gene_predictions ./../$genome_tag.nuclear_genome.maker.combined.gff3 \
     --protein_alignments ./../$genome_tag.nuclear_genome.protein_evidence.gff3 \
     --transcript_alignments ./../$genome_tag.nuclear_genome.est_evidence.gff3 \
@@ -73,7 +73,7 @@ $EVM_HOME/EvmUtils/partition_EVM_inputs.pl \
     --partition_listing $genome_tag.nuclear_genome.partitions_list.out
 
 $EVM_HOME/EvmUtils/write_EVM_commands.pl \
-    --genome ./../genome.uppercase.fa \
+    --genome ./../$genome_tag.assembly.nuclear_genome.tidy.fa \
     --weights $EVM_weights  \
     --gene_predictions ./../$genome_tag.nuclear_genome.maker.combined.gff3 \
     --output_file_name $genome_tag.nuclear_genome.evm.out \
@@ -87,40 +87,51 @@ $EVM_HOME/EvmUtils/recombine_EVM_partial_outputs.pl \
 $EVM_HOME/EvmUtils/convert_EVM_outputs_to_GFF3.pl \
     --partitions $genome_tag.nuclear_genome.partitions_list.out \
     --output $genome_tag.nuclear_genome.evm.out \
-    --genome ./../genome.uppercase.fa
+    --genome ./../$genome_tag.assembly.nuclear_genome.tidy.fa
 
-perl $LRSDAY_HOME/scripts/collect_EVM_gff3.pl -p $genome_tag.nuclear_genome  -r ./../genome.uppercase.fa
+perl $LRSDAY_HOME/scripts/collect_EVM_gff3.pl -p $genome_tag.nuclear_genome  -r ./../$genome_tag.assembly.nuclear_genome.tidy.fa
 
 cat $genome_tag.nuclear_genome.EVM.raw.gff3 ./../$genome_tag.nuclear_genome.maker.raw.tRNA.gff3 > $genome_tag.nuclear_genome.EVM.raw.with_tRNA.gff3
 perl $LRSDAY_HOME/scripts/tidy_maker_gff3.pl \
     -i $genome_tag.nuclear_genome.EVM.raw.with_tRNA.gff3 \
-    -r ./../genome.uppercase.fa \
+    -r ./../$genome_tag.assembly.nuclear_genome.tidy.fa \
     -t $genome_tag \
     -o $genome_tag.nuclear_genome.EVM.gff3
-cp $genome_tag.nuclear_genome.EVM.gff3 ./../$genome_tag.nuclear_genome.EVM.gff3
+cp $genome_tag.nuclear_genome.EVM.gff3 ./../$genome_tag.nuclear_genome.gff3
 cd ..
 
 perl $LRSDAY_HOME/scripts/extract_cds_from_tidy_gff3.pl \
-    -r $genome_assembly \
-    -g $genome_tag.nuclear_genome.EVM.gff3 \
-    -o $genome_tag.nuclear_genome.EVM.cds.fa
+    -r $genome_tag.assembly.nuclear_genome.tidy.fa \
+    -g $genome_tag.nuclear_genome.gff3 \
+    -o $genome_tag.nuclear_genome.cds.fa
 perl $LRSDAY_HOME/scripts/cds2protein.pl \
-    -i $genome_tag.nuclear_genome.EVM.cds.fa \
-    -p $genome_tag.nuclear_genome.EVM \
+    -i $genome_tag.nuclear_genome.cds.fa \
+    -p $genome_tag.nuclear_genome \
     -t 1
 
-perl $LRSDAY_HOME/scripts/prepare_PoFFgff_simple.pl -i $genome_tag.nuclear_genome.EVM.gff3 -o $genome_tag.nuclear_genome.EVM.PoFF.gff 
-perl $LRSDAY_HOME/scripts/prepare_PoFFfaa_simple.pl -i $genome_tag.nuclear_genome.EVM.trimmed_cds.fa -o $genome_tag.nuclear_genome.EVM.PoFF.ffn 
-perl $LRSDAY_HOME/scripts/prepare_PoFFfaa_simple.pl -i $genome_tag.nuclear_genome.EVM.pep.fa -o $genome_tag.nuclear_genome.EVM.PoFF.faa
 
 # filtered out snoRNA annotation since it is still an experimental features suffering from redundant annotations
-cp $genome_tag.nuclear_genome.EVM.gff3 $genome_tag.nuclear_genome.EVM.gff3.tmp
-cat $genome_tag.nuclear_genome.EVM.gff3.tmp | egrep -v "snoRNA" > $genome_tag.nuclear_genome.EVM.gff3
+cp $genome_tag.nuclear_genome.gff3 $genome_tag.nuclear_genome.gff3.tmp
+cat $genome_tag.nuclear_genome.gff3.tmp | egrep -v "snoRNA" > $genome_tag.nuclear_genome.snoRNA_filtered.gff3
+perl $LRSDAY_HOME/scripts/label_pseudogene_in_gff3.pl -i $genome_tag.nuclear_genome.snoRNA_filtered.gff3 -l $genome_tag.nuclear_genome.manual_check.list -o $genome_tag.nuclear_genome.gff3
+
+perl $LRSDAY_HOME/scripts/extract_cds_from_tidy_gff3.pl \
+    -r $genome_tag.assembly.nuclear_genome.tidy.fa \
+    -g $genome_tag.nuclear_genome.gff3 \
+    -o $genome_tag.nuclear_genome.cds.fa
+perl $LRSDAY_HOME/scripts/cds2protein.pl \
+    -i $genome_tag.nuclear_genome.cds.fa \
+    -p $genome_tag.nuclear_genome \
+    -t 1
+
+perl $LRSDAY_HOME/scripts/prepare_PoFFgff_simple.pl -i $genome_tag.nuclear_genome.gff3 -o $genome_tag.nuclear_genome.PoFF.gff 
+perl $LRSDAY_HOME/scripts/prepare_PoFFfaa_simple.pl -i $genome_tag.nuclear_genome.trimmed_cds.fa -o $genome_tag.nuclear_genome.PoFF.ffn 
+perl $LRSDAY_HOME/scripts/prepare_PoFFfaa_simple.pl -i $genome_tag.nuclear_genome.pep.fa -o $genome_tag.nuclear_genome.PoFF.faa
 
 # clean up intermediate files
 if [[ $debug == "no" ]]
 then
-    rm genome.uppercase.fa
+    rm $genome_tag.assembly.nuclear_genome.fa
     rm $genome_tag.nuclear_genome.maker.raw.tRNA.gff3
     rm $genome_tag.nuclear_genome.maker.raw.protein_coding_gene.gff3
     rm $genome_tag.nuclear_genome.maker.raw.protein_coding_gene.single_exon_gene.gff3
@@ -129,9 +140,11 @@ then
     rm $genome_tag.nuclear_genome.est_evidence.for_gene_model_refinement.gff3
     rm $genome_tag.nuclear_genome.protein_evidence.complementary_gene_model.gff3
     rm $genome_tag.nuclear_genome.est_evidence.complementary_gene_model.gff3
-    rm $genome_tag.nuclear_genome.EVM.gff3.tmp
+    rm $genome_tag.nuclear_genome.gff3.tmp
     rm $genome_tag.nuclear_genome.maker.combined.gff3
+    rm $genome_tag.nuclear_genome.snoRNA_filtered.gff3
     rm -rf _Inline
+    rm *.ctl
 fi
 
 ############################

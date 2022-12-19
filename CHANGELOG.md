@@ -5,7 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.7.0] - 2022-12-31
+### Changed
+- Better robunsteness for the dependency installation script.
+- Functional enhancement for the basecalling, demultiplexing, and quality summary of ONT raw fast5 reads.
+- Version updates for multiple genome assemblers.
+- Functional enhancement for the mitochondrial genome assembly.
+- Functional enhancement for the mitochondrial gene annotation.
+- Functional enhancement for the nuclear gene annotation.
+- Functional enhancement for the TE annotation.
+- Functional enhancement for SGD_based orthology identification and tagging.
+- Removal of support for the long-read-assembler: Ra.
+- Removal of support for the long-read-polisher: MarginPolish.
 
 ## [1.6.0] - 2019-10-03
 ### Added

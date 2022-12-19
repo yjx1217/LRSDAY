@@ -1,19 +1,20 @@
 #!/bin/bash
 set -e -o pipefail
 ##########################################
-# load environment variables for LRSDAY
+# load environment variables
 source ./../../env.sh
 PATH=$gnuplot_dir:$PATH
 
 ###########################################
 # set project-specific variables
-prefix="SK1" # The file name prefix for the processing sample. Default = "SK1" for the testing example.
+prefix="CPG_1a" # The file name prefix (only allowing strings of alphabetical letters, numbers, and underscores) for the processing sample. Default = "CPG_1a" for the testing example.         
+
 long_reads="./../00.Long_Reads/$prefix.filtlong.fastq.gz" # The file path of the long reads file (in fastq or fastq.gz format).
-long_reads_type="pacbio-raw" # The long reads data type. Use "pacbio-raw" or "pacbio-corrected" or "nanopore-raw" or "nanopore-corrected". Default = "pacbio-raw" for the testing example
+long_reads_type="nanopore-raw" # The long reads data type. Use "pacbio-raw" or "pacbio-corrected" or "pacbio-hifi" or "nanopore-raw" or "nanopore-corrected" or "nanopore-hq" (QV20 reads). Default = "nanopore-raw" for the testing example.
 genome_size="12.5m" # The estimated genome size with the format of <number>[g|m|k], e.g. 12.5m for 12.5 Mb. Default = "12.5m".
-assembler="canu" # The long-read assembler to use. Use "canu" or "flye" or "wtdbg2" or "smartdenovo" or "ra" or "shasta" or "canu-flye" or "canu-wtdbg2" or "canu-smartdenovo" or "canu-ra" or "canu-shasta". For "canu-flye", "canu-wtdbg2", "canu-smartdenovo", "canu-ra", or "canu-shasta", the assembler canu is used first to generate error-corrected reads from the raw reads and then the assembler flye/wtdbg2/smartdenovo/ra/shasta is used to assemble the genome. Default = "canu".
-customized_canu_parameters="" # When assembler="canu" or "canu-flye", "canu-wtdbg2", "canu-smartdenovo", "canu-ra", or "canu-shasta", users can set customized Canu assembly parameters here when needed. If users want to keep Canu's default parameters or when other assembler is used, simply leave it empty like customized_canu_parameters="". For example users could set customized_canu_parameters="correctedErrorRate=0.04" for high coverage (>60X) PacBio data and customized_canu_parameters="overlapper=mhap;utgReAlign=true" for high coverage (>60X) Nanopore data to improve the assembly speed. When assembling genomes with high heterozygosity, you can could set customized_canu_parameters="corOutCoverage=200;batOptions=-dg 3 -db 3 -dr 1 -ca 500 -cp 50" to avoid collasping haplotypes. As shown in these examples, more than one customized parameters can be set here as long as they are separeted by a semicolon and contained in a pair of double quotes (e.g. customized_canu_parameters="option1=XXX;option2=YYY;option3=ZZZ"). Please consult Canu's manual "http://canu.readthedocs.io/en/latest/faq.html#what-parameters-can-i-tweak" for advanced customization settings. Default = "" for the testing example.
-threads=4 # The number of threads to use. Default = 4.
+assembler="canu" # The long-read assembler to use. Use "canu" or "flye" or "wtdbg2" or "smartdenovo" or "shasta" or "canu-flye" or "canu-wtdbg2" or "canu-smartdenovo" or "canu-shasta". For "canu-flye", "canu-wtdbg2", "canu-smartdenovo", or "canu-shasta", the assembler canu is used first to generate error-corrected reads from the raw reads and then the assembler flye/wtdbg2/smartdenovo/shasta is used to assemble the genome. Default = "canu".
+customized_canu_parameters="" # When assembler="canu" or "canu-flye", "canu-wtdbg2", "canu-smartdenovo", or "canu-shasta", users can set customized Canu assembly parameters here when needed. If users want to keep Canu's default parameters or when other assembler is used, simply leave it empty like customized_canu_parameters="". For example users could set customized_canu_parameters="correctedErrorRate=0.04" for high coverage (>60X) PacBio data and customized_canu_parameters="overlapper=mhap;utgReAlign=true" for high coverage (>60X) Nanopore data to improve the assembly speed. When assembling genomes with high heterozygosity, you can could set customized_canu_parameters="corOutCoverage=200;batOptions=-dg 3 -db 3 -dr 1 -ca 500 -cp 50" to avoid collasping haplotypes. As shown in these examples, more than one customized parameters can be set here as long as they are separeted by a semicolon and contained in a pair of double quotes (e.g. customized_canu_parameters="option1=XXX;option2=YYY;option3=ZZZ"). Please consult Canu's manual "http://canu.readthedocs.io/en/latest/faq.html#what-parameters-can-i-tweak" for advanced customization settings. Default = "" for the testing example.
+threads=8 # The number of threads to use. Default = 8.
 vcf="yes" # Use "yes" if prefer to have vcf file generated to show SNP and INDEL differences between the assembled genome and the reference genome for their uniquely alignable regions. Otherwise use "no". Default = "yes".
 dotplot="yes" # Use "yes" if prefer to plot genome-wide dotplot based on the comparison with the reference genome below. Otherwise use "no". Default = "yes".
 
@@ -23,11 +24,11 @@ then
     ref_genome_raw="./../00.Reference_Genome/S288C.ASM205763v1.fa" # The file path of the raw reference genome. This is only needed when the option "dotplot" or "vcf" has been set as "yes".
 else
     parent1_tag="Parent1" # The name tag for parent1. Default = "Parent1".
-    parent1_short_reads="./../00.Short_Reads/$parent1_tag.illumina.fastq.gz" # The relative path to Illumina reads of parent1 of the long-read sequenced hybrid. This is only needed when the "canu_triobinning_mode" option has been set as "yes". You can combine the R1 and R2 reads into a single fastq file here.
+    parent1_short_reads="./../00.Short_Reads/$parent1_tag.fq.gz" # The relative path to Illumina reads of parent1 of the long-read sequenced hybrid. This is only needed when the "canu_triobinning_mode" option has been set as "yes". You can combine the R1 and R2 reads into a single fastq file here.
     parent1_ref_genome_raw="./../00.Reference_Genome/$parent1_tag.genome.raw.fa" # The relative path to the reference genome of parent1 of the hybrid. This is only needed when the options "canu_triobinning_mode" and "dotplot" (or "canu_triobinning_mode" and "vcf") have been set as "yes". When not available, it can be set to a general reference genome of the organism. 
 
     parent2_tag="Parent2" # The name tag for parent2. Default = "Parent2".
-    parent2_short_reads="./../00.Short_Reads/$parent2_tag.illumina.fastq.gz" # The relative path to Illumina reads of parent2 of the long-read sequenced hybrid. This is only needed when the "canu_triobinning_mode" option has been set as "yes". You can combine the R1 and R2 reads into a single fastq file here.
+    parent2_short_reads="./../00.Short_Reads/$parent2_tag.fq.gz" # The relative path to Illumina reads of parent2 of the long-read sequenced hybrid. This is only needed when the "canu_triobinning_mode" option has been set as "yes". You can combine the R1 and R2 reads into a single fastq file here.
     parent2_ref_genome_raw="./../00.Reference_Genome/$parent2_tag.genome.raw.fa" # The relative path to the reference genome of parent1 of the hybrid. This is only needed when the options "canu_triobinning_mode" and "dotplot" (or "canu_triobinning_mode" and "vcf") have been set as "yes". When not available, it can be set to a general reference genome of the organism. 
 fi
 
@@ -155,21 +156,33 @@ then
     fi
 elif [[ "$assembler" == "flye" ]]
 then
-    if [[ "$long_reads_type" == "pacbio-corrected" ]]
+    if [[ "$long_reads_type" == "pacbio-raw" ]]
+    then
+	long_reads_type="pacbio-raw"
+    elif [[ "$long_reads_type" == "pacbio-corrected" ]]
     then
 	long_reads_type="pacbio-corr"
+    elif [[ "$long_reads_type" == "pacbio-hifi" ]]
+    then
+	long_reads_type="pacbio-hifi"
     elif [[ "$long_reads_type" == "nanopore-raw" ]]
     then
         long_reads_type="nano-raw"
     elif [[ "$long_reads_type" == "nanopore-corrected" ]]
     then
         long_reads_type="nano-corr"
+    elif [[ "$long_reads_type" == "nanopore-hq" ]]
+    then
+        long_reads_type="nano-hq"
     fi
+    source $miniconda3_dir/activate $build_dir/flye_conda_env
     $flye_dir/flye -o $out_dir \
 	-t $threads \
 	-g $genome_size \
+	--keep-haplotypes \
 	--${long_reads_type} $long_reads \
 	-i 2
+    source $miniconda3_dir/deactivate
     perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i $out_dir/assembly.fasta -o $prefix.assembly.$assembler.fa
 elif [[ "$assembler" == "wtdbg2" ]]
 then
@@ -188,33 +201,22 @@ then
     make -f $prefix.mak
     cd ..
     perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i $out_dir/$prefix.dmo.cns  -o $prefix.assembly.$assembler.fa
-elif [[ "$assembler" == "ra" ]]
-then
-    mkdir $out_dir
-    cd $out_dir
-    if [[ "$long_reads_type" == "pacbio-raw" || "$long_reads_type" == "pacbio-corrected" ]]
-    then
-        long_reads_type="pb"
-    elif [[ "$long_reads_type" == "nanopore-raw" || "$long_reads_type" == "nanopore-corrected" ]]
-    then
-        long_reads_type="ont"
-    fi
-    $ra_dir/ra -x $long_reads_type -t $threads ./../$long_reads > $prefix.assembly.$assembler.fa
-    cd ..
-    perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i $out_dir/$prefix.assembly.$assembler.fa -o $prefix.assembly.$assembler.fa
 elif [[ "$assembler" == "shasta" ]]
 then
-    if [[ "$long_reads_type" == "pacbio-raw" || "$long_reads_type" == "pacbio-corrected" ]]
+    if [[ "$long_reads_type" == "pacbio-hifi" ]] 
     then
-        long_reads_type="pb"
-    elif [[ "$long_reads_type" == "nanopore-raw" || "$long_reads_type" == "nanopore-corrected" ]]
+        long_reads_type="HiFi-Oct2021"
+    elif [[ "$long_reads_type" == "nanopore-raw" || "$long_reads_type" == "pacbio-raw" ]]
     then
-        long_reads_type="ont"
+        long_reads_type="Nanopore-Dec2019"
+    elif [[ "$long_reads_type" == "nanopore-corrected" || "$long_reads_type" == "pacbio-corrected" || "$long_reads_type" == "nanopore-hq" ]]
+    then
+	long_reads_type="R10-Slow-Nov2022"
     fi
-    perl $LRSDAY_HOME/scripts/fastq2fasta.pl -i $long_reads -o $prefix.long_reads.fasta
-    $shasta_dir/shasta --input $prefix.long_reads.fasta  --output $out_dir
+    perl $LRSDAY_HOME/scripts/fastq2fasta.pl -i $long_reads -o $prefix.long_reads.fa
+    $shasta_dir/shasta --input $prefix.long_reads.fa --assemblyDirectory $out_dir --config $long_reads_type
     perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i $out_dir/Assembly.fasta -o $prefix.assembly.$assembler.fa
-    rm $prefix.long_reads.fasta
+    rm $prefix.long_reads.fa
 elif [[ "$assembler" == "canu-flye" ]]
 then
     OLDIFS=$IFS;
@@ -230,18 +232,21 @@ then
 	gnuplot=$gnuplot_dir/gnuplot \
 	-${long_reads_type} $long_reads
     mv $prefix.customized_canu_parameters.spec ./$out_dir/canu
-    if [[ "$long_reads_type" == "pacbio-raw" || "$long_reads_type" == "pacbio-corrected" ]]
+    if [[ "$long_reads_type" == "pacbio-raw" || "$long_reads_type" == "pacbio-corrected" || "$long_reads_type" == "pacbio-hifi"  ]]
     then
 	long_reads_type="pacbio-corr"
-    elif [[ "$long_reads_type" == "nanopore-raw" || "$long_reads_type" == "nanopore-corrected" ]]
+    elif [[ "$long_reads_type" == "nanopore-raw" || "$long_reads_type" == "nanopore-corrected" || "$long_reads_type" == "nanopore-hq" ]]
     then
         long_reads_type="nano-corr"
     fi
+    source $miniconda3_dir/activate $build_dir/flye_conda_env
     $flye_dir/flye -o $out_dir/flye \
 	-t $threads \
 	-g $genome_size \
+	--keep-haplotypes \
 	--${long_reads_type} $out_dir/canu/$prefix.correctedReads.fasta.gz \
 	-i 2
+    source $miniconda3_dir/deactivate
     perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i $out_dir/flye/assembly.fasta -o $prefix.assembly.$assembler.fa
 elif [[ "$assembler" == "canu-wtdbg2" ]]
 then
@@ -286,34 +291,6 @@ then
     make -f $prefix.mak
     cd ../..
     perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i $out_dir/smartdenovo/$prefix.dmo.cns  -o $prefix.assembly.$assembler.fa
-elif [[ "$assembler" == "canu-ra" ]]
-then
-    OLDIFS=$IFS;
-    IFS=";"
-    customized_canu_parameters_array=($customized_canu_parameters)
-    IFS=$OLDIFS;
-    printf "%s\n" "${customized_canu_parameters_array[@]}" > $prefix.customized_canu_parameters.spec
-
-    $canu_dir/canu -correct -p $prefix -d $out_dir/canu \
-	-s $prefix.customized_canu_parameters.spec \
-        useGrid=false \
-        maxThreads=$threads \
-        genomeSize=$genome_size \
-        gnuplot=$gnuplot_dir/gnuplot \
-        -${long_reads_type} $long_reads 
-    mv $prefix.customized_canu_parameters.spec ./$out_dir/canu
-    if [[ "$long_reads_type" == "pacbio-raw" || "$long_reads_type" == "pacbio-corrected" ]]
-    then
-	long_reads_type="pb"
-    elif [[ "$long_reads_type" == "nanopore-raw" || "$long_reads_type" == "nanopore-corrected" ]]
-    then
-        long_reads_type="ont"
-    fi
-    mkdir -p $out_dir/ra
-    cd $out_dir/ra
-    $ra_dir/ra -x $long_reads_type -t $threads ./../canu/$prefix.correctedReads.fasta.gz > $prefix.assembly.$assembler.fa
-    cd ../..
-    perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i $out_dir/ra/$prefix.assembly.$assembler.fa -o $prefix.assembly.$assembler.fa
 elif [[ "$assembler" == "canu-shasta" ]]
 then
     OLDIFS=$IFS;
@@ -330,15 +307,14 @@ then
         gnuplot=$gnuplot_dir/gnuplot \
         -${long_reads_type} $long_reads 
     mv $prefix.customized_canu_parameters.spec ./$out_dir/canu
-    if [[ "$long_reads_type" == "pacbio-raw" || "$long_reads_type" == "pacbio-corrected" ]]
+    if [[ "$long_reads_type" == "pacbio-hifi" ]]
     then
-	long_reads_type="pb"
-    elif [[ "$long_reads_type" == "nanopore-raw" || "$long_reads_type" == "nanopore-corrected" ]]
-    then
-        long_reads_type="ont"
+	long_reads_type="HiFi-Oct2021"
+    else
+	long_reads_type="R10-Slow-Nov2022"
     fi
     gunzip < $out_dir/canu/$prefix.correctedReads.fasta.gz > $out_dir/$prefix.correctedReads.fasta
-    $shasta_dir/shasta --input $out_dir/$prefix.correctedReads.fasta  --output $out_dir/shasta
+    $shasta_dir/shasta --input $out_dir/$prefix.correctedReads.fasta --assemblyDirectory $out_dir/shasta --config $long_reads_type
     rm $out_dir/$prefix.correctedReads.fasta
     perl $LRSDAY_HOME/scripts/simplify_seq_name.pl -i $out_dir/shasta/Assembly.fasta -o $prefix.assembly.$assembler.fa
 fi
@@ -441,9 +417,11 @@ fi
 # checking bash exit status
 if [[ $? -eq 0 ]]
 then
+    echo "#########################################################"
     echo ""
     echo "LRSDAY message: This bash script has been successfully processed! :)"
     echo ""
+    echo "#########################################################"
     echo ""
     exit 0
 fi

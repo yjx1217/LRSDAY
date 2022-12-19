@@ -6,7 +6,7 @@ use Getopt::Long;
 ##############################################################
 #  script: TY_list2gff3.pl
 #  author: Jia-Xing Yue (GitHub ID: yjx1217)
-#  last edited: 2017.06.17
+#  last edited: 2022.12.11
 #  description: covert TY_list to GFF3
 #  example: perl TY_list2gff3.pl -i ty.list -o ty.gff3 -t genome_tag
 ##############################################################
@@ -35,6 +35,7 @@ while (<$input_fh>) {
     }
     my $new_id = "$type:$chr:$start-$end:$strand";
     print $output_fh "$chr\t$tag\t$type\t$start\t$end\t.\t$strand\t.\tID=${new_id};Name=${new_id}\n";
+    # print $output_fh "$chr\t$tag\tmobile_element\t$start\t$end\t.\t$strand\t.\tID=${new_id};Name=${new_id};mobile_element_type=$type\n";
 }
 
 sub read_file {

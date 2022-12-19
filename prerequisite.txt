@@ -3,7 +3,7 @@
 #######################################################
 # Hardware, operating system and network requirements
 #######################################################
-This protocol is designed for a desktop or computing server running an x86-64-bit Linux operating system. Multithreaded processors are preferred to speed up the process since many steps can be configured to use multiple threads in parallel. For assembling and analyzing the budding yeast genomes (genome size = ~12.5 Mb), at least 16 Gb of RAM and 100 Gb of free disk space are reccomended. When adapted for other eukaryotic organisms with larger genome sizes, the RAM and disk space consumption will scale up, majorly during de novo genome assembly (performed by Canu). Plese refer to Canu’s manual (http://canu.readthedocs.io/en/latest/) for suggested RAM and disk space consumption for assembling large genomes. Stable Internet connection is required for the installation and configuration of LRSDAY as well as for retrieving the testing data.
+This protocol is designed for a desktop or computing server running an x86-64-bit Linux operating system. Multithreaded processors are preferred to speed up the process since many steps can be configured to use multiple threads in parallel. For assembling and analyzing the budding yeast genomes (genome size = ~12.5 Mb), at least 16 Gb of RAM and 100 Gb of free disk space are reccomended. More disk space is needed if you want to use LRSDAY to do Nanopore basecalling. When adapted for other eukaryotic organisms with larger genome sizes, the RAM and disk space consumption will scale up, majorly during de novo genome assembly (performed by Canu). Plese refer to Canu’s manual (http://canu.readthedocs.io/en/latest/) for suggested RAM and disk space consumption for assembling large genomes. Stable Internet connection is required for the installation and configuration of LRSDAY as well as for retrieving the testing data.
 
 ########################
 # Software requirements
@@ -20,7 +20,7 @@ This protocol is designed for a desktop or computing server running an x86-64-bi
 ● perl v5.12 or newer (https://www.perl.org/)
 ● python v2.7.9 or newer (https://www.python.org/)
 ● python-devel 
-● python v3.4 or newer (https://www.python.org/)
+● python v3.7 or newer (https://www.python.org/)
 ● python3-devel 
 ● tar (https://www.gnu.org/software/tar/)
 ● unzip (http://infozip.sourceforge.net/UnZip.html)

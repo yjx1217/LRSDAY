@@ -65,7 +65,6 @@ my %gff = ();
 my $refseq_fh = read_file($refseq);
 my @chr = get_chr_list($refseq_fh);
 
-
 foreach my $record (@output) {
     my ($chr, $source, $type, $start, $end, $score, $strand, $frame, $attributes) = split /\t/, $record;
     $gff{$type}{$chr}{$start} = $record;

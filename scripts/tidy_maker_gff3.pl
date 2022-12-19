@@ -1,12 +1,13 @@
 #!/usr/bin/perl
 use warnings;
+#use warnings FATAL => 'all';
 use strict;
 use Getopt::Long;
 
 ##############################################################
 #  script: tidy_maker_gff3.pl
 #  author: Jia-Xing Yue (GitHub ID: yjx1217)
-#  last edited: 2017.06.17
+#  last edited: 2022.12.09
 #  description: tidy maker gff3 by re-sorting and re-naming feature IDs
 #  example: perl tidy_maker_gff3.pl -i raw.gff3 -t genome_tag -o tidy.gff3 -r genome.fa(.gz)
 ##############################################################
@@ -35,44 +36,39 @@ foreach my $chr (@refseq) {
     print $output_fh "##sequence-region $chr 1 $chr_length\n";
 }
 
-my $gene_index = 0;
+my $feature_index = 0;
 foreach my $chr (@refseq) { 
-    my @genes_on_chr = ();
-    foreach my $gene_id (sort keys %gff) {
-	if ($gff{$gene_id}{'gene_chr'} eq $chr) {
-	    push @genes_on_chr, $gene_id;
+    my @features_on_chr = ();
+    foreach my $feature_id (sort keys %gff) {
+	if ($gff{$feature_id}{'chr'} eq $chr) {
+	    push @features_on_chr, $feature_id;
 	}
     }
-    foreach my $gene_id (sort {$gff{$a}{'gene_start'} <=> $gff{$b}{'gene_start'} or $gff{$a}{'gene_end'} <=> $gff{$b}{'gene_end'}} @genes_on_chr) {
-	my $gene_type = $gff{$gene_id}{'gene_type'};
-	my $gene_start = $gff{$gene_id}{'gene_start'};
-	my $gene_end = $gff{$gene_id}{'gene_end'};
-	my $gene_score = $gff{$gene_id}{'gene_score'};
-	my $gene_strand = $gff{$gene_id}{'gene_strand'};
-	my $gene_phase = $gff{$gene_id}{'gene_phase'};
-	if ($gene_type ne "gene") {
-	    my $new_gene_id;
-	    if ($gene_type eq "centromere") {
-		$new_gene_id = $gene_id;
-	    } else {
-		$new_gene_id = "$gene_type:$chr:$gene_start-$gene_end:$gene_strand";
-	    }
-	    print $output_fh "$chr\t$tag\t$gene_type\t$gene_start\t$gene_end\t$gene_score\t$gene_strand\t$gene_phase\tID=$new_gene_id;Name=$new_gene_id\n";
+    foreach my $feature_id (sort {$gff{$a}{'start'} <=> $gff{$b}{'start'} or $gff{$a}{'end'} <=> $gff{$b}{'end'}} @features_on_chr) {
+	my $feature_name = $gff{$feature_id}{'feature_name'};
+	my $feature_type = $gff{$feature_id}{'feature_type'};
+	my $feature_start = $gff{$feature_id}{'start'};
+	my $feature_end = $gff{$feature_id}{'end'};
+	my $feature_score = $gff{$feature_id}{'score'};
+	my $feature_strand = $gff{$feature_id}{'strand'};
+	my $feature_phase = $gff{$feature_id}{'phase'};
+	if ($feature_type ne "gene") {
+	    print $output_fh "$chr\t$tag\t$feature_type\t$feature_start\t$feature_end\t$feature_score\t$feature_strand\t$feature_phase\tID=$feature_id;Name=$feature_name\n";
 	} else {
-	    $gene_index += 10;
-	    my $new_gene_id = sprintf("%07d", $gene_index);
-	    $new_gene_id = "${tag}_" . "G" . $new_gene_id;
-	    print $output_fh "$chr\t$tag\tgene\t$gene_start\t$gene_end\t$gene_score\t$gene_strand\t$gene_phase\tID=$new_gene_id;Name=$new_gene_id\n";
-	    foreach my $mRNA_id (sort {$gff{$gene_id}{'mRNA'}{$a}{'mRNA_index'} <=> $gff{$gene_id}{'mRNA'}{$b}{'mRNA_index'}} keys %{$gff{$gene_id}{'mRNA'}}) {
-		my $mRNA_index = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'mRNA_index'};
-		my $mRNA_start = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'mRNA_start'};
-		my $mRNA_end = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'mRNA_end'};
-		my $mRNA_score = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'mRNA_score'};
-		my $mRNA_strand = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'mRNA_strand'};
-		my $mRNA_phase = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'mRNA_phase'};
-		my $new_mRNA_id = "$new_gene_id.mRNA.$mRNA_index";
-		print $output_fh "$chr\t$tag\tmRNA\t$mRNA_start\t$mRNA_end\t$mRNA_score\t$mRNA_strand\t$mRNA_phase\tID=$new_mRNA_id;Name=$new_mRNA_id;Parent=$new_gene_id\n";
-		my @exon_indices = sort {$a <=> $b} keys %{$gff{$gene_id}{'mRNA'}{$mRNA_id}{'exon'}};
+	    $feature_index += 10;
+	    my $new_feature_id = sprintf("%07d", $feature_index);
+	    $new_feature_id = "${tag}_" . "G" . $new_feature_id;
+	    print $output_fh "$chr\t$tag\t$feature_type\t$feature_start\t$feature_end\t$feature_score\t$feature_strand\t$feature_phase\tID=$new_feature_id;Name=$new_feature_id\n";
+	    foreach my $mRNA_id (sort {$gff{$feature_id}{'mRNA'}{$a}{'mRNA_index'} <=> $gff{$feature_id}{'mRNA'}{$b}{'mRNA_index'}} keys %{$gff{$feature_id}{'mRNA'}}) {
+		my $mRNA_index = $gff{$feature_id}{'mRNA'}{$mRNA_id}{'mRNA_index'};
+		my $mRNA_start = $gff{$feature_id}{'mRNA'}{$mRNA_id}{'start'};
+		my $mRNA_end = $gff{$feature_id}{'mRNA'}{$mRNA_id}{'end'};
+		my $mRNA_score = $gff{$feature_id}{'mRNA'}{$mRNA_id}{'score'};
+		my $mRNA_strand = $gff{$feature_id}{'mRNA'}{$mRNA_id}{'strand'};
+		my $mRNA_phase = $gff{$feature_id}{'mRNA'}{$mRNA_id}{'phase'};
+		my $new_mRNA_id = "$new_feature_id.mRNA.$mRNA_index";
+		print $output_fh "$chr\t$tag\tmRNA\t$mRNA_start\t$mRNA_end\t$mRNA_score\t$mRNA_strand\t$mRNA_phase\tID=$new_mRNA_id;Name=$new_mRNA_id;Parent=$new_feature_id\n";
+		my @exon_indices = sort {$a <=> $b} keys %{$gff{$feature_id}{'mRNA'}{$mRNA_id}{'exon'}};
 		my $exon_num = scalar @exon_indices;
 		my $new_exon_index;
 		if ($mRNA_strand eq '+') {
@@ -81,11 +77,11 @@ foreach my $chr (@refseq) {
 		    $new_exon_index = $exon_num + 1;
 		}
 		foreach my $exon_index (@exon_indices) {
-		    my $exon_start = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'exon_start'};
-		    my $exon_end = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'exon_end'};
-		    my $exon_score = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'exon_score'};
-		    my $exon_strand = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'exon_strand'};
-		    my $exon_phase = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'exon_phase'};
+		    my $exon_start = $gff{$feature_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'start'};
+		    my $exon_end = $gff{$feature_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'end'};
+		    my $exon_score = $gff{$feature_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'score'};
+		    my $exon_strand = $gff{$feature_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'strand'};
+		    my $exon_phase = $gff{$feature_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'phase'};
 		    if ($mRNA_strand eq '+') {
 			$new_exon_index++;
 		    } else {
@@ -94,7 +90,7 @@ foreach my $chr (@refseq) {
 		    my $new_exon_id = "$new_mRNA_id.exon.$new_exon_index";
 		    print $output_fh "$chr\t$tag\texon\t$exon_start\t$exon_end\t$exon_score\t$exon_strand\t$exon_phase\tID=$new_exon_id;Name=$new_exon_id;Parent=$new_mRNA_id\n";
 		}
-		my @cds_indices = sort {$a <=> $b} keys %{$gff{$gene_id}{'mRNA'}{$mRNA_id}{'cds'}};
+		my @cds_indices = sort {$a <=> $b} keys %{$gff{$feature_id}{'mRNA'}{$mRNA_id}{'cds'}};
 		my $cds_num = scalar @cds_indices;
 		my $new_cds_index;
 		if ($mRNA_strand eq '+') {
@@ -103,11 +99,11 @@ foreach my $chr (@refseq) {
 		    $new_cds_index = $cds_num + 1;
 		}
 		foreach my $cds_index (@cds_indices) {
-		    my $cds_start = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'cds_start'};
-		    my $cds_end = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'cds_end'};
-		    my $cds_score = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'cds_score'};
-		    my $cds_strand = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'cds_strand'};
-		    my $cds_phase = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'cds_phase'};
+		    my $cds_start = $gff{$feature_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'start'};
+		    my $cds_end = $gff{$feature_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'end'};
+		    my $cds_score = $gff{$feature_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'score'};
+		    my $cds_strand = $gff{$feature_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'strand'};
+		    my $cds_phase = $gff{$feature_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'phase'};
 		    if ($mRNA_strand eq '+') {
 			$new_cds_index++;
 		    } else {
@@ -169,72 +165,109 @@ sub parse_fasta_file {
 sub parse_gff_file {
     my $fh = shift @_;
     my %gff = ();
-    my $gene_id;
-    my $gene_name;
-    my $gene_type;
+    my $feature_id;
+    my $feature_name;
+    my $feature_type;
     my $mRNA_index;
     while (<$fh>) {
 	chomp;
 	/^##FASTA/ and last;
 	/^#/ and next;
 	my ($chr, $source, $type, $start, $end, $score, $strand, $phase, $attributes) = split /\t/, $_;
+	# print "$_\n";
 	if ($type eq "gene") {
-	    ($gene_id, $gene_name) = ($attributes =~ /ID=([^;]+);\S*Name=([^;]+)/);
-	    if ($gene_id =~ /^trnascan/) {
-		$gene_type = "tRNA";
+	    ($feature_id, $feature_name) = ($attributes =~ /ID=([^;]+);\S*Name=([^;]+)/);
+	    if ($feature_id =~ /^trnascan/) {
+		$feature_type = "tRNA";
 		next;
-	    } elsif ($gene_id =~ /^snoscan/) {
-		$gene_type = "snoRNA";
+	    } elsif ($feature_id =~ /^snoscan/) {
+		$feature_type = "snoRNA";
 		next;
 	    } else {
-		$gene_type = "gene";
+		$feature_type = "gene";
 	    }
-	    $gff{$gene_id}{'gene_type'} = $gene_type;
-	    $gff{$gene_id}{'gene_chr'} = $chr;
-	    $gff{$gene_id}{'gene_start'} = $start;
-	    $gff{$gene_id}{'gene_end'} = $end;
-	    $gff{$gene_id}{'gene_strand'} = $strand;
-	    $gff{$gene_id}{'gene_source'} = $source;
-	    $gff{$gene_id}{'gene_score'} = $score;
-	    $gff{$gene_id}{'gene_phase'} = $phase;
+	    $gff{$feature_id}{'feature_type'} = $feature_type;
+	    $gff{$feature_id}{'feature_name'} = $feature_name;
+	    $gff{$feature_id}{'chr'} = $chr;
+	    $gff{$feature_id}{'start'} = $start;
+	    $gff{$feature_id}{'end'} = $end;
+	    $gff{$feature_id}{'strand'} = $strand;
+	    $gff{$feature_id}{'source'} = $source;
+	    $gff{$feature_id}{'score'} = $score;
+	    $gff{$feature_id}{'phase'} = $phase;
 	    $mRNA_index = 0;
 	} elsif ($type eq "centromere") {
-	    $gene_type = $type;
-	    ($gene_id, $gene_name) = ($attributes =~ /ID=([^;]+);\S*Name=([^;]+)/);
-	    $gff{$gene_id}{'gene_type'} = $gene_type;
-            $gff{$gene_id}{'gene_chr'} = $chr;
-            $gff{$gene_id}{'gene_start'} = $start;
-            $gff{$gene_id}{'gene_end'} = $end;
-            $gff{$gene_id}{'gene_strand'} = $strand;
-            $gff{$gene_id}{'gene_source'} = $source;
-            $gff{$gene_id}{'gene_score'} = $score;
-            $gff{$gene_id}{'gene_phase'} = $phase;
+	    $feature_type = $type;
+	    ($feature_id, $feature_name) = ($attributes =~ /ID=([^;]+);\S*Name=([^;]+)/);
+	    $gff{$feature_id}{'feature_type'} = $feature_type;
+	    $gff{$feature_id}{'feature_name'} = $feature_name;
+            $gff{$feature_id}{'chr'} = $chr;
+            $gff{$feature_id}{'start'} = $start;
+            $gff{$feature_id}{'end'} = $end;
+            $gff{$feature_id}{'strand'} = $strand;
+            $gff{$feature_id}{'source'} = $source;
+            $gff{$feature_id}{'score'} = $score;
+            $gff{$feature_id}{'phase'} = $phase;
+	# } elsif ($type eq "mobile_element") {
+	#     $feature_type = $type;
+	#     ($feature_id, $feature_name) = ($attributes =~ /ID=([^;]+);\S*Name=([^;]+\S*mobile_element_type=[^;]+)/);
+	#     $gff{$feature_id}{'feature_type'} = $feature_type;
+	#     $gff{$feature_id}{'feature_name'} = $feature_name;
+        #     $gff{$feature_id}{'chr'} = $chr;
+        #     $gff{$feature_id}{'start'} = $start;
+        #     $gff{$feature_id}{'end'} = $end;
+        #     $gff{$feature_id}{'strand'} = $strand;
+        #     $gff{$feature_id}{'source'} = $source;
+        #     $gff{$feature_id}{'score'} = $score;
+        #     $gff{$feature_id}{'phase'} = $phase;
+	} elsif ($type eq "tRNA") {
+	    $feature_type = $type;
+	    ($feature_id, $feature_name) = ($attributes =~ /ID=([^;]+);\S*Name=([^;]+)/);
+	    # print "feature_id=$feature_id\n";
+	    # print "feature_name=$feature_name\n";
+	    my ($aa, $anticodon) = ($feature_id =~ /noncoding\-([^\_]+)\_([^\_]+)\-gene/);
+	    # print "aa=$aa\n";
+	    # print "anticodon=$anticodon\n";
+	    $feature_id = "$feature_type:$chr:${start}-${end}:$strand";
+	    $feature_name = "tRNA_${aa}($anticodon)";
+	    # print "feature_id=$feature_id, feature_name=$feature_name";
+	    $gff{$feature_id}{'feature_type'} = $feature_type;
+	    $gff{$feature_id}{'feature_name'} = $feature_name;
+            $gff{$feature_id}{'chr'} = $chr;
+            $gff{$feature_id}{'start'} = $start;
+            $gff{$feature_id}{'end'} = $end;
+            $gff{$feature_id}{'strand'} = $strand;
+            $gff{$feature_id}{'source'} = $source;
+            $gff{$feature_id}{'score'} = $score;
+            $gff{$feature_id}{'phase'} = $phase;
 	} elsif ($type !~ /(exon|CDS|mRNA|UTR)/) {
 	    # e.g. type = TY, X-element, Y_prime_element ...
-	    $gene_type = $type;
-	    $gene_id = "$gene_type:$chr:${start}-${end}:$strand";
-	    $gff{$gene_id}{'gene_type'} = $gene_type;
-	    $gff{$gene_id}{'gene_chr'} = $chr;
-	    $gff{$gene_id}{'gene_start'} = $start;
-	    $gff{$gene_id}{'gene_end'} = $end;
-	    $gff{$gene_id}{'gene_strand'} = $strand;
-	    $gff{$gene_id}{'gene_source'} = $source;
-	    $gff{$gene_id}{'gene_score'} = $score;
-	    $gff{$gene_id}{'gene_phase'} = $phase;
+	    $feature_type = $type;
+	    $feature_id = "$feature_type:$chr:${start}-${end}:$strand";
+	    $feature_name = "$feature_type:$chr:${start}-${end}:$strand";
+	    $gff{$feature_id}{'feature_type'} = $feature_type;
+	    $gff{$feature_id}{'feature_name'} = $feature_name;
+	    $gff{$feature_id}{'chr'} = $chr;
+	    $gff{$feature_id}{'start'} = $start;
+	    $gff{$feature_id}{'end'} = $end;
+	    $gff{$feature_id}{'strand'} = $strand;
+	    $gff{$feature_id}{'source'} = $source;
+	    $gff{$feature_id}{'score'} = $score;
+	    $gff{$feature_id}{'phase'} = $phase;
 	} elsif ($type eq "mRNA") {
-	    my ($mRNA_id, $gene_id) = ($attributes =~ /ID=([^;]+);\S*Parent=([^;]+)/);
-	    if (exists $gff{$gene_id}) {
+	    my ($mRNA_id, $feature_id) = ($attributes =~ /ID=([^;]+);\S*Parent=([^;]+)/);
+	    if (exists $gff{$feature_id}) {
 		$mRNA_index++;
-		$gff{$gene_id}{'mRNA'}{$mRNA_id}{'mRNA_index'} = $mRNA_index;
-		$gff{$gene_id}{'mRNA'}{$mRNA_id}{'mRNA_chr'} = $chr;
-		$gff{$gene_id}{'mRNA'}{$mRNA_id}{'mRNA_start'} = $start;
-		$gff{$gene_id}{'mRNA'}{$mRNA_id}{'mRNA_end'} = $end;
-		$gff{$gene_id}{'mRNA'}{$mRNA_id}{'mRNA_strand'} = $strand;
-		$gff{$gene_id}{'mRNA'}{$mRNA_id}{'mRNA_source'} = $source;
-		$gff{$gene_id}{'mRNA'}{$mRNA_id}{'mRNA_score'} = $score;
-		$gff{$gene_id}{'mRNA'}{$mRNA_id}{'mRNA_phase'} = $phase;
+		$gff{$feature_id}{'mRNA'}{$mRNA_id}{'mRNA_index'} = $mRNA_index;
+		$gff{$feature_id}{'mRNA'}{$mRNA_id}{'chr'} = $chr;
+		$gff{$feature_id}{'mRNA'}{$mRNA_id}{'start'} = $start;
+		$gff{$feature_id}{'mRNA'}{$mRNA_id}{'end'} = $end;
+		$gff{$feature_id}{'mRNA'}{$mRNA_id}{'strand'} = $strand;
+		$gff{$feature_id}{'mRNA'}{$mRNA_id}{'source'} = $source;
+		$gff{$feature_id}{'mRNA'}{$mRNA_id}{'score'} = $score;
+		$gff{$feature_id}{'mRNA'}{$mRNA_id}{'phase'} = $phase;
 	    } else {
-		die "cannot find matching gene record for the mRNA $mRNA_id derived from the gene $gene_id\n"
+		die "cannot find matching gene record for the mRNA $mRNA_id derived from the gene $feature_id\n"
 	    }
 	} elsif ($type eq "exon") {
 	    my ($exon_id, $mRNA_id) = ($attributes =~ /ID=([^;]+);\S*Parent=([^;]+)/);
@@ -242,29 +275,29 @@ sub parse_gff_file {
 		next;
 	    } elsif ($exon_id =~ /^snoscan/) {
 		next;
-	    } elsif (exists $gff{$gene_id}{'mRNA'}{$mRNA_id}) {
+	    } elsif (exists $gff{$feature_id}{'mRNA'}{$mRNA_id}) {
 		my $exon_index = $start;
-		$gff{$gene_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'exon_chr'} = $chr;
-		$gff{$gene_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'exon_start'} = $start;
-		$gff{$gene_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'exon_end'} = $end;
-		$gff{$gene_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'exon_strand'} = $strand;
-		$gff{$gene_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'exon_source'} = $source;
-		$gff{$gene_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'exon_score'} = $score;
-		$gff{$gene_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'exon_phase'} = $phase;
+		$gff{$feature_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'chr'} = $chr;
+		$gff{$feature_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'start'} = $start;
+		$gff{$feature_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'end'} = $end;
+		$gff{$feature_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'strand'} = $strand;
+		$gff{$feature_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'source'} = $source;
+		$gff{$feature_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'score'} = $score;
+		$gff{$feature_id}{'mRNA'}{$mRNA_id}{'exon'}{$exon_index}{'phase'} = $phase;
 	    } else {
 		die "cannot find matching mRNA record for the exon $exon_id derived from the mRNA $mRNA_id\n"
 	    }
 	} elsif ($type eq "CDS") {
             my ($cds_id, $mRNA_id) = ($attributes =~ /ID=([^;]+);\S*Parent=([^;]+)/);
-            if (exists $gff{$gene_id}{'mRNA'}{$mRNA_id}) {
+            if (exists $gff{$feature_id}{'mRNA'}{$mRNA_id}) {
                 my $cds_index = $start;
-                $gff{$gene_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'cds_chr'} = $chr;
-                $gff{$gene_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'cds_start'} = $start;
-                $gff{$gene_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'cds_end'} = $end;
-                $gff{$gene_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'cds_strand'} = $strand;
-                $gff{$gene_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'cds_source'} = $source;
-                $gff{$gene_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'cds_score'} = $score;
-                $gff{$gene_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'cds_phase'} = $phase;
+                $gff{$feature_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'chr'} = $chr;
+                $gff{$feature_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'start'} = $start;
+                $gff{$feature_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'end'} = $end;
+                $gff{$feature_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'strand'} = $strand;
+                $gff{$feature_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'source'} = $source;
+                $gff{$feature_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'score'} = $score;
+                $gff{$feature_id}{'mRNA'}{$mRNA_id}{'cds'}{$cds_index}{'phase'} = $phase;
             } else {
                 die "cannot find matching mRNA record for the CDS $cds_id derived from the mRNA $mRNA_id\n"
             }

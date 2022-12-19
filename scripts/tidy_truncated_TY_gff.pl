@@ -24,7 +24,7 @@ while (<$input_fh>) {
     /^#/ and next;
     /^\s*$/ and next;
     my ($chr, $source, $type, $start, $end, $score, $strand, $phase, $attributes) = split /\t/, $_;
-    my ($new_type) = ($type =~ /(TY\d+)/);
+    my ($new_type) = ($type =~ /(TY\d+|TSU4)/);
     $new_type .= "_truncated";
     my $new_id = "$new_type:$chr:$start-$end:$strand";
     print $output_fh "$chr\t$tag\t$new_type\t$start\t$end\t.\t$strand\t.\tID=${new_id};Name=${new_id}\n";

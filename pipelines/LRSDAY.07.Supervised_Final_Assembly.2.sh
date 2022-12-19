@@ -7,20 +7,23 @@ PATH=$gnuplot_dir:$PATH
 
 #######################################
 # set project-specific variables
-prefix="SK1" # The file name prefix for the processing sample. Default = "SK1" for the testing example.
+prefix="CPG_1a" # The file name prefix (only allowing strings of alphabetical letters, numbers, and underscores) for the processing sample. Default = "CPG_1a" for the testing example.          
+
 genome="./../06.Mitochondrial_Genome_Assembly_Improvement/$prefix.assembly.mt_improved.fa" # The file path of the input genome assembly.
-vcf="yes" # Whether to generate a vcf file generated to show SNP and INDEL differences between the assembled genome and the reference genome for their uniquely alignable regions. Use "yes" if prefer to have vcf file generated to show SNP and INDEL differences between the assembled genome and the reference genome. Default = "yes".
 dotplot="yes" # Whether to plot genome-wide dotplot based on the comparison with the reference genome below. Use "yes" if prefer to plot, otherwise use "no". Default = "yes".
 ref_genome_raw="./../00.Reference_Genome/S288C.ASM205763v1.fa" # The path of the raw reference genome, only needed when dotplot="yes" or vcf="yes".
-threads=1 # The number of threads to use. Default = 1.
+threads=8 # The number of threads to use. Default = 8.
 debug="no" # Whether to keep intermediate files for debugging. Use "yes" if prefer to keep intermediate files, otherwise use "no". Default = "no".
 
 #######################################
 # process the pipeline
 # Please mark desiarable changes in the $prefix.modification.list file and comment the command lines for Step 1 before proceeding with Step 2.
+
+vcf="no" # Whether to generate a vcf file generated to show SNP and INDEL differences between the assembled genome and the reference genome for their uniquely alignable regions. Use "yes" if prefer to have vcf file generated to show SNP and INDEL differences between the assembled genome and the reference genome. Default = "no".
 # Step 2:
-perl $LRSDAY_HOME/scripts/relabel_and_reorder_sequences.pl  -i $genome -m $prefix.assembly.modification.list -o $prefix.assembly.final.fa
+perl $LRSDAY_HOME/scripts/relabel_and_reorder_sequences.pl -i $genome -m $prefix.assembly.modification.list -o $prefix.assembly.relabel_and_reorder.fa
 # generate assembly statistics
+perl $LRSDAY_HOME/scripts/tidy_fasta.pl -i $prefix.assembly.relabel_and_reorder.fa -o $prefix.assembly.final.fa
 perl $LRSDAY_HOME/scripts/cal_assembly_stats.pl -i $prefix.assembly.final.fa -o $prefix.assembly.final.stats.txt
 
 # check project-specific variables
@@ -77,6 +80,8 @@ then
     rm *.delta
     rm *.delta_filter
     rm ref_genome.fa
+    rm $prefix.assembly.relabel_and_reorder.fa
+
     if [[ $vcf == "yes" ]] 
     then
 	rm ref_genome.fa.fai

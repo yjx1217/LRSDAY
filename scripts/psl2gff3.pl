@@ -27,7 +27,6 @@ my %refseq = parse_fasta_file($refseq_fh);
 my $input_fh = read_file($input);
 my $output_fh = write_file($output);
 
-my $length_cutoff = 0;
 while (<$input_fh>) {
     chomp;
     if (/^\d+/) {
@@ -40,7 +39,7 @@ while (<$input_fh>) {
 	    ($start, $end) = ($end, $start);
 	}
 	my $feature_length = $end - $start + 1;
-	if ($feature_length >= $length_cutoff) {
+	if ($feature_length >= $length_cutoff_for_completeness) {
 	    my $new_feature_type = $feature_type;
 	    if ($feature_length < $length_cutoff_for_completeness) {
 		$new_feature_type = "${feature_type}_partial";

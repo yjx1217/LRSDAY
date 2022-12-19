@@ -22,6 +22,7 @@ Jia-Xing Yue & Gianni Liti. (2018) Long-read sequencing data analysis for yeasts
 Jia-Xing Yue, Jing Li, Louise Aigrain, Johan Hallin, Karl Persson, Karen Oliver, Anders Bergström, Paul Coupland, Jonas Warringer, Marco Cosentino Lagomarsino, Gilles Fischer, Richard Durbin, Gianni Liti. (2017) Contrasting evolutionary genome dynamics between domesticated and wild yeasts. *Nature Genetics*, 49:913-924.
 
 ## Release history
+* v1.7.0 Released on 2022/12/31
 * v1.6.0 Released on 2019/10/03
 * v1.5.0 Released on 2019/05/13
 * v1.4.0 Released on 2019/03/21
@@ -37,7 +38,7 @@ LRSDAY itself is distributed under the MIT license. A number of LRSDAY's depende
 
 ## Requirements
 ### Hardware, operating system and network
-This protocol is designed for a desktop or computing server running an x86-64-bit Linux operating system. Multithreaded processors are preferred to speed up the process since many steps can be configured to use multiple threads in parallel. For assembling and analyzing the budding yeast genomes (genome size = ~12.5 Mb), at least 16 Gb of RAM and 100 Gb of free disk space are recomended. When adapted for other eukaryotic organisms with larger genome sizes, the RAM and disk space consumption will scale up, majorly during *de novo* genome assembly (performed by [Canu](https://github.com/marbl/canu) by default. Plese refer to [Canu’s manual](http://canu.readthedocs.io/en/latest/) for suggested RAM and disk space consumption for assembling large genomes. Stable Internet connection is required for the installation and configuration of LRSDAY as well as for retrieving the test data.
+This protocol is designed for a desktop or computing server running an x86-64-bit Linux operating system. Multithreaded processors are preferred to speed up the process since many steps can be configured to use multiple threads in parallel. For assembling and analyzing the budding yeast genomes (genome size = ~12.5 Mb), at least 16 Gb of RAM and 100 Gb of free disk space are recomended. More disk space is needed if you want to use LRSDAY to do Nanopore basecalling. When adapted for other eukaryotic organisms with larger genome sizes, the RAM and disk space consumption will scale up, majorly during *de novo* genome assembly (performed by [Canu](https://github.com/marbl/canu) by default. Plese refer to [Canu’s manual](http://canu.readthedocs.io/en/latest/) for suggested RAM and disk space consumption for assembling large genomes. Stable Internet connection is required for the installation and configuration of LRSDAY as well as for retrieving the test data.
 
 
 ### Software or library requirements
@@ -53,7 +54,7 @@ This protocol is designed for a desktop or computing server running an x86-64-bi
 * perl v5.12 or newer (https://www.perl.org/)
 * python v2.7.9 or newer (https://www.python.org/)
 * python-devel
-* python v3.4 or newer (https://www.python.org/)
+* python v3.7 or newer (https://www.python.org/)
 * python3-devel
 * tar (https://www.gnu.org/software/tar/)
 * unzip (http://infozip.sourceforge.net/UnZip.html)

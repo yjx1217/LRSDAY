@@ -6,7 +6,8 @@ source ./../../env.sh
 
 #######################################
 # set project-specific variables
-prefix="SK1" # The file name prefix for the processing sample. Default = "SK1" for the testing example.
+prefix="CPG_1a" # The file name prefix (only allowing strings of alphabetical letters, numbers, and underscores) for the processing sample. Default = "CPG_1a" for the testing example.         
+
 genome="./../06.Mitochondrial_Genome_Assembly_Improvement/$prefix.assembly.mt_improved.fa" # The file name of the input genome assembly.
 
 

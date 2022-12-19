@@ -1,12 +1,13 @@
 #!/usr/bin/perl
-use warnings;
+#use warnings;
+use warnings FATAL => 'all';
 use strict;
 use Getopt::Long;
 
 ##############################################################
 #  script: update_gff3_by_proteinortho.pl
 #  author: Jia-Xing Yue (GitHub ID: yjx1217)
-#  last edited: 2017.06.17
+#  last edited: 2022.12.11
 #  description: update gff3 file based on proteinortho result: attach gene name based on gene orthology 
 #  example: perl update_gff3_by_proteinortho.pl -i query.maker.gff3 -x query.poff -r ref.PoFF.faa -q query.maker.PoFF.faa -o query.final.gff
 ##############################################################
@@ -60,12 +61,43 @@ foreach my $index (sort {$a<=>$b} keys %orthology) {
 
 while (<$input_fh>) {
     chomp;
-    /^#/ and next;
     /^\s*$/ and next;
+    if (/^#/) {
+	print $output_fh "$_\n";
+	next;
+    }
     my ($chr, $source, $type, $start, $end, $score, $strand, $phase, $attributes) = split '\t', $_;
-    my ($id, $name) = ($attributes =~ /ID=([^;]+);\S*Name=([^;]+)/);
+    my ($id, $original_name) = ($attributes =~ /ID=([^;]+);\S*Name=([^;]+)/);
+    # print "$_\n";
+    my @original_name = ();
+    if ($original_name =~ /\//) {
+	@original_name = split /\//, $original_name;
+    } else {
+	@original_name = ($original_name);
+    }
+    my %name = ();
+
+    # foreach my $n (@original_name) {
+    # 	if ($n !~ /\d+$/) {
+    # 	    $name{$n} = 1;
+    # 	}
+    # }
+
     if (($type eq "gene") and (exists $ortho_map{$id})) {
-	$name = $ortho_map{$id};
+	my $new_name = $ortho_map{$id};
+	my @new_name =();
+	if ($new_name =~ /\//){
+	    @new_name = split /\//, $new_name;
+	} else {
+	    @new_name = ($new_name);
+	}
+	foreach my $n (@new_name) {
+	    if (not exists $name{$n}) {
+		$name{$n} = 1;
+	    }
+	}
+	my @name = sort keys %name;
+	my $name = join '/', @name;
         print $output_fh "$chr\t$source\t$type\t$start\t$end\t$score\t$strand\t$phase\tID=$id;Name=$name\n";
     } else {
         print $output_fh "$_\n";

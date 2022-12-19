@@ -31,7 +31,7 @@ foreach my $input (@inputs) {
 	    /^#/ and next;
 	    /^\s*$/ and next;
 	    my @line = split /\t/, $_;
-	    if ($line[0] =~ /_TY/) {
+	    if ($line[0] =~ /(_TY|_TSU4)/) {
 		$index++;
 		$line[0] = $chr;
 		($line[1], $line[2]) = ($line[1] =~ /(REannotate)_(\S+)/);

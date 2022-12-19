@@ -7,7 +7,7 @@ use List::Util qw(sum min max);
 ##############################################################
 #  script: cal_assembly_stats.pl
 #  author: Jia-Xing Yue (GitHub ID: yjx1217)
-#  last edited: 2017.06.19
+#  last edited: 2022.07.22
 #  description: calculate basice statistics for genome assemblies, such as GC%, N50, N90, etc ...
 #  example: perl cal_assembly_stats.pl -i input.fa(.gz) -o output.txt
 ##############################################################
@@ -59,10 +59,17 @@ foreach my $base (@base) {
     my $base_pct = $base_count{$base} * 100 / $total_sequence_length;
     $base_pct{$base} =  sprintf("%.2f", $base_pct);
 }
-$base_pct{'AT'} =  ($base_count{'A'} + $base_count{'T'}) * 100 / $total_sequence_length;
-$base_pct{'GC'} =  ($base_count{'G'} + $base_count{'C'}) * 100 / $total_sequence_length;
+
+$base_count{'AT'} = $base_count{'A'} + $base_count{'T'};
+$base_count{'GC'} = $base_count{'G'} + $base_count{'C'};
+$base_pct{'AT'} =  ($base_count{'AT'} * 100) / $total_sequence_length;
+$base_pct{'GC'} =  ($base_count{'GC'} * 100) / $total_sequence_length;
 $base_pct{'AT'} =  sprintf("%.2f", $base_pct{'AT'});
 $base_pct{'GC'} =  sprintf("%.2f", $base_pct{'GC'});
+$base_pct{'AT_adjusted'} = ($base_count{'AT'} * 100)/($base_count{'AT'} + $base_count{'GC'});
+$base_pct{'GC_adjusted'} = ($base_count{'GC'} * 100)/($base_count{'AT'} + $base_count{'GC'});
+$base_pct{'AT_adjusted'} =  sprintf("%.2f", $base_pct{'AT_adjusted'});
+$base_pct{'GC_adjusted'} =  sprintf("%.2f", $base_pct{'GC_adjusted'});
 
 print $output_fh "total sequence count: $total_sequence_count\n";
 print $output_fh "total sequence length: $total_sequence_length\n";
@@ -70,18 +77,29 @@ print $output_fh "min sequence length: $min_length\n";
 print $output_fh "max sequence length: $max_length\n";
 print $output_fh "mean sequence length: $mean_length\n";
 print $output_fh "median sequence length: $median_length\n";
+print $output_fh "###################\n";
 print $output_fh "N50: $N50\n";
 print $output_fh "L50: $L50\n";
 print $output_fh "N90: $N90\n";
 print $output_fh "L90: $L90\n";
-
+print $output_fh "###################\n";
+print $output_fh "A count: $base_count{'A'}\n";
+print $output_fh "T count: $base_count{'T'}\n";
+print $output_fh "G count: $base_count{'G'}\n";
+print $output_fh "C count: $base_count{'C'}\n";
+print $output_fh "(A+T) count: $base_count{'AT'}\n";
+print $output_fh "(G+C) count: $base_count{'GC'}\n";
+print $output_fh "N count: $base_count{'N'}\n";
+print $output_fh "###################\n";
 print $output_fh "A%: $base_pct{'A'}\n";
 print $output_fh "T%: $base_pct{'T'}\n";
 print $output_fh "G%: $base_pct{'G'}\n";
 print $output_fh "C%: $base_pct{'C'}\n";
-print $output_fh "AT%: $base_pct{'AT'}\n";
-print $output_fh "GC%: $base_pct{'GC'}\n";
+print $output_fh "(A+T)%: $base_pct{'AT'}\n";
+print $output_fh "(G+C)%: $base_pct{'GC'}\n";
 print $output_fh "N%: $base_pct{'N'}\n";
+print $output_fh "((A+T)/(A+T+G+C))%: $base_pct{'AT_adjusted'}\n";
+print $output_fh "((G+C)/(A+T+G+C))%: $base_pct{'GC_adjusted'}\n";
 
 
 sub read_file {
@@ -154,6 +172,24 @@ sub cal_median {
 	}
 	return $median;
 }
+
+sub cal_stdev {
+    my $data_arrayref = shift @_;
+    my $data_num = scalar @$data_arrayref;
+    my $stdev;
+    if ($data_num == 1){
+        $stdev = 0;
+    } else {
+        my $mean = cal_mean($data_arrayref);
+        my $sq_sum = 0;
+        foreach my $i (@$data_arrayref) {
+            $sq_sum += ($mean -$i) ** 2;
+        }
+        $stdev = ($sq_sum / ($data_num - 1)) ** 0.5;
+    }
+    return $stdev;
+}
+
 
 
 

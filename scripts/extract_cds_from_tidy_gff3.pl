@@ -6,7 +6,7 @@ use Getopt::Long;
 ##############################################################
 #  script: extract_cds_from_tidy_gff3.pl
 #  author: Jia-Xing Yue (GitHub ID: yjx1217)
-#  last edited: 2020.01.07
+#  last edited: 2022.12.11
 #  description: extract CDS sequences from GFF3 file
 #  example: perl extract_cds_from_tidy_gff3.pl -r genome.fa.gz -g genome.gff3 -o genome.cds.fa
 ##############################################################
@@ -36,6 +36,7 @@ foreach my $chr (@refseq) {
 	}
     }
     foreach my $gene_id (sort {$gff{$a}{'gene_start'} <=> $gff{$b}{'gene_start'} or $gff{$a}{'gene_end'} <=> $gff{$b}{'gene_end'}} @genes_on_chr) {
+	my $gene_name = $gff{$gene_id}{'gene_name'};
 	foreach my $mRNA_id (sort {$gff{$gene_id}{'mRNA'}{$a}{'mRNA_index'} <=> $gff{$gene_id}{'mRNA'}{$b}{'mRNA_index'}} keys %{$gff{$gene_id}{'mRNA'}}) {
 	    my $mRNA_index = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'mRNA_index'};
 	    my $mRNA_strand = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'mRNA_strand'};
@@ -56,7 +57,7 @@ foreach my $chr (@refseq) {
 	    if ($mRNA_strand eq '-') {
 		$mRNA_seq = revcom($mRNA_seq);
 	    }
-	    print $output_fh ">$gene_id|$mRNA_id\n$mRNA_seq\n";
+	    print $output_fh ">$gene_id|$mRNA_id|$gene_name\n$mRNA_seq\n";
 	}
     }
 }
@@ -130,6 +131,7 @@ sub parse_gff_file {
 		$gene_type = "gene";
 	    }
 	    $gff{$gene_id}{'gene_type'} = $gene_type;
+	    $gff{$gene_id}{'gene_name'} = $gene_name;
 	    $gff{$gene_id}{'gene_chr'} = $chr;
 	    $gff{$gene_id}{'gene_start'} = $start;
 	    $gff{$gene_id}{'gene_end'} = $end;
@@ -143,7 +145,7 @@ sub parse_gff_file {
 	    $gene_type = $type;
 	    $gene_id = "$gene_type:$chr:${start}-${end}:$strand";
 	    $gff{$gene_id}{'gene_type'} = $gene_type;
-	    $gff{$gene_id}{'gene_type'} = $type;
+	    $gff{$gene_id}{'gene_name'} = $gene_name;
 	    $gff{$gene_id}{'gene_chr'} = $chr;
 	    $gff{$gene_id}{'gene_start'} = $start;
 	    $gff{$gene_id}{'gene_end'} = $end;

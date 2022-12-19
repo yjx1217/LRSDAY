@@ -6,7 +6,7 @@ use Getopt::Long;
 ##############################################################
 #  script: break_contig_by_blast.pl
 #  author: Jia-Xing Yue (GitHub ID: yjx1217)
-#  last edited: 2018.01.24
+#  last edited: 2022.03.04
 #  description: break contigs containing blast hit into multiple contigs
 #  example: perl break_contig_by_blast.pl -i input.fa(.gz) -o output.fa(.gz) -b blast.result.outfmt7.txt 
 ##############################################################
@@ -101,10 +101,18 @@ sub parse_blast_file {
 	    $blast{$subject}{'part2'} = substr $input{$subject}, $subject_start - 1;
 	} else {
 	    # hit on the negative strand
-	    $blast{$subject}{'part1'} = substr $input{$subject}, 0, $subject_end;
-	    $blast{$subject}{'part2'} = substr $input{$subject}, $subject_end;
+	    $blast{$subject}{'part1'} = substr $input{$subject}, 0, $subject_start;
+	    $blast{$subject}{'part1'} = revcom($blast{$subject}{'part1'});
+	    $blast{$subject}{'part2'} = substr $input{$subject}, $subject_start;
+	    $blast{$subject}{'part2'} = revcom($blast{$subject}{'part2'});
 	}
     }
     return %blast;
 }
 
+sub revcom {
+    my $seq = shift @_;
+    my $seq_revcom = reverse $seq;
+    $seq_revcom =~ tr/ATGCNatgcn/TACGNtacgn/;
+    return $seq_revcom;
+}
