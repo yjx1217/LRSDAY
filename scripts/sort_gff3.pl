@@ -6,7 +6,7 @@ use Getopt::Long;
 ##############################################################
 #  script: sort_gff3.pl
 #  author: Jia-Xing Yue (GitHub ID: yjx1217)
-#  last edited: 2022.12.11
+#  last edited: 2023.01.28
 #  description: sort gff3 file by the input multi-fasta genome file
 #  example: perl sort_gff3.pl -i raw.gff3 -t genome_tag -o sorted.gff3 -r genome.fa(.gz)
 ##############################################################
@@ -46,12 +46,17 @@ foreach my $chr (@refseq) {
     foreach my $gene_id (sort {$gff{$a}{'gene_start'} <=> $gff{$b}{'gene_start'} or $gff{$a}{'gene_end'} <=> $gff{$b}{'gene_end'}} @genes_on_chr) {
 	my $gene_name = $gff{$gene_id}{'gene_name'};
 	my $gene_type = $gff{$gene_id}{'gene_type'};
+	my $mobile_element_type = $gff{$gene_id}{'mobile_element_type'};
 	my $gene_start = $gff{$gene_id}{'gene_start'};
 	my $gene_end = $gff{$gene_id}{'gene_end'};
 	my $gene_score = $gff{$gene_id}{'gene_score'};
 	my $gene_strand = $gff{$gene_id}{'gene_strand'};
 	my $gene_phase = $gff{$gene_id}{'gene_phase'};
-	print $output_fh "$chr\t$tag\t$gene_type\t$gene_start\t$gene_end\t$gene_score\t$gene_strand\t$gene_phase\tID=$gene_id;Name=$gene_name\n";
+	if ($gene_type eq "mobile_element") {
+	    print $output_fh "$chr\t$tag\t$gene_type\t$gene_start\t$gene_end\t$gene_score\t$gene_strand\t$gene_phase\tID=$gene_id;Name=$gene_name;mobile_element_type=$mobile_element_type\n";
+	} else {
+	    print $output_fh "$chr\t$tag\t$gene_type\t$gene_start\t$gene_end\t$gene_score\t$gene_strand\t$gene_phase\tID=$gene_id;Name=$gene_name\n";
+	}
 	if ($gene_type eq "gene") {
 	    foreach my $mRNA_id (sort {$gff{$gene_id}{'mRNA'}{$a}{'mRNA_index'} <=> $gff{$gene_id}{'mRNA'}{$b}{'mRNA_index'}} keys %{$gff{$gene_id}{'mRNA'}}) {
 		my $mRNA_index = $gff{$gene_id}{'mRNA'}{$mRNA_id}{'mRNA_index'};
@@ -162,6 +167,7 @@ sub parse_gff_file {
     my $gene_id;
     my $gene_name;
     my $gene_type;
+    my $mobile_element_type;
     my $mRNA_index;
     while (<$fh>) {
 	chomp;
@@ -194,6 +200,19 @@ sub parse_gff_file {
 	    ($gene_id, $gene_name) = ($attributes =~ /ID=([^;]+);\S*Name=([^;]+)/);
 	    $gff{$gene_id}{'gene_name'} = $gene_name;
 	    $gff{$gene_id}{'gene_type'} = $gene_type;
+            $gff{$gene_id}{'gene_chr'} = $chr;
+            $gff{$gene_id}{'gene_start'} = $start;
+            $gff{$gene_id}{'gene_end'} = $end;
+            $gff{$gene_id}{'gene_strand'} = $strand;
+            $gff{$gene_id}{'gene_source'} = $source;
+            $gff{$gene_id}{'gene_score'} = $score;
+            $gff{$gene_id}{'gene_phase'} = $phase;
+	} elsif ($type =~ /(mobile_element)/) {
+	    $gene_type = $type;
+	    ($gene_id, $gene_name, $mobile_element_type) = ($attributes =~ /ID=([^;]+);\S*Name=([^;]+);mobile_element_type=([^;]+)/);
+	    $gff{$gene_id}{'gene_name'} = $gene_name;
+	    $gff{$gene_id}{'gene_type'} = $gene_type;
+	    $gff{$gene_id}{'mobile_element_type'} = $mobile_element_type;
             $gff{$gene_id}{'gene_chr'} = $chr;
             $gff{$gene_id}{'gene_start'} = $start;
             $gff{$gene_id}{'gene_end'} = $end;
