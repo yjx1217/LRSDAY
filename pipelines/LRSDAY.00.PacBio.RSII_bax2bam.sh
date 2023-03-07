@@ -13,12 +13,14 @@ pacbio_RSII_bax_fofn_file="./pacbio_fofn_files/$prefix.RSII_bax.fofn" # The fofn
 #######################################
 # process the pipeline
 
-source $miniconda2_dir/activate $conda_pacbio_dir/../../conda_pacbio_env
-$conda_pacbio_dir/bax2bam \
+#source $miniconda2_dir/activate $conda_pacbio_dir/../../conda_pacbio_env
+
+$bax2bam_dir/bax2bam \
     --fofn=$pacbio_RSII_bax_fofn_file \
     -o ./pacbio_fofn_files/$prefix.bax2bam \
     --subread \
-    --pulsefeatures=DeletionQV,DeletionTag,InsertionQV,IPD,MergeQV,SubstitutionQV,PulseWidth,SubstitutionTag
+    --pulsefeatures=DeletionQV,DeletionTag,InsertionQV,IPD,MergeQV,SubstitutionQV,PulseWidth,SubstitutionTag \
+    --allowUnrecognizedChemistryTriple
 
 cd pacbio_fofn_files
 rm $prefix.bax2bam.scraps.bam

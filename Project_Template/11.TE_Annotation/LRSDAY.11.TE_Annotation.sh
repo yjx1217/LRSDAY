@@ -111,13 +111,14 @@ $bedtools_dir/bedtools intersect -v -a $prefix.TY_soloLTR.refined.nr.gff -b $pre
 
 cat $prefix.TY.complete_plus_truncated.final.gff $prefix.TY.soloLTR.final.gff > $prefix.TY.all.final.gff
 
-#perl $LRSDAY_HOME/scripts/tidy_maker_gff3.pl -r ./../$prefix.genome.fa -i $prefix.TY.all.final.gff -o $prefix.TE.gff3 -t $prefix 
-perl $LRSDAY_HOME/scripts/tidy_TE_gff3.pl -r ./../$prefix.genome.fa -i $prefix.TY.all.final.gff -o ./../$prefix.nuclear_genome.TE.gff3 -t $prefix 
+perl $LRSDAY_HOME/scripts/tidy_TE_gff3.pl -r ./../$prefix.genome.fa -i $prefix.TY.all.final.gff -o $prefix.nuclear_genome.TE.raw.gff3 -t $prefix 
+perl $LRSDAY_HOME/scripts/adjust_TY_annotation_for_gff3.pl -i $prefix.nuclear_genome.TE.raw.gff3 -o ./../$prefix.nuclear_genome.TE.gff3 
 
 
 if [[ $debug == "no" ]]
 then
     rm $prefix.*.final.gff
+    rm $prefix.nuclear_genome.TE.raw.gff3
 fi
 
 cd ..

@@ -13,7 +13,7 @@ reads_type="nanopore-raw" # The long reads data type: "pacbio-raw" or "pacbio-co
 run_filtering="yes" # Whether to filter and downsample the reads: "yes" or "no". Default = "yes".
 genome_size="12500000" # The haploid genome size (in bp) of sequenced organism. Default = "12500000" (i.e. 12.5 Mb for the budding yeast S. cereviaie genome). This is used to calculate targeted sequencing coverage after read filtering (see below). 
 post_filtering_coverage="60" # Targeted sequencing coverage after read filtering and downsampling. Default = "60" (i.e. 60x coverage).
-threads=24 # The number of threads to use. Default = "4".
+threads=4 # The number of threads to use. Default = "4".
 
 #######################################
 # process the pipeline

@@ -164,7 +164,7 @@ SHASTA_DOWNLOAD_URL="https://github.com/paoloshasta/shasta/releases/download/${S
 # for assembly polishing
 
 PB_ASSEMBLY_VERSION="0.0.8" #
-BAX2BAM_VERSION="0.0.11" #
+BAX2BAM_VERSION="0.0.9" #
 PBMM2_VERSION="1.9.0" #
 
 NANOPOLISH_VERSION="0.14.0" # released on 2021.04.06
@@ -572,7 +572,8 @@ then
 	clean "$build_dir/bax2bam_conda_env"
 	$miniconda2_dir/conda create -y -p $build_dir/bax2bam_conda_env 
 	source $miniconda2_dir/activate $build_dir/bax2bam_conda_env
-	$miniconda2_dir/conda install -y -c bioconda bax2bam=${BAX2BAM_VERSION}
+	#$miniconda2_dir/conda install -y -c bioconda bax2bam=${BAX2BAM_VERSION}
+	$miniconda2_dir/conda install -y -c "bioconda/label/cf201901" bax2bam 
 	source $miniconda2_dir/deactivate
 	note_installed $bax2bam_dir
     fi
