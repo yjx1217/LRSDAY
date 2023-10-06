@@ -285,7 +285,7 @@ TRNASCAN_DOWNLOAD_URL="http://eddylab.org/software/tRNAscan-SE/tRNAscan-SE.tar.g
 SNOSCAN_VERSION="0.9.1" #
 SNOSCAN_DOWNLOAD_URL="http://eddylab.org/software/snoscan/snoscan.tar.gz"
 
-REPEATMASKER_VERSION="4.1.4" #
+REPEATMASKER_VERSION="open-4-0-7" #
 # REPEATMASKER_VERSION="4.1.0" #
 REPEATMASKER_DOWNLOAD_URL="http://www.repeatmasker.org/RepeatMasker/RepeatMasker-${REPEATMASKER_VERSION}.tar.gz"
 
