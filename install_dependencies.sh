@@ -287,7 +287,7 @@ SNOSCAN_DOWNLOAD_URL="http://eddylab.org/software/snoscan/snoscan.tar.gz"
 
 REPEATMASKER_VERSION="open-4-0-7" #
 # REPEATMASKER_VERSION="4.1.0" #
-REPEATMASKER_DOWNLOAD_URL="http://www.repeatmasker.org/RepeatMasker-${REPEATMASKER_VERSION}.tar.gz"
+REPEATMASKER_DOWNLOAD_URL="http://www.repeatmasker.org/RepeatMasker/RepeatMasker-${REPEATMASKER_VERSION}.tar.gz"
 
 #REPBASE_VERSION="20181026"
 REPBASE_VERSION="20170127"
