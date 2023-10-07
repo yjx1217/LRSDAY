@@ -335,7 +335,7 @@ ERPIN_VERSION="5.5.4" #
 ERPIN_DOWNLOAD_URL="http://rna.igmors.u-psud.fr/download/Erpin/erpin${ERPIN_VERSION}.serv.tar.gz"
 
 TBL2ASN_VERSION="" #
-TBL2ASN_DOWNLOAD_URL="ftp://ftp.ncbi.nih.gov/toolbox/ncbi_tools/converters/by_program/tbl2asn/linux64.tbl2asn.gz"
+TBL2ASN_DOWNLOAD_URL="https://ftp.ncbi.nlm.nih.gov/asn1-converters/by_program/table2asn/linux64.table2asn.gz"
 
 PIROBJECT_VERSION="1.19" #
 PIROBJECT_DOWNLOAD_URL="https://github.com/prioux/PirObject/archive/v${PIROBJECT_VERSION}.tar.gz"
@@ -1653,7 +1653,7 @@ if [ -z $(check_installed $tbl2asn_dir) ]; then
     mkdir tbl2asn_dir
     cd tbl2asn_dir
     wget -c  $TBL2ASN_DOWNLOAD_URL # linux64.tbl2asn.gz
-    mv linux64.tbl2asn.gz tbl2asn.gz
+    mv linux64.table2asn.gz tbl2asn.gz
     gunzip tbl2asn.gz
     chmod 755 tbl2asn
     note_installed $tbl2asn_dir
