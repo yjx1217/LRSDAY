@@ -9,7 +9,15 @@ PATH=$gnuplot_dir:$PATH
 # set project-specific variables
 prefix="CPG_1a" # The file name prefix (only allowing strings of alphabetical letters, numbers, and underscores) for the processing sample. Default = "CPG_1a" for the testing example.         
 
-input_assembly="./../03.Short-read-based_Assembly_Polishing/$prefix.assembly.short_read_polished.fa" # The file path of the input genome assembly.
+shortreads="no" # "yes" if short reads have been used for polishing, "no" otherwise
+
+if [[ $shortreads == "yes" ]]
+then
+ input_assembly="./../03.Short-read-based_Assembly_Polishing/$prefix.assembly.short_read_polished.fa" # The file path of the input genome assembly if there are short reads.
+else
+ input_assembly="./../02.Long-read-based_Assembly_Polishing/$prefix.assembly.long_read_polished.fa" # The file path of the input genome assembly if there are NOT short reads.
+fi
+
 ref_genome_raw="./../00.Reference_Genome/S288C.ASM205763v1.fa" # The file path of the raw reference genome.
 ref_genome_noncore_masked="./../00.Reference_Genome/S288C.ASM205763v1.noncore_masked.fa" # The file path of the specially masked reference genome where subtelomeres and chromosome-ends were hard masked. When the subtelomere/chromosome-end information is unavailable for the organism that you are interested in, you can just put the path of the raw reference genome assembly here.
 chrMT_tag="chrMT" # The sequence name for the mitochondrial genome in the raw reference genome file, if there are multiple reference mitochondrial genomes that you want to check, use a single ';' to separate them. e.g. "Sc_chrMT;Sp_chrMT". Default = "chrMT".
