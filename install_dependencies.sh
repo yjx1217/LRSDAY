@@ -231,7 +231,7 @@ BEDTOOLS_VERSION="2.30.0" # released on 2021.01.24
 BEDTOOLS_DOWNLOAD_URL="https://github.com/arq5x/bedtools2/releases/download/v${BEDTOOLS_VERSION}/bedtools-${BEDTOOLS_VERSION}.tar.gz"
 
 SPADES_VERSION="3.14.1" # released on 2020.05.02
-SPADES_DOWNLOAD_URL="http://cab.spbu.ru/files/release${SPADES_VERSION}/SPAdes-${SPADES_VERSION}-Linux.tar.gz"
+SPADES_DOWNLOAD_URL="https://github.com/ablab/spades/releases/download/v${SPADES_VERSION}/SPAdes-${SPADES_VERSION}-Linux.tar.gz"
 
 PRODIGAL_VERSION="2.6.3" # released on 2016.02.12
 PRODIGAL_DOWNLOAD_URL="https://github.com/hyattpd/Prodigal/archive/v${PRODIGAL_VERSION}.tar.gz"
@@ -287,7 +287,7 @@ SNOSCAN_DOWNLOAD_URL="http://eddylab.org/software/snoscan/snoscan.tar.gz"
 
 REPEATMASKER_VERSION="open-4-0-7" #
 # REPEATMASKER_VERSION="4.1.0" #
-REPEATMASKER_DOWNLOAD_URL="http://www.repeatmasker.org/RepeatMasker/RepeatMasker-${REPEATMASKER_VERSION}.tar.gz"
+REPEATMASKER_DOWNLOAD_URL="https://www.repeatmasker.org/RepeatMasker/RepeatMasker-${REPEATMASKER_VERSION}.tar.gz"
 
 #REPBASE_VERSION="20181026"
 REPBASE_VERSION="20170127"
@@ -334,8 +334,8 @@ EMBOSS_DOWNLOAD_URL="ftp://emboss.open-bio.org/pub/EMBOSS/old/${EMBOSS_VERSION_p
 ERPIN_VERSION="5.5.4" # 
 ERPIN_DOWNLOAD_URL="http://rna.igmors.u-psud.fr/download/Erpin/erpin${ERPIN_VERSION}.serv.tar.gz"
 
-TBL2ASN_VERSION="" #
-TBL2ASN_DOWNLOAD_URL="https://ftp.ncbi.nlm.nih.gov/asn1-converters/by_program/table2asn/linux64.table2asn.gz"
+TBL2ASN_VERSION="25.7" #
+TBL2ASN_DOWNLOAD_URL="https://anaconda.org/bioconda/tbl2asn/${TBL2ASN_VERSION}/download/linux-64/tbl2asn-${TBL2ASN_VERSION}-0.tar.bz2"
 
 PIROBJECT_VERSION="1.19" #
 PIROBJECT_DOWNLOAD_URL="https://github.com/prioux/PirObject/archive/v${PIROBJECT_VERSION}.tar.gz"
@@ -1652,10 +1652,11 @@ if [ -z $(check_installed $tbl2asn_dir) ]; then
     echo "Download tbl2asn"
     mkdir tbl2asn_dir
     cd tbl2asn_dir
-    wget -c  $TBL2ASN_DOWNLOAD_URL # linux64.tbl2asn.gz
-    mv linux64.table2asn.gz tbl2asn.gz
-    gunzip tbl2asn.gz
+    download  $TBL2ASN_DOWNLOAD_URL "tbl2asn.tar.bz2"
+    tar jxvf tbl2asn.tar.bz2
+    cp ./bin/tbl2asn .
     chmod 755 tbl2asn
+    rm tbl2asn.tar.bz2
     note_installed $tbl2asn_dir
 fi
 
