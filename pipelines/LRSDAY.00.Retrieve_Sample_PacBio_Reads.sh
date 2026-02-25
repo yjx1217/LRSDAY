@@ -7,7 +7,7 @@ source ./../../env.sh
 #######################################
 # set project-specific variables
 file_name="SK1.filtered_subreads.bam" # The name of the ENA bam file for the testing example. 
-file_url="ftp://ftp.sra.ebi.ac.uk/vol1/ERZ448/ERZ448251/SK1.filtered_subreads.bam" # The URL of the ENA bam file for the testing example.
+file_url="ftp://ftp.sra.ebi.ac.uk/vol1/analysis/ERZ448/ERZ448251/SK1.filtered_subreads.bam" # The URL of the ENA bam file for the testing example.
 prefix="SK1" # The file name prefix for output files of the testing example. 
 
 #######################################

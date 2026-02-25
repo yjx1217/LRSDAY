@@ -1,5 +1,5 @@
 #!/bin/bash
-# last update: 2022/12/21
+# last update: 2026/02/21
 set -e -o pipefail
 
 LRSDAY_HOME=$(pwd)
@@ -109,8 +109,9 @@ else
     MINICONDA2_DOWNLOAD_URL="https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda2-${MINICONDA2_VERSION}-Linux-x86_64.sh"
 fi
 
-MINICONDA3_VERSION="py37_4.9.2" # released on 2020.11.23                                                                                                                
-if [[ "$mainland_china_installation" == "yes" ]]
+#MINICONDA3_VERSION="py37_4.9.2" # released on 2020.11.23
+MINICONDA3_VERSION="py39_25.7.0-2" # released on 2025.08.25 
+if [[ "$mainland_china_installation" == "no" ]]
 then
     MINICONDA3_DOWNLOAD_URL="https://repo.anaconda.com/miniconda/Miniconda3-${MINICONDA3_VERSION}-Linux-x86_64.sh"
 else
@@ -286,12 +287,12 @@ SNOSCAN_VERSION="0.9.1" #
 SNOSCAN_DOWNLOAD_URL="http://eddylab.org/software/snoscan/snoscan.tar.gz"
 
 REPEATMASKER_VERSION="open-4-0-7" #
-# REPEATMASKER_VERSION="4.1.0" #
-REPEATMASKER_DOWNLOAD_URL="https://www.repeatmasker.org/RepeatMasker/RepeatMasker-${REPEATMASKER_VERSION}.tar.gz"
+#REPEATMASKER_VERSION="4.0.7" #
+REPEATMASKER_DOWNLOAD_URL="https://github.com/yjx1217/RepeatMasker-open-4-0-7_Archive/raw/main/RepeatMasker-open-4-0-7.tar.gz"
+#REPEATMASKER_DOWNLOAD_URL="https://zenodo.org/records/18732025/files/RepeatMasker-${REPEATMASKER_VERSION}.tar.gz"
 
-#REPBASE_VERSION="20181026"
 REPBASE_VERSION="20170127"
-REPBASE_DOWNLOAD_URL="https://github.com/yjx1217/RMRB.git"
+REPBASE_DOWNLOAD_URL="https://github.com/yjx1217/RMRB"
 
 TRF_VERSION="409" #
 TRF_DOWNLOAD_URL="https://github.com/Benson-Genomics-Lab/TRF/releases/download/v4.09.1/trf409.linux64"
@@ -300,7 +301,7 @@ REANNOTATE_GITHUB_COMMIT_VERSION="7fdb339"
 REANNOTATE_DOWNLOAD_URL="https://github.com/yjx1217/REannotate_LongQueryName"
 
 CLUSTALW_VERSION="2.1" #
-CLUSTALW_DOWNLOAD_URL="http://www.clustal.org/download/${CLUSTALW_VERSION}/clustalw-${CLUSTALW_VERSION}.tar.gz"
+CLUSTALW_DOWNLOAD_URL="https://ftp.ebi.ac.uk/pub/software/clustalw2/${CLUSTALW_VERSION}/clustalw-${CLUSTALW_VERSION}.tar.gz"
 
 MUSCLE_VERSION="3.8.31" #
 MUSCLE_DOWNLOAD_URL="http://www.drive5.com/muscle/downloads${MUSCLE_VERSION}/muscle${MUSCLE_VERSION}_i86linux64.tar.gz"
@@ -372,11 +373,11 @@ MFANNOT_DOWNLOAD_URL="https://github.com/BFL-lab/MFannot.git"
 # GFF3TOOLKIT_DOWNLOAD_URL="https://github.com/NAL-i5K/GFF3toolkit"
 
 # UCSC Utilities
-BLAT_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/blat/blat"
-FASPLIT_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/faSplit"
-PSLSORT_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/pslSort"
-PSLSCORE_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/pslScore"
-PSLCDNAFILTER_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/pslCDnaFilter"
+BLAT_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v385/blat/blat"
+FASPLIT_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v385/faSplit"
+PSLSORT_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v385/pslSort"
+PSLSCORE_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v385/pslScore"
+PSLCDNAFILTER_DOWNLOAD_URL="http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64.v385/pslCDnaFilter"
 
 
 # Create the $BUILD directory for dependency installation
@@ -480,12 +481,6 @@ then
             $miniconda2_dir/conda config --add channels https://anaconda.mirrors.sjtug.sjtu.edu.cn/pkgs/msys2
             $miniconda2_dir/conda config --add channels https://anaconda.mirrors.sjtug.sjtu.edu.cn/cloud/bioconda
             $miniconda2_dir/conda config --add channels https://anaconda.mirrors.sjtug.sjtu.edu.cn/cloud/conda-forge
-	    
-	    # $miniconda2_dir/conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
-	    # $miniconda2_dir/conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
-	    # $miniconda2_dir/conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/
-	    # $miniconda2_dir/conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/
-	    # $miniconda2_dir/conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
 	else 
 	    $miniconda2_dir/conda config --add channels defaults
 	    $miniconda2_dir/conda config --add channels bioconda
@@ -524,12 +519,6 @@ if [ -z $(check_installed $miniconda3_dir) ]; then
         $miniconda3_dir/conda config --add channels https://anaconda.mirrors.sjtug.sjtu.edu.cn/pkgs/msys2
         $miniconda3_dir/conda config --add channels https://anaconda.mirrors.sjtug.sjtu.edu.cn/cloud/bioconda
         $miniconda3_dir/conda config --add channels https://anaconda.mirrors.sjtug.sjtu.edu.cn/cloud/conda-forge
-
-	# $miniconda3_dir/conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
-	# $miniconda3_dir/conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
-	# $miniconda3_dir/conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/
-	# $miniconda3_dir/conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/
-	# $miniconda3_dir/conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
     else 
 	$miniconda3_dir/conda config --add channels defaults
 	$miniconda3_dir/conda config --add channels bioconda
@@ -551,6 +540,7 @@ then
     echo "[$(timestamp)] Installing pb-assembly ..."
     pbassembly_dir=$build_dir/pbassembly_conda_env/bin
     if [ -z $(check_installed $pbassembly_dir) ]; then
+        export CONDA_PLUGINS_AUTO_ACCEPT_TOS=yes
 	cd $build_dir
 	clean "$build_dir/pbassembly_conda_env"
 	$miniconda3_dir/conda create -y -p $build_dir/pbassembly_conda_env 
@@ -568,11 +558,11 @@ then
     echo "[$(timestamp)] Installing bax2bam ..."
     bax2bam_dir="$build_dir/bax2bam_conda_env/bin"
     if [ -z $(check_installed $bax2bam_dir) ]; then
+        export CONDA_PLUGINS_AUTO_ACCEPT_TOS=yes
 	cd $build_dir
 	clean "$build_dir/bax2bam_conda_env"
 	$miniconda2_dir/conda create -y -p $build_dir/bax2bam_conda_env 
 	source $miniconda2_dir/activate $build_dir/bax2bam_conda_env
-	#$miniconda2_dir/conda install -y -c bioconda bax2bam=${BAX2BAM_VERSION}
 	$miniconda2_dir/conda install -y -c "bioconda/label/cf201901" bax2bam 
 	source $miniconda2_dir/deactivate
 	note_installed $bax2bam_dir
@@ -690,7 +680,7 @@ flye_dir="$build_dir/flye_conda_env/bin"
 if [ -z $(check_installed $flye_dir) ]; then
     cd $build_dir
     clean "$build_dir/flye_conda_env"
-    $miniconda3_dir/conda create -y -p $build_dir/flye_conda_env python=3.7
+    $miniconda3_dir/conda create -y -p $build_dir/flye_conda_env 
     source $miniconda3_dir/activate $build_dir/flye_conda_env
     $miniconda3_dir/conda install -y -c bioconda flye=${FLYE_VERSION} 
     source $miniconda3_dir/deactivate
@@ -1339,20 +1329,50 @@ echo "[$(timestamp)] Installing RepeatMasker ..."
 if [ -z $(check_installed $repeatmasker_dir) ]; then
     cd $build_dir
     clean "$build_dir/RepeatMasker"
-    echo "Download Repeatmasker-v${REPEATMASKER_VERSION}"
+    echo "Download RepeatMasker-v${REPEATMASKER_VERSION}"
     download $REPEATMASKER_DOWNLOAD_URL "RepeatMasker-${REPEATMASKER_VERSION}.tar.gz"
     tar xvzf RepeatMasker-${REPEATMASKER_VERSION}.tar.gz
+    mv RepeatMasker-${REPEATMASKER_VERSION} RepeatMasker
     cd $repeatmasker_dir
-    echo "Download and setup RepBase library"
-    # download $REPBASE_DOWNLOAD_URL "RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz"
-    git clone $REPBASE_DOWNLOAD_URL
-    mv ./RMRB/RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz .
-    tar xzf RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
-    rm RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
+    # echo "Download and setup RepBase library"
+    # # download $REPBASE_DOWNLOAD_URL "RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz"
+    # git clone $REPBASE_DOWNLOAD_URL
+    # mv ./RMRB/RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz .
+    # tar xzf RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
+    # rm RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
     cd $build_dir
     rm RepeatMasker-${REPEATMASKER_VERSION}.tar.gz
     note_installed $repeatmasker_dir
 fi
+
+# # --------------- RepeatMasker ------------------
+# repeatmasker_dir="$build_dir/repeatmasker_conda_env/bin"
+# echo ""
+# echo "[$(timestamp)] Installing RepeatMasker ..."
+# if [ -z $(check_installed $repeatmasker_dir) ]; then
+#     cd $build_dir
+#     $miniconda3_dir/conda create -y -p $build_dir/repeatmasker_conda_env
+#     source $miniconda3_dir/activate $build_dir/repeatmasker_conda_env
+#     $miniconda3_dir/conda install -y  repeatmasker=${REPEATMASKER_VERSION}
+#     source $miniconda3_dir/deactivate
+#     note_installed $repeatmasker_dir
+# fi
+
+# --------------- RMRB ------------------
+rmrb_dir="$repeatmasker_dir"
+echo ""
+echo "[$(timestamp)] Installing rmrb ..."
+if [ ! -e "$repeatmasker_dir/RMRB" ]; then
+    cd $rmrb_dir
+    echo "Download RMRB-v${RMRB_VERSION}"
+    echo "Download and setup RepBase library"
+    git clone $REPBASE_DOWNLOAD_URL
+    mv ./RMRB/RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz .
+    tar xzf RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
+    rm RepBaseRepeatMaskerEdition-${REPBASE_VERSION}.tar.gz
+    note_installed "$rmrb_dir/RMRB"
+fi
+
 
 # --------------- TRF ------------------
 trf_dir=$repeatmasker_dir
@@ -1401,6 +1421,7 @@ if [ -z $(check_installed $clustalw_dir) ]; then
     rm clustalw-${CLUSTALW_VERSION}.tar.gz
     note_installed $clustalw_dir
 fi
+
 
 # --------------- MUSCLE ------------------
 muscle_dir="$build_dir/muscle-${MUSCLE_VERSION}"
