@@ -11,15 +11,19 @@ use Getopt::Long;
 #  example: perl psl2gff3.pl -i input.psl -o output.gff3 -r genome.fa(.gz) -f feature -t genome_tag -l 100
 ##############################################################
 
-my ($input, $output, $tag, $refseq, $feature_type, $length_cutoff_for_completeness);
+my ($input, $output, $tag, $refseq, $feature_type, $length_cutoff_for_completeness, $query_as_parent, $query_as_feature_suffix);
 $length_cutoff_for_completeness = 0;
+$query_as_parent = 0;
+$query_as_feature_suffix = 0;
 
 GetOptions('input|i:s' => \$input, # input psl file
 	   'output|o:s' => \$output, # output gff3 file
 	   'refseq|r:s' => \$refseq, # reference genome file in fasta format, could be compressed with gzip
 	   'feature_type|ft:s' => \$feature_type, # feature type label for the output
 	   'tag|t:s' => \$tag, # genome_tag label for the output
-	   'length_cutoff_for_completeness|l:s' => \$length_cutoff_for_completeness); # length cutoff for labeling whether the feature is complete or partial
+	   'length_cutoff_for_completeness|l:s' => \$length_cutoff_for_completeness, # length cutoff for labeling whether the feature is complete or partial
+	   'query_as_parent|qp' => \$query_as_parent, # append the PSL query name as the GFF3 Parent attribute
+	   'query_as_feature_suffix|qfs' => \$query_as_feature_suffix); # append the PSL query name to the feature type
 
 
 my $refseq_fh = read_file($refseq);
@@ -31,6 +35,7 @@ while (<$input_fh>) {
     chomp;
     if (/^\d+/) {
 	my @line = split /\t/, $_;
+	my $query_name = $line[9];
 	my $strand = $line[8];
 	my $chr = $line[13];
 	my $start = $line[15] + 1; 
@@ -41,11 +46,18 @@ while (<$input_fh>) {
 	my $feature_length = $end - $start + 1;
 	if ($feature_length >= $length_cutoff_for_completeness) {
 	    my $new_feature_type = $feature_type;
+	    if ($query_as_feature_suffix) {
+		$new_feature_type = "$feature_type-$query_name";
+	    }
 	    if ($feature_length < $length_cutoff_for_completeness) {
-		$new_feature_type = "${feature_type}_partial";
+		$new_feature_type = "${new_feature_type}_partial";
 	    }
 	    my $id = "$new_feature_type:$chr:$start-$end:$strand";
-	    print $output_fh "$chr\t$tag\t$new_feature_type\t$start\t$end\t.\t$strand\t.\tID=$id;Name=$id\n";
+	    my $attributes = "ID=$id;Name=$id";
+	    if ($query_as_parent) {
+		$attributes .= ";Parent=$query_name";
+	    }
+	    print $output_fh "$chr\t$tag\t$new_feature_type\t$start\t$end\t.\t$strand\t.\t$attributes\n";
 	}
     }
 }
