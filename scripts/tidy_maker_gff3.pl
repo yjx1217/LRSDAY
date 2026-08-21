@@ -12,11 +12,13 @@ use Getopt::Long;
 #  example: perl tidy_maker_gff3.pl -i raw.gff3 -t genome_tag -o tidy.gff3 -r genome.fa(.gz)
 ##############################################################
 
-my ($refseq, $input, $output, $tag);
+my ($refseq, $input, $output, $tag, $preserve_parent);
+$preserve_parent = 0;
 GetOptions('refseq|r:s' => \$refseq, # reference genome file in fasta format; can be compressed by gzip
 	   'input|i:s' => \$input, # input raw gff3
 	   'output|o:s' => \$output, # output tidy gff3
-	   'tag|t:s' => \$tag); # genome tag
+	   'tag|t:s' => \$tag, # genome tag
+	   'preserve_parent|pp' => \$preserve_parent); # retain Parent attributes on non-gene features
 
 my $refseq_fh = read_file($refseq);
 my %refseq = ();
@@ -53,7 +55,11 @@ foreach my $chr (@refseq) {
 	my $feature_strand = $gff{$feature_id}{'strand'};
 	my $feature_phase = $gff{$feature_id}{'phase'};
 	if ($feature_type ne "gene") {
-	    print $output_fh "$chr\t$tag\t$feature_type\t$feature_start\t$feature_end\t$feature_score\t$feature_strand\t$feature_phase\tID=$feature_id;Name=$feature_name\n";
+	    my $parent_attribute = "";
+	    if ($preserve_parent && exists $gff{$feature_id}{'parent'}) {
+		$parent_attribute = ";Parent=$gff{$feature_id}{'parent'}";
+	    }
+	    print $output_fh "$chr\t$tag\t$feature_type\t$feature_start\t$feature_end\t$feature_score\t$feature_strand\t$feature_phase\tID=$feature_id;Name=$feature_name$parent_attribute\n";
 	} else {
 	    $feature_index += 10;
 	    my $new_feature_id = sprintf("%07d", $feature_index);
@@ -243,6 +249,7 @@ sub parse_gff_file {
 	} elsif ($type !~ /(exon|CDS|mRNA|UTR)/) {
 	    # e.g. type = TY, X-element, Y_prime_element ...
 	    $feature_type = $type;
+	    my ($parent) = ($attributes =~ /(?:^|;)Parent=([^;]+)/);
 	    $feature_id = "$feature_type:$chr:${start}-${end}:$strand";
 	    $feature_name = "$feature_type:$chr:${start}-${end}:$strand";
 	    $gff{$feature_id}{'feature_type'} = $feature_type;
@@ -254,6 +261,9 @@ sub parse_gff_file {
 	    $gff{$feature_id}{'source'} = $source;
 	    $gff{$feature_id}{'score'} = $score;
 	    $gff{$feature_id}{'phase'} = $phase;
+	    if (defined $parent) {
+		$gff{$feature_id}{'parent'} = $parent;
+	    }
 	} elsif ($type eq "mRNA") {
 	    my ($mRNA_id, $feature_id) = ($attributes =~ /ID=([^;]+);\S*Parent=([^;]+)/);
 	    if (exists $gff{$feature_id}) {
@@ -305,4 +315,3 @@ sub parse_gff_file {
     }
     return %gff;
 }
-
